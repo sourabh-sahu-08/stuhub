@@ -7,10 +7,10 @@ services:
     volumes:
       - mongo-data:/data/db
 
-  server:
+  backend:
     build:
       context: .
-      dockerfile: server/Dockerfile
+      dockerfile: backend/Dockerfile
     restart: unless-stopped
     env_file:
       - .env
@@ -19,15 +19,15 @@ services:
     depends_on:
       - mongo
 
-  client:
+  frontend:
     build:
       context: .
-      dockerfile: client/Dockerfile
+      dockerfile: frontend/Dockerfile
     restart: unless-stopped
     ports:
       - "5173:80"
     depends_on:
-      - server
+      - backend
 
 volumes:
   mongo-data:
