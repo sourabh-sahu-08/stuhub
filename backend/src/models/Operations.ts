@@ -6,7 +6,6 @@ export const Attendance = mongoose.model(
     {
       student: { type: Schema.Types.ObjectId, ref: "Student", required: true },
       subject: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
-      teacher: { type: Schema.Types.ObjectId, ref: "Teacher" },
       date: { type: Date, required: true },
       status: { type: String, enum: ["present", "absent", "late"], required: true }
     },
@@ -21,7 +20,6 @@ export const Assignment = mongoose.model(
       title: { type: String, required: true },
       description: String,
       subject: { type: Schema.Types.ObjectId, ref: "Subject" },
-      teacher: { type: Schema.Types.ObjectId, ref: "Teacher" },
       dueAt: Date,
       points: Number,
       attachments: [String],
@@ -75,7 +73,6 @@ export const Timetable = mongoose.model(
           startsAt: String,
           endsAt: String,
           subject: { type: Schema.Types.ObjectId, ref: "Subject" },
-          teacher: { type: Schema.Types.ObjectId, ref: "Teacher" },
           room: String
         }
       ]
@@ -92,8 +89,7 @@ export const Leave = mongoose.model(
       reason: String,
       from: Date,
       to: Date,
-      status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
-      reviewedBy: { type: Schema.Types.ObjectId, ref: "Teacher" }
+      status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" }
     },
     { timestamps: true }
   )

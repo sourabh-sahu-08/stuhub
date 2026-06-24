@@ -6,7 +6,7 @@ export const Notice = mongoose.model(
     {
       title: { type: String, required: true },
       body: { type: String, required: true },
-      audience: [{ type: String, enum: ["student", "teacher", "admin", "all"] }],
+      audience: [{ type: String, enum: ["student", "all"], default: "student" }],
       department: { type: Schema.Types.ObjectId, ref: "Department" },
       author: { type: Schema.Types.ObjectId, ref: "User" },
       pinned: { type: Boolean, default: false }
@@ -72,7 +72,6 @@ export const Club = mongoose.model(
       name: { type: String, required: true },
       description: String,
       category: String,
-      facultyLead: { type: Schema.Types.ObjectId, ref: "Teacher" },
       members: [{ type: Schema.Types.ObjectId, ref: "Student" }]
     },
     { timestamps: true }

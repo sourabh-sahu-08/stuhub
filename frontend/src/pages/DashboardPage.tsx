@@ -8,7 +8,7 @@ export function DashboardPage() {
   const { user } = useAuth();
 
   const allowedModules = navItems.filter(
-    (item) => item.roles.includes(user?.role as any) && item.path !== "/"
+    (item) => item.path !== "/"
   );
 
   return (

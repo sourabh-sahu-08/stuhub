@@ -12,7 +12,7 @@ export function AppShell() {
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
   const location = useLocation();
-  const items = useMemo(() => navItems.filter((item) => user && item.roles.includes(user.role)), [user]);
+  const items = useMemo(() => navItems, []);
 
   useEffect(() => setOpen(false), [location.pathname]);
 

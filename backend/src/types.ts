@@ -1,7 +1,7 @@
 import type { Request } from "express";
 import type { JwtPayload } from "jsonwebtoken";
 
-export type Role = "student" | "teacher" | "admin";
+export type Role = "student";
 
 export interface AuthTokenPayload extends JwtPayload {
   id: string;

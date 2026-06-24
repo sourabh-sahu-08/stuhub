@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { User } from "../models/User.js";
-import { Student, Teacher } from "../models/Academic.js";
+import { Student } from "../models/Academic.js";
 import { requireAuth, signToken } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
 
@@ -21,11 +21,7 @@ authRouter.post("/register", async (req, res, next) => {
     if (exists) return res.status(409).json({ message: "Email already exists" });
 
     const user = await User.create(data);
-    if (data.role === "student") {
-      await Student.create({ user: user._id, rollNumber: `STU-${Date.now()}`, semester: 1, section: "A" });
-    } else {
-      await Teacher.create({ user: user._id, employeeId: `TCH-${Date.now()}`, designation: "Faculty" });
-    }
+    await Student.create({ user: user._id, rollNumber: `STU-${Date.now()}`, semester: 1, section: "A" });
     const token = signToken({ id: user.id, role: user.role });
     res.status(201).json({ token, user: sanitizeUser(user) });
   } catch (error) {
