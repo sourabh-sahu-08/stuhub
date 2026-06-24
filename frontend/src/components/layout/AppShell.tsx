@@ -1,6 +1,6 @@
 import { Menu, Moon, Search, Sun, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { io } from "socket.io-client";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -30,10 +30,10 @@ export function AppShell() {
     <div className="min-h-screen bg-mist text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <aside className={`fixed inset-y-0 left-0 z-40 w-72 border-r border-slate-200 bg-white/95 p-4 shadow-soft transition dark:border-slate-800 dark:bg-slate-950/95 lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-lg font-extrabold tracking-normal text-slate-950 dark:text-white">College OS</p>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-600 dark:text-brand-100">{user?.role} portal</p>
-          </div>
+          <Link to="/" className="group block select-none">
+            <p className="text-lg font-extrabold tracking-normal text-slate-950 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">College OS</p>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-600 dark:text-brand-100 transition-colors group-hover:text-indigo-500">{user?.role} portal</p>
+          </Link>
           <button className="focus-ring rounded-lg p-2 lg:hidden" onClick={() => setOpen(false)} aria-label="Close navigation">
             <X size={20} />
           </button>
