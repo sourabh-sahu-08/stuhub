@@ -6,7 +6,6 @@ export const Department = mongoose.model(
     {
       name: { type: String, required: true },
       code: { type: String, required: true, unique: true },
-      head: { type: Schema.Types.ObjectId, ref: "Teacher" },
       description: String
     },
     { timestamps: true }
@@ -35,7 +34,6 @@ export const Subject = mongoose.model(
       code: { type: String, required: true, unique: true },
       course: { type: Schema.Types.ObjectId, ref: "Course" },
       department: { type: Schema.Types.ObjectId, ref: "Department" },
-      teacher: { type: Schema.Types.ObjectId, ref: "Teacher" },
       credits: Number,
       semester: Number
     },
@@ -60,21 +58,6 @@ export const Student = mongoose.model(
         name: String,
         phone: String
       }
-    },
-    { timestamps: true }
-  )
-);
-
-export const Teacher = mongoose.model(
-  "Teacher",
-  new Schema(
-    {
-      user: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
-      employeeId: { type: String, required: true, unique: true },
-      department: { type: Schema.Types.ObjectId, ref: "Department" },
-      subjects: [{ type: Schema.Types.ObjectId, ref: "Subject" }],
-      designation: String,
-      officeHours: String
     },
     { timestamps: true }
   )

@@ -9,16 +9,16 @@ import {
   Settings,
   Sparkles
 } from "lucide-react";
-import type { Role } from "../../types";
+
 
 export const navItems = [
-  { label: "Dashboard", path: "/", icon: Home, roles: ["student", "teacher", "admin"] },
-  { label: "Assignments", path: "/assignments", icon: ClipboardCheck, roles: ["student", "teacher"] },
-  { label: "Attendance", path: "/attendance", icon: CalendarDays, roles: ["student", "teacher"] },
-  { label: "Grades", path: "/grades", icon: GraduationCap, roles: ["student", "teacher"] },
-  { label: "Digital Library", path: "/library", icon: Library, roles: ["student", "teacher", "admin"] },
-  { label: "Messages", path: "/messages", icon: MessageSquare, roles: ["student", "teacher", "admin"] },
-  { label: "AI Studio", path: "/ai", icon: Bot, roles: ["student", "teacher", "admin"] },
-  { label: "Settings", path: "/settings", icon: Settings, roles: ["student", "teacher", "admin"] },
-  { label: "Smart Plan", path: "/planner", icon: Sparkles, roles: ["student"] }
-] satisfies Array<{ label: string; path: string; icon: typeof Home; roles: Role[] }>;
+  { label: "Dashboard", path: "/", icon: Home },
+  { label: "Assignments", path: "/assignments", icon: ClipboardCheck },
+  { label: "Attendance", path: "/attendance", icon: CalendarDays },
+  { label: "Grades", path: "/grades", icon: GraduationCap },
+  { label: "Digital Library", path: "/library", icon: Library },
+  { label: "Messages", path: "/messages", icon: MessageSquare },
+  { label: "AI Studio", path: "/ai", icon: Bot },
+  { label: "Settings", path: "/settings", icon: Settings },
+  { label: "Smart Plan", path: "/planner", icon: Sparkles }
+] satisfies Array<{ label: string; path: string; icon: typeof Home }>;
