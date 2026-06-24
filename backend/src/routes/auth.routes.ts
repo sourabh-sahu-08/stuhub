@@ -11,7 +11,7 @@ const registerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(["student", "teacher"]).default("student")
+  role: z.enum(["student"]).default("student")
 });
 
 authRouter.post("/register", async (req, res, next) => {

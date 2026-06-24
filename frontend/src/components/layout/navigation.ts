@@ -1,6 +1,5 @@
 import {
   Bell,
-  BookOpen,
   Bot,
   Briefcase,
   CalendarDays,
@@ -10,7 +9,6 @@ import {
   Library,
   MessageSquare,
   Settings,
-  Shield,
   Sparkles,
   Trophy,
   Users
@@ -29,8 +27,6 @@ export const navItems = [
   { label: "Alumni", path: "/alumni", icon: Users, roles: ["student", "admin"] },
   { label: "Messages", path: "/messages", icon: MessageSquare, roles: ["student", "teacher", "admin"] },
   { label: "AI Studio", path: "/ai", icon: Bot, roles: ["student", "teacher", "admin"] },
-  { label: "Admin", path: "/admin", icon: Shield, roles: ["admin"] },
-  { label: "Resources", path: "/resources", icon: BookOpen, roles: ["teacher", "admin"] },
   { label: "Settings", path: "/settings", icon: Settings, roles: ["student", "teacher", "admin"] },
   { label: "Smart Plan", path: "/planner", icon: Sparkles, roles: ["student"] }
 ] satisfies Array<{ label: string; path: string; icon: typeof Home; roles: Role[] }>;
