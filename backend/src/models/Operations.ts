@@ -45,20 +45,6 @@ export const Submission = mongoose.model(
   )
 );
 
-export const Grade = mongoose.model(
-  "Grade",
-  new Schema(
-    {
-      student: { type: Schema.Types.ObjectId, ref: "Student", required: true },
-      subject: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
-      marks: Number,
-      maxMarks: Number,
-      grade: String,
-      examType: { type: String, enum: ["internal", "midterm", "final", "practical"] }
-    },
-    { timestamps: true }
-  )
-);
 
 export const Timetable = mongoose.model(
   "Timetable",

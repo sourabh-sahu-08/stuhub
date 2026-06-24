@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { connectDatabase } from "./config/db.js";
 import { User } from "./models/User.js";
 import { Course, Department, Student, Subject } from "./models/Academic.js";
-import { Assignment, Attendance, Grade, Leave, Timetable } from "./models/Operations.js";
+import { Assignment, Attendance, Leave, Timetable } from "./models/Operations.js";
 import { Alumni, Club, Event, Notice, Notification, Placement, Resource } from "./models/Campus.js";
 
 await connectDatabase();
@@ -15,7 +15,6 @@ await Promise.all([
   Student.deleteMany({}),
   Assignment.deleteMany({}),
   Attendance.deleteMany({}),
-  Grade.deleteMany({}),
   Leave.deleteMany({}),
   Timetable.deleteMany({}),
   Notice.deleteMany({}),
