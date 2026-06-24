@@ -5,11 +5,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
-import { adminRouter } from "./routes/admin.routes.js";
-import { aiRouter } from "./routes/ai.routes.js";
 import { authRouter } from "./routes/auth.routes.js";
-import { dashboardRouter } from "./routes/dashboard.routes.js";
-import { resourceRouter } from "./routes/resource.routes.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
 export function createApp() {
@@ -23,10 +19,15 @@ export function createApp() {
 
   app.get("/health", (_req, res) => res.json({ ok: true, service: "college-os-api" }));
   app.use("/api/auth", authRouter);
-  app.use("/api/dashboard", dashboardRouter);
-  app.use("/api", resourceRouter);
-  app.use("/api/admin", adminRouter);
-  app.use("/api/ai", aiRouter);
+  
+  // Stubs for features to be rebuilt from scratch
+  app.use("/api/dashboard/:role", (_req, res) => res.json({ metrics: {}, notices: [] }));
+  app.use("/api/ai/chat", (_req, res) => res.json({ answer: "AI Studio is currently offline. Ready to be built from scratch." }));
+  app.get([
+    "/api/assignments",
+    "/api/library"
+  ], (_req, res) => res.json([]));
+
   app.use(notFound);
   app.use(errorHandler);
 
