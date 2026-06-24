@@ -36,7 +36,7 @@ authRouter.post("/register", async (req, res, next) => {
 authRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = z.object({ email: z.string().email(), password: z.string() }).parse(req.body);
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password") as any;
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ message: "Invalid email or password" });
     }

@@ -1,6 +1,6 @@
-import type { ErrorRequestHandler } from "express";
+import type { ErrorRequestHandler, RequestHandler } from "express";
 
-export const notFound: ErrorRequestHandler = (req, res) => {
+export const notFound: RequestHandler = (req, res) => {
   res.status(404).json({ message: `Route not found: ${req.originalUrl}` });
 };
 
