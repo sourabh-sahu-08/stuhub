@@ -5,15 +5,13 @@ import { useAuth } from "../context/AuthContext";
 import type { Role } from "../types";
 
 const demoAccounts = [
-  { label: "Student", email: "student@collegeos.edu", role: "student" as Role },
-  { label: "Teacher", email: "teacher@collegeos.edu", role: "teacher" as Role },
-  { label: "Admin", email: "admin@collegeos.edu", role: "admin" as Role }
+  { label: "Student", email: "student@collegeos.edu", role: "student" as Role }
 ];
 
 export function LoginPage() {
   const { login, register } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
-  const [role, setRole] = useState<Role>("student");
+  const [role] = useState<Role>("student");
   const [name, setName] = useState("Riya Sharma");
   const [email, setEmail] = useState("student@collegeos.edu");
   const [password, setPassword] = useState("password123");
@@ -62,13 +60,14 @@ export function LoginPage() {
         </section>
 
         <section className="flex items-center justify-center bg-mist px-4 py-10 text-slate-950 dark:bg-slate-950 dark:text-white">
-          <div className="panel w-full max-w-md p-5">
-            <div className="mb-5 flex rounded-lg bg-slate-100 p-1 dark:bg-slate-900">
-              {(["login", "register"] as const).map((item) => (
-                <button key={item} className={`focus-ring h-10 flex-1 rounded-md text-sm font-bold capitalize ${mode === item ? "bg-white shadow-sm dark:bg-slate-800" : "text-slate-500"}`} onClick={() => setMode(item)}>
-                  {item}
-                </button>
-              ))}
+          <div className="panel w-full max-w-md p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-extrabold tracking-normal text-slate-950 dark:text-white mb-1">
+                {mode === "login" ? "Sign in" : "Create your account"}
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {mode === "login" ? "Access your student workspace" : "Get started with your student command center"}
+              </p>
             </div>
 
             <form onSubmit={onSubmit} className="space-y-4">
@@ -86,15 +85,6 @@ export function LoginPage() {
                 Password
                 <input className="focus-ring mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
               </label>
-              {mode === "register" && (
-                <div className="grid grid-cols-3 gap-2">
-                  {(["student", "teacher", "admin"] as Role[]).map((item) => (
-                    <button type="button" key={item} className={`focus-ring h-10 rounded-lg text-sm font-bold capitalize ${role === item ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-slate-300"}`} onClick={() => setRole(item)}>
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              )}
               {error && <p className="rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700 dark:bg-red-500/10 dark:text-red-200">{error}</p>}
               <button className="focus-ring flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 text-sm font-bold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-slate-950" disabled={loading}>
                 {loading ? "Please wait" : mode === "login" ? "Enter workspace" : "Create account"}
@@ -102,13 +92,58 @@ export function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              {demoAccounts.map((account) => (
-                <button key={account.email} className="focus-ring rounded-lg border border-slate-200 px-2 py-2 text-xs font-bold dark:border-slate-800" onClick={() => setEmail(account.email)}>
-                  {account.label}
+            <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+              {mode === "login" ? (
+                <>
+                  New to College OS?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("register");
+                      setName("");
+                      setEmail("");
+                      setPassword("");
+                      setError("");
+                    }}
+                    className="font-bold text-brand-600 hover:underline dark:text-brand-400"
+                  >
+                    Create an account
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("login");
+                      setName("Riya Sharma");
+                      setEmail("student@collegeos.edu");
+                      setPassword("password123");
+                      setError("");
+                    }}
+                    className="font-bold text-brand-600 hover:underline dark:text-brand-400"
+                  >
+                    Sign in
+                  </button>
+                </>
+              )}
+            </p>
+
+            {mode === "login" && (
+              <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("student@collegeos.edu");
+                    setPassword("password123");
+                  }}
+                  className="w-full h-11 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-brand-600 dark:hover:border-brand-400 text-xs font-bold transition flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400"
+                >
+                  Auto-fill Student Demo Account
                 </button>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         </section>
       </div>
