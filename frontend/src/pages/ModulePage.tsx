@@ -7,7 +7,7 @@ export function ModulePage() {
   const { module } = useParams();
   const { user } = useAuth();
 
-  const currentItem = navItems.find((item) => item.path === `/${module}`);
+  const currentItem = navItems.find((item) => item.path === `/${module}` || item.path === `/dashboard/${module}`);
 
   if (!currentItem) {
     return (
