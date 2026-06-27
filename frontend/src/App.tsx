@@ -13,15 +13,20 @@ export function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
+      {/* Root landing and overview page */}
+      <Route path="/" element={<LoginPage />} />
+      
+      {/* Dashboard workspace nested under /dashboard */}
       <Route
-        path="/"
-        element={user ? <AppShell /> : <Navigate to="/login" replace />}
+        path="/dashboard"
+        element={user ? <AppShell /> : <Navigate to="/" replace />}
       >
         <Route index element={<DashboardPage />} />
         <Route path=":module" element={<ModulePage />} />
       </Route>
-      <Route path="*" element={<Navigate to={user ? "/" : "/login"} replace />} />
+
+      {/* Redirect all unmatched routes to root */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

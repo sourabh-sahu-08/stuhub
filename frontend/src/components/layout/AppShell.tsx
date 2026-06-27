@@ -5,6 +5,7 @@ import { io } from "socket.io-client";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { navItems } from "./navigation";
+import { CompleteProfileModal } from "../auth/CompleteProfileModal";
 
 export function AppShell() {
   const { user, logout } = useAuth();
@@ -31,7 +32,7 @@ export function AppShell() {
       {/* Sidebar Navigation */}
       <aside className={`fixed inset-y-0 left-0 z-40 w-72 border-r border-slate-200 bg-white/95 p-4 shadow-soft transition dark:border-slate-800 dark:bg-slate-950/95 lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between">
-          <Link to="/" className="group flex items-center gap-2 select-none">
+          <Link to="/dashboard" className="group flex items-center gap-2 select-none">
             <div className="h-9 w-9 rounded-lg bg-brand-500 flex items-center justify-center font-extrabold text-white text-lg">
               S
             </div>
@@ -88,7 +89,7 @@ export function AppShell() {
 
               {/* JobLuxe User Profile Card */}
               <div className="flex min-w-0 items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-1.5 dark:border-slate-800 dark:bg-slate-900">
-                <Link to="/" className="flex items-center gap-2 min-w-0 group select-none">
+                <Link to="/dashboard" className="flex items-center gap-2 min-w-0 group select-none">
                   {/* Circular Avatar Progress Ring (25%) */}
                   <div className="relative flex items-center justify-center h-8 w-8">
                     <svg className="absolute w-full h-full transform -rotate-90">
@@ -133,6 +134,9 @@ export function AppShell() {
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{toast.body}</p>
         </div>
       )}
+
+      {/* Mandatory Social Login Profile Completion Modal */}
+      <CompleteProfileModal />
     </div>
   );
 }
