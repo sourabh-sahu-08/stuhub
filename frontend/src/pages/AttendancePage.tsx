@@ -970,7 +970,7 @@ export function AttendancePage() {
                     }}
                   />
                   <Legend wrapperStyle={{ fontSize: "10px" }} />
-                  <Bar dataKey="Current Attendance" fill="#00b853" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Current Attendance" fill="#6366f1" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Required Attendance" fill="#475569" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

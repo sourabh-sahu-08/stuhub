@@ -50,7 +50,7 @@ export function AppShell() {
             <NavLink
               key={item.path}
               to={item.path}
-              className={({ isActive }) => `flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition ${isActive ? "bg-brand-500 text-white shadow-[0_5px_15px_rgba(0,184,83,0.3)]" : "text-slate-600 hover:bg-brand-500/5 hover:text-brand-500 dark:text-slate-300 dark:hover:bg-brand-500/10 dark:hover:text-brand-500"}`}
+              className={({ isActive }) => `flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition ${isActive ? "bg-brand-500 text-white shadow-[0_5px_15px_rgba(99,102,241,0.3)]" : "text-slate-600 hover:bg-brand-500/5 hover:text-brand-500 dark:text-slate-300 dark:hover:bg-brand-500/10 dark:hover:text-brand-500"}`}
             >
               <item.icon size={18} aria-hidden />
               {item.label}

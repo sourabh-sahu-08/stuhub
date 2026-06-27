@@ -95,13 +95,13 @@ export function DashboardPage() {
           className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-950 to-black p-8 sm:p-10 text-white shadow-[0_15px_30px_rgba(0,0,0,0.3)] border border-white/5"
         >
           <div className="relative z-10 max-w-3xl space-y-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3.5 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(0,184,83,0.15)]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3.5 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(99,102,241,0.15)]">
               <span className="h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
               STUDENT WORKSPACE ACTIVE
             </span>
             <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
               Scale Your Academic Goals <br />
-              <span className="text-brand-500 drop-shadow-[0_0_20px_rgba(0,184,83,0.2)]">Build Your Future</span>
+              <span className="text-brand-500 drop-shadow-[0_0_20px_rgba(99,102,241,0.2)]">Build Your Future</span>
             </h1>
             <p className="mt-2 text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl">
               Welcome back, {user?.name}. Your college portal dashboard is synchronized. Check your live metrics below or filter modules to enter your workspace.
@@ -121,7 +121,7 @@ export function DashboardPage() {
               </div>
               <button
                 type="submit"
-                className="h-8 px-4 rounded-lg bg-brand-500 text-xs font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(0,184,83,0.3)] active:scale-95"
+                className="h-8 px-4 rounded-lg bg-brand-500 text-xs font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(99,102,241,0.3)] active:scale-95"
               >
                 Search <ArrowRight size={12} />
               </button>
@@ -231,7 +231,7 @@ export function DashboardPage() {
                 <Link
                   key={item.label}
                   to={item.path}
-                  className="group relative flex flex-col justify-between rounded-xl border border-slate-200 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500 hover:shadow-[0_10px_30px_rgba(0,184,83,0.08)] bg-white dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-brand-500"
+                  className="group relative flex flex-col justify-between rounded-xl border border-slate-200 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500 hover:shadow-[0_10px_30px_rgba(99,102,241,0.08)] bg-white dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-brand-500"
                 >
                   <div>
                     {/* Icon container */}

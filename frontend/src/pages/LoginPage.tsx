@@ -170,7 +170,7 @@ export function LoginPage() {
       {/* 1. Header Nav */}
       <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-6 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-2 select-none">
-          <div className="h-9 w-9 rounded-lg bg-brand-500 flex items-center justify-center font-extrabold text-white text-lg shadow-[0_0_15px_rgba(0,184,83,0.4)]">
+          <div className="h-9 w-9 rounded-lg bg-brand-500 flex items-center justify-center font-extrabold text-white text-lg shadow-[0_0_15px_rgba(99,102,241,0.4)]">
             S
           </div>
           <div>
@@ -212,7 +212,7 @@ export function LoginPage() {
                 setIsModalOpen(true);
                 setModalMode("login");
               }}
-              className="focus-ring h-10 px-6 rounded-lg bg-brand-500 text-sm font-bold text-white transition-all duration-200 hover:bg-brand-600 hover:shadow-[0_0_15px_rgba(0,184,83,0.3)] active:scale-95"
+              className="focus-ring h-10 px-6 rounded-lg bg-brand-500 text-sm font-bold text-white transition-all duration-200 hover:bg-brand-600 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] active:scale-95"
             >
               Sign in
             </button>
@@ -234,7 +234,7 @@ export function LoginPage() {
 
         <div className="relative z-10 max-w-4xl text-center space-y-8">
           {/* Active Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(0,184,83,0.1)]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(99,102,241,0.1)]">
             <span className="h-2 w-2 rounded-full bg-brand-500 animate-ping" />
             STUHUB STUDENT ENVIRONMENT IS ACTIVE
           </div>
@@ -242,7 +242,7 @@ export function LoginPage() {
           {/* Heading */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-white">
             Find Your Dream Study <br />
-            <span className="text-brand-500 drop-shadow-[0_0_25px_rgba(0,184,83,0.2)]">Build Your Future</span>
+            <span className="text-brand-500 drop-shadow-[0_0_25px_rgba(99,102,241,0.2)]">Build Your Future</span>
           </h1>
 
           {/* Subtitle */}
@@ -264,7 +264,7 @@ export function LoginPage() {
             </div>
             <button
               type="submit"
-              className="h-10 px-5 rounded-lg bg-brand-500 text-sm font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(0,184,83,0.3)] active:scale-95"
+              className="h-10 px-5 rounded-lg bg-brand-500 text-sm font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(99,102,241,0.3)] active:scale-95"
             >
               Search <ArrowRight size={16} />
             </button>
@@ -299,7 +299,7 @@ export function LoginPage() {
           ].map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.title} className="group relative p-6 rounded-xl border border-white/5 bg-slate-900/30 hover:border-brand-500/45 hover:bg-slate-900/50 transition-all duration-300 space-y-4 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,184,83,0.08)]">
+              <div key={item.title} className="group relative p-6 rounded-xl border border-white/5 bg-slate-900/30 hover:border-brand-500/45 hover:bg-slate-900/50 transition-all duration-300 space-y-4 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(99,102,241,0.08)]">
                 <div className="h-12 w-12 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <Icon size={24} />
                 </div>
