@@ -10,7 +10,7 @@ export function DashboardPage() {
   const [filterQuery, setFilterQuery] = useState("");
 
   const allowedModules = navItems.filter(
-    (item) => item.path !== "/" &&
+    (item) => item.path !== "/dashboard" &&
     (filterQuery === "" || item.label.toLowerCase().includes(filterQuery.toLowerCase()))
   );
 

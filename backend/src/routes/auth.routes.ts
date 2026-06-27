@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { User } from "../models/User.js";
-import { Student } from "../models/Academic.js";
+import { Student, Department } from "../models/Academic.js";
 import { requireAuth, signToken } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
 
@@ -143,3 +143,12 @@ function sanitizeUser(user: any) {
     department: user.department
   };
 }
+
+authRouter.get("/departments", async (req, res, next) => {
+  try {
+    const departments = await Department.find({}, "name code");
+    res.json(departments);
+  } catch (error) {
+    next(error);
+  }
+});
