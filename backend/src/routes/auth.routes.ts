@@ -22,7 +22,7 @@ authRouter.post("/register", async (req, res, next) => {
 
     const user = await User.create(data);
     await Student.create({ user: user._id, rollNumber: `STU-${Date.now()}`, semester: 1, section: "A" });
-    const token = signToken({ id: user.id, role: user.role });
+    const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
     res.status(201).json({ token, user: sanitizeUser(user) });
   } catch (error) {
     next(error);
@@ -39,7 +39,7 @@ authRouter.post("/login", async (req, res, next) => {
     if (!user.isActive) return res.status(403).json({ message: "Account disabled" });
     user.lastLoginAt = new Date();
     await user.save();
-    const token = signToken({ id: user.id, role: user.role });
+    const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
     res.json({ token, user: sanitizeUser(user) });
   } catch (error) {
     next(error);
@@ -55,6 +55,82 @@ authRouter.get("/me", requireAuth, async (req: AuthRequest, res, next) => {
   }
 });
 
+authRouter.post("/social-login", async (req, res, next) => {
+  try {
+    const { email, name, avatar } = z.object({
+      email: z.string().email(),
+      name: z.string(),
+      avatar: z.string().optional()
+    }).parse(req.body);
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      // Create user with isProfileComplete: false
+      user = await User.create({
+        name,
+        email,
+        password: Math.random().toString(36).slice(-10) + "Aa1!",
+        role: "student",
+        avatar,
+        isProfileComplete: false
+      });
+
+      // Create temporary student document
+      await Student.create({
+        user: user._id,
+        rollNumber: `TEMP-STU-${Date.now()}`
+      });
+    }
+
+    const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
+    res.json({ token, user: sanitizeUser(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+authRouter.put("/complete-profile", requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const { name, rollNumber, department, semester, section } = z.object({
+      name: z.string().min(2),
+      rollNumber: z.string().min(2),
+      department: z.string().optional(),
+      semester: z.number().optional(),
+      section: z.string().optional()
+    }).parse(req.body);
+
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+
+    // Check rollNumber uniqueness
+    const existingStudent = await Student.findOne({ rollNumber, user: { $ne: userId } });
+    if (existingStudent) {
+      return res.status(409).json({ message: "Roll number is already taken by another student" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.name = name;
+    user.isProfileComplete = true;
+    await user.save();
+
+    const student = await Student.findOne({ user: userId });
+    if (!student) return res.status(404).json({ message: "Student record not found" });
+
+    student.rollNumber = rollNumber;
+    if (department) student.department = department as any;
+    if (semester) student.semester = semester;
+    if (section) student.section = section;
+    await student.save();
+
+    const token = signToken({ id: user.id, role: user.role, isProfileComplete: true });
+    res.json({ token, user: sanitizeUser(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
 function sanitizeUser(user: any) {
   if (!user) return null;
   return {
@@ -63,6 +139,7 @@ function sanitizeUser(user: any) {
     email: user.email,
     role: user.role,
     avatar: user.avatar,
+    isProfileComplete: user.isProfileComplete,
     department: user.department
   };
 }
