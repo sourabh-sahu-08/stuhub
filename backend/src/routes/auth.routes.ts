@@ -4,6 +4,10 @@ import { User } from "../models/User.js";
 import { Student, Department } from "../models/Academic.js";
 import { requireAuth, signToken } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
+import { OAuth2Client } from "google-auth-library";
+import { env } from "../config/env.js";
+
+const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 export const authRouter = Router();
 
@@ -57,11 +61,37 @@ authRouter.get("/me", requireAuth, async (req: AuthRequest, res, next) => {
 
 authRouter.post("/social-login", async (req, res, next) => {
   try {
-    const { email, name, avatar } = z.object({
-      email: z.string().email(),
-      name: z.string(),
-      avatar: z.string().optional()
-    }).parse(req.body);
+    const { idToken } = z.object({ idToken: z.string() }).parse(req.body);
+
+    let email: string;
+    let name: string;
+    let avatar: string | undefined;
+
+    if (env.GOOGLE_CLIENT_ID) {
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: env.GOOGLE_CLIENT_ID
+      });
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        return res.status(400).json({ message: "Invalid Google token payload" });
+      }
+      email = payload.email;
+      name = payload.name || "Google User";
+      avatar = payload.picture;
+    } else {
+      // Development mode fallback
+      try {
+        const parsed = JSON.parse(idToken);
+        email = parsed.email;
+        name = parsed.name;
+        avatar = parsed.avatar;
+      } catch {
+        email = idToken.includes("@") ? idToken : "sourabh08923@gmail.com";
+        name = "Sourabh Sahu";
+        avatar = "https://lh3.googleusercontent.com/a/default-user";
+      }
+    }
 
     let user = await User.findOne({ email });
     if (!user) {

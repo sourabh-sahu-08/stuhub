@@ -8,7 +8,7 @@ interface AuthContextValue {
   loading: boolean;
   login(email: string, password: string): Promise<void>;
   register(payload: { name: string; email: string; password: string; role: Role }): Promise<void>;
-  socialLogin(email: string, name: string, avatar?: string): Promise<void>;
+  socialLogin(idToken: string): Promise<void>;
   completeProfile(payload: { name: string; rollNumber: string; department?: string; semester?: number; section?: string }): Promise<void>;
   logout(): void;
 }
@@ -47,8 +47,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(response.data.token);
       setUser(response.data.user);
     },
-    async socialLogin(email, name, avatar) {
-      const response = await api.post("/auth/social-login", { email, name, avatar });
+    async socialLogin(idToken) {
+      const response = await api.post("/auth/social-login", { idToken });
       localStorage.setItem("college-os-token", response.data.token);
       setToken(response.data.token);
       setUser(response.data.user);
