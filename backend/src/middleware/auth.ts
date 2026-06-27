@@ -4,7 +4,7 @@ import type { SignOptions } from "jsonwebtoken";
 import { env } from "../config/env.js";
 import type { AuthRequest, AuthTokenPayload, Role } from "../types.js";
 
-export function signToken(payload: Pick<AuthTokenPayload, "id" | "role">) {
+export function signToken(payload: Pick<AuthTokenPayload, "id" | "role" | "isProfileComplete">) {
   const options: SignOptions = { expiresIn: env.JWT_EXPIRES_IN as SignOptions["expiresIn"] };
   return jwt.sign(payload, env.JWT_SECRET, options);
 }
