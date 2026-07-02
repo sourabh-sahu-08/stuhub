@@ -225,12 +225,25 @@ export function LoginPage() {
         
         t5 = setTimeout(() => {
           setIsAiTyping(false);
-          setAiConversation(prev => [
-            ...prev,
-            { role: "ai", text: "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent." }
-          ]);
-        }, 1200);
-      }, 500);
+          const responseText = "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent.";
+          const words = responseText.split(" ");
+          let wordIdx = 0;
+          let typedText = "";
+          
+          interval = setInterval(() => {
+            if (wordIdx < words.length) {
+              typedText += (wordIdx === 0 ? "" : " ") + words[wordIdx];
+              setAiConversation([
+                { role: "user", text: "Explain binary search trees." },
+                { role: "ai", text: typedText }
+              ]);
+              wordIdx++;
+            } else {
+              clearInterval(interval);
+            }
+          }, 80);
+        }, 1000);
+      }, 400);
     }
     
     if (activeFeature === 4) { // PYQ
@@ -980,6 +993,13 @@ export function LoginPage() {
                             {msg.text}
                           </div>
                         ))}
+                        {isAiTyping && (
+                          <div className="p-2 rounded-lg bg-slate-900/80 border border-white/5 text-slate-300 self-start flex items-center gap-1 shadow-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        )}
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5 pt-2">
                         {["Explain BST", "What is semaphore?"].map((prompt) => (
