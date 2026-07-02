@@ -36,7 +36,7 @@ const [btechCse] = await Course.create([
 ]);
 
 const [studentUser] = await User.create([
-  { name: "Riya Sharma", email: "student@collegeos.edu", password: "password123", role: "student", department: cse._id }
+  { name: "Riya Sharma", email: "student@stuhub.edu", password: "password123", role: "student", department: cse._id }
 ]);
 
 const [dbms, os, ai] = await Subject.create([
@@ -57,5 +57,5 @@ await Student.create({
   skills: ["React", "Node.js", "MongoDB"]
 });
 
-console.log("Seeded College OS demo data (Clean Baseline)");
+console.log("Seeded Stuhub demo data (Clean Baseline)");
 await mongoose.disconnect();

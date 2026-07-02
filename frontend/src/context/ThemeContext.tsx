@@ -5,11 +5,11 @@ type Theme = "light" | "dark";
 const ThemeContext = createContext<{ theme: Theme; toggleTheme(): void } | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("college-os-theme") as Theme) || "light");
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("stuhub-theme") as Theme) || "light");
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("college-os-theme", theme);
+    localStorage.setItem("stuhub-theme", theme);
   }, [theme]);
 
   const value = useMemo(() => ({

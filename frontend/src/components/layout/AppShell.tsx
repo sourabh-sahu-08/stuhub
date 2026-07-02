@@ -29,6 +29,14 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen bg-mist text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans">
+      {/* Sidebar Backdrop Overlay */}
+      {open && (
+        <div
+          className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm lg:hidden transition-opacity duration-300"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
       <aside className={`fixed inset-y-0 left-0 z-40 w-72 border-r border-slate-200 bg-white/95 p-4 shadow-soft transition dark:border-slate-800 dark:bg-slate-950/95 lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between">
@@ -50,7 +58,7 @@ export function AppShell() {
             <NavLink
               key={item.path}
               to={item.path}
-              className={({ isActive }) => `flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition ${isActive ? "bg-brand-500 text-white shadow-[0_5px_15px_rgba(0,184,83,0.3)]" : "text-slate-600 hover:bg-brand-500/5 hover:text-brand-500 dark:text-slate-300 dark:hover:bg-brand-500/10 dark:hover:text-brand-500"}`}
+              className={({ isActive }) => `flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition ${isActive ? "bg-brand-500 text-white shadow-[0_5px_15px_rgba(99,102,241,0.3)]" : "text-slate-600 hover:bg-brand-500/5 hover:text-brand-500 dark:text-slate-300 dark:hover:bg-brand-500/10 dark:hover:text-brand-500"}`}
             >
               <item.icon size={18} aria-hidden />
               {item.label}

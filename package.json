@@ -1,8 +1,8 @@
 {
-  "name": "college-os",
+  "name": "stuhub",
   "version": "1.0.0",
   "private": true,
-  "description": "A modern full-stack College OS for students, teachers, and administrators.",
+  "description": "A modern full-stack Stuhub for students, teachers, and administrators.",
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace backend\" \"npm run dev --workspace frontend\"",
     "build": "npm run build --workspace backend && npm run build --workspace frontend",

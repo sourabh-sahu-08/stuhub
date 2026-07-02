@@ -71,12 +71,12 @@ export function AttendancePage() {
   
   // Data States
   const [subjects, setSubjects] = useState<Subject[]>(() => {
-    const saved = localStorage.getItem("college-os-attendance-subjects-v2");
+    const saved = localStorage.getItem("stuhub-attendance-subjects-v2");
     return saved ? JSON.parse(saved) : DEFAULT_SUBJECTS;
   });
 
   const [logs, setLogs] = useState<AttendanceLog[]>(() => {
-    const saved = localStorage.getItem("college-os-attendance-logs-v2");
+    const saved = localStorage.getItem("stuhub-attendance-logs-v2");
     return saved ? JSON.parse(saved) : DEFAULT_LOGS;
   });
 
@@ -98,11 +98,11 @@ export function AttendancePage() {
 
   // Persist State to Local Storage
   useEffect(() => {
-    localStorage.setItem("college-os-attendance-subjects-v2", JSON.stringify(subjects));
+    localStorage.setItem("stuhub-attendance-subjects-v2", JSON.stringify(subjects));
   }, [subjects]);
 
   useEffect(() => {
-    localStorage.setItem("college-os-attendance-logs-v2", JSON.stringify(logs));
+    localStorage.setItem("stuhub-attendance-logs-v2", JSON.stringify(logs));
   }, [logs]);
 
   // Compute computed subjects (baselines + logs)
@@ -439,7 +439,7 @@ export function AttendancePage() {
 
       {/* 2. Overview Summary Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 print-full-width">
-        <div className="panel p-6 flex flex-col justify-between">
+        <div className="panel p-4 sm:p-6 flex flex-col justify-between">
           <div>
             <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Overall Attendance</p>
             <h2 className={`text-4xl font-extrabold tracking-tight mt-2 ${overallPercentage >= 75 ? "text-emerald-500" : "text-red-500"}`}>
@@ -457,7 +457,7 @@ export function AttendancePage() {
           </div>
         </div>
 
-        <div className="panel p-6 flex flex-col justify-between">
+        <div className="panel p-4 sm:p-6 flex flex-col justify-between">
           <div>
             <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Course Standings</p>
             <div className="flex items-center gap-3 mt-3">
@@ -480,7 +480,7 @@ export function AttendancePage() {
           <p className="text-[10px] text-slate-400 font-medium">Total Subjects: {subjects.length}</p>
         </div>
 
-        <div className="panel p-6 flex flex-col justify-between">
+        <div className="panel p-4 sm:p-6 flex flex-col justify-between">
           <div>
             <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Logged Classes</p>
             <div className="flex items-baseline gap-1 mt-2">
@@ -492,7 +492,7 @@ export function AttendancePage() {
           <div className="h-1 bg-slate-100 dark:bg-slate-800 rounded-full" />
         </div>
 
-        <div className="panel p-6 flex flex-col justify-between">
+        <div className="panel p-4 sm:p-6 flex flex-col justify-between">
           <div>
             <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Average Attendance</p>
             <h2 className="text-3xl font-extrabold text-slate-850 dark:text-white mt-2">
@@ -510,7 +510,7 @@ export function AttendancePage() {
       {/* 3. Interactive Calendar & Logs Panel (Crucial Add) */}
       <div className="grid gap-6 md:grid-cols-3 no-print">
         {/* Calendar Grid (Spans 2 cols) */}
-        <div className="panel p-6 md:col-span-2 space-y-4">
+        <div className="panel p-4 sm:p-6 md:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <CalendarIcon className="text-brand-500" size={20} /> Attendance Logger Calendar
@@ -535,7 +535,7 @@ export function AttendancePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold uppercase tracking-wider text-slate-400 py-1">
+          <div className="grid grid-cols-7 gap-1 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 py-1">
             <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
@@ -545,7 +545,7 @@ export function AttendancePage() {
             <span>Sat</span>
           </div>
 
-          <div className="grid grid-cols-7 gap-1.5">
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
             {calendarGrid.map((cell, idx) => {
               const hasLogs = cell.dateString ? getLogsForDate(cell.dateString) : [];
               const isSelected = cell.dateString === selectedDateStr;
@@ -555,7 +555,7 @@ export function AttendancePage() {
                   key={idx}
                   disabled={!cell.isCurrentMonth}
                   onClick={() => cell.dateString && setSelectedDateStr(cell.dateString)}
-                  className={`relative min-h-[50px] p-1.5 rounded-lg border flex flex-col items-center justify-between text-xs transition-all ${
+                  className={`relative min-h-[38px] sm:min-h-[50px] p-1 sm:p-1.5 rounded-lg border flex flex-col items-center justify-between text-[10px] sm:text-xs transition-all ${
                     !cell.isCurrentMonth
                       ? "border-transparent bg-transparent text-slate-300 dark:text-slate-800"
                       : isSelected
@@ -567,11 +567,11 @@ export function AttendancePage() {
                   
                   {/* Status dots */}
                   {hasLogs.length > 0 && (
-                    <div className="flex flex-wrap justify-center gap-1 w-full max-w-[36px] overflow-hidden">
+                    <div className="flex flex-wrap justify-center gap-0.5 sm:gap-1 w-full max-w-[28px] sm:max-w-[36px] overflow-hidden">
                       {hasLogs.slice(0, 3).map((log, index) => (
                         <span
                           key={index}
-                          className={`h-1.5 w-1.5 rounded-full ${
+                          className={`h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${
                             log.status === "attended"
                               ? "bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.5)]"
                               : log.status === "bunked"
@@ -589,7 +589,7 @@ export function AttendancePage() {
         </div>
 
         {/* Selected date log manager */}
-        <div className="panel p-6 space-y-4">
+        <div className="panel p-4 sm:p-6 space-y-4">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-brand-500">Day Logger Panel</span>
             <h3 className="text-base font-extrabold text-slate-855 dark:text-white mt-1">
@@ -683,7 +683,7 @@ export function AttendancePage() {
       <div className="grid gap-6 lg:grid-cols-3 print-full-width">
         {/* Form Container */}
         <div className="lg:col-span-1 no-print">
-          <div className="panel p-6 space-y-4">
+          <div className="panel p-4 sm:p-6 space-y-4">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">
               {editingId ? "Edit Course Subject" : "Add Course Subject"}
             </h3>
@@ -841,11 +841,11 @@ export function AttendancePage() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   key={sub.id}
-                  className="panel p-5 space-y-4 flex flex-col justify-between"
+                  className="panel p-4 sm:p-5 space-y-4 flex flex-col justify-between"
                 >
                   <div className="space-y-2">
                     <div className="flex justify-between items-start gap-2">
-                      <h4 className="font-bold text-slate-850 dark:text-white text-base leading-snug line-clamp-1">
+                      <h4 className="font-bold text-slate-855 dark:text-white text-base leading-snug line-clamp-1">
                         {sub.name}
                       </h4>
                       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase ${
@@ -944,11 +944,10 @@ export function AttendancePage() {
           </div>
         </div>
       </div>
-
       {/* 6. Charts Panel */}
       <div className="grid gap-6 md:grid-cols-2 print-full-width">
-        <div className="panel p-6">
-          <h3 className="text-sm font-bold text-slate-850 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+        <div className="panel p-4 sm:p-6 min-w-0 w-full">
+          <h3 className="text-sm font-bold text-slate-855 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
             <TrendingUp size={16} className="text-brand-500" /> Subject-wise Audit Chart
           </h3>
           <div className="h-64 w-full">
@@ -970,7 +969,7 @@ export function AttendancePage() {
                     }}
                   />
                   <Legend wrapperStyle={{ fontSize: "10px" }} />
-                  <Bar dataKey="Current Attendance" fill="#00b853" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Current Attendance" fill="#6366f1" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Required Attendance" fill="#475569" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -978,8 +977,8 @@ export function AttendancePage() {
           </div>
         </div>
 
-        <div className="panel p-6">
-          <h3 className="text-sm font-bold text-slate-850 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+        <div className="panel p-4 sm:p-6 min-w-0 w-full">
+          <h3 className="text-sm font-bold text-slate-855 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
             <BookOpen size={16} className="text-brand-500" /> Standing Distribution
           </h3>
           <div className="h-64 w-full flex items-center justify-center">
