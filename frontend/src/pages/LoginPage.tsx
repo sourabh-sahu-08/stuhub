@@ -768,7 +768,7 @@ export function LoginPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* Tabs selector column (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-2.5 justify-center">
+          <div className="lg:col-span-5 flex flex-col gap-3 justify-center relative">
             {features.map((feat, idx) => {
               const Icon = feat.icon;
               const isActive = activeFeature === idx;
@@ -776,14 +776,23 @@ export function LoginPage() {
                 <button
                   key={feat.title}
                   onClick={() => setActiveFeature(idx)}
-                  className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all duration-300 ${
+                  className={`relative flex items-start gap-4 p-4 rounded-xl border text-left transition-all duration-300 overflow-hidden ${
                     isActive
-                      ? "bg-slate-900/60 border-brand-500/50 shadow-[0_4px_20px_rgba(99,102,241,0.08)]"
+                      ? "bg-slate-900/60 border-brand-500/35 shadow-[0_8px_30px_rgba(99,102,241,0.12)]"
                       : "bg-slate-900/10 border-white/5 hover:border-white/10 hover:bg-slate-900/20"
                   }`}
                 >
+                  {/* Sliding active tab indicator */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeFeatureIndicator"
+                      className="absolute inset-0 bg-gradient-to-r from-brand-500/10 to-transparent border-l-2 border-brand-500 pointer-events-none -z-10"
+                      transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                    />
+                  )}
+
                   <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 transition ${
-                    isActive ? "bg-brand-500 text-white" : "bg-white/5 text-slate-400"
+                    isActive ? "bg-brand-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]" : "bg-white/5 text-slate-400"
                   }`}>
                     <Icon size={20} />
                   </div>
@@ -845,9 +854,18 @@ export function LoginPage() {
           </div>
 
           {/* Interactive display panel (7 cols) */}
-          <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-slate-900/40 p-6 flex flex-col justify-between shadow-[0_15px_30px_rgba(0,0,0,0.4)] relative min-h-[380px] overflow-hidden">
+          <div className="lg:col-span-7 rounded-2xl border border-white/15 bg-slate-900/30 p-6 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative min-h-[400px] overflow-hidden backdrop-blur-md">
             {/* Decorative background grid */}
             <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:12px_12px] -z-10" />
+
+            {/* Ambient background glow mapped to active tab color */}
+            <div className={`absolute top-1/4 right-1/4 h-64 w-64 rounded-full bg-gradient-to-br ${
+              activeFeature === 0 ? 'from-blue-500/10 to-indigo-500/10' :
+              activeFeature === 1 ? 'from-amber-500/10 to-orange-500/10' :
+              activeFeature === 2 ? 'from-emerald-500/10 to-teal-500/10' :
+              activeFeature === 3 ? 'from-purple-500/10 to-fuchsia-500/10' :
+              'from-indigo-500/10 to-purple-500/10'
+            } blur-[100px] pointer-events-none transition-all duration-700 -z-10`} />
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -858,13 +876,18 @@ export function LoginPage() {
                 transition={{ duration: 0.25 }}
                 className="flex-1 flex flex-col justify-between space-y-6"
               >
-                <div>
-                  <h3 className="text-xl font-extrabold text-white mb-2">
-                    {features[activeFeature].title}
-                  </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    {features[activeFeature].description}
-                  </p>
+                {/* Upgraded Header with Active Badge */}
+                <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-1 text-left">
+                  <div>
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-brand-500 font-extrabold block">Stuhub Module &bull; Live Preview</span>
+                    <h3 className="text-xl font-extrabold text-white mt-1">
+                      {features[activeFeature].title}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-brand-500/10 border border-brand-500/20 px-3 py-1 rounded-full text-[9px] font-bold text-brand-450">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" />
+                    LIVE MODULE
+                  </div>
                 </div>
 
                 {/* Feature specific live mockup */}
