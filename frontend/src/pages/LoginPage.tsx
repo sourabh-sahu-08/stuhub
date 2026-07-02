@@ -225,7 +225,7 @@ export function LoginPage() {
         {/* Background Image with Blurred Gradient Overlay */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/workspace_background.png"
+            src="/workspace_background.jpg"
             alt="Collaborative Workspace"
             className="w-full h-full object-cover filter brightness-[0.25] contrast-[1.05]"
           />
