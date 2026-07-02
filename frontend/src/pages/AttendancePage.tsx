@@ -71,12 +71,12 @@ export function AttendancePage() {
   
   // Data States
   const [subjects, setSubjects] = useState<Subject[]>(() => {
-    const saved = localStorage.getItem("college-os-attendance-subjects-v2");
+    const saved = localStorage.getItem("stuhub-attendance-subjects-v2");
     return saved ? JSON.parse(saved) : DEFAULT_SUBJECTS;
   });
 
   const [logs, setLogs] = useState<AttendanceLog[]>(() => {
-    const saved = localStorage.getItem("college-os-attendance-logs-v2");
+    const saved = localStorage.getItem("stuhub-attendance-logs-v2");
     return saved ? JSON.parse(saved) : DEFAULT_LOGS;
   });
 
@@ -98,11 +98,11 @@ export function AttendancePage() {
 
   // Persist State to Local Storage
   useEffect(() => {
-    localStorage.setItem("college-os-attendance-subjects-v2", JSON.stringify(subjects));
+    localStorage.setItem("stuhub-attendance-subjects-v2", JSON.stringify(subjects));
   }, [subjects]);
 
   useEffect(() => {
-    localStorage.setItem("college-os-attendance-logs-v2", JSON.stringify(logs));
+    localStorage.setItem("stuhub-attendance-logs-v2", JSON.stringify(logs));
   }, [logs]);
 
   // Compute computed subjects (baselines + logs)

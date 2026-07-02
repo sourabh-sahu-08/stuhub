@@ -1,4 +1,4 @@
-# College OS
+# Stuhub
 
 A modern full-stack college operating system for students, teachers, and administrators.
 
@@ -24,9 +24,9 @@ The frontend runs at `http://localhost:5173` and the backend API runs at `http:/
 
 ## Demo Accounts
 
-- Admin: `admin@collegeos.edu` / `password123`
-- Teacher: `teacher@collegeos.edu` / `password123`
-- Student: `student@collegeos.edu` / `password123`
+- Admin: `admin@stuhub.edu` / `password123`
+- Teacher: `teacher@stuhub.edu` / `password123`
+- Student: `student@stuhub.edu` / `password123`
 
 ## Docker
 

@@ -27,7 +27,7 @@ export function LoginPage() {
 
   // Auth Form States
   const [name, setName] = useState("Riya Sharma");
-  const [email, setEmail] = useState("student@collegeos.edu");
+  const [email, setEmail] = useState("student@stuhub.edu");
   const [password, setPassword] = useState("password123");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -116,7 +116,7 @@ export function LoginPage() {
         await socialLogin(mockPayload);
       } else {
         const mockPayload = JSON.stringify({
-          email: "sourabh_github@collegeos.edu",
+          email: "sourabh_github@stuhub.edu",
           name: "Sourabh Github",
           avatar: "https://avatars.githubusercontent.com/u/9919?v=4"
         });
@@ -134,7 +134,7 @@ export function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      await login("student@collegeos.edu", "password123");
+      await login("student@stuhub.edu", "password123");
       setIsModalOpen(false);
     } catch (err) {
       setError("Demo login failed.");

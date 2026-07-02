@@ -21,8 +21,8 @@ export function DashboardPage() {
   // Load live statistics from Local Storage
   useEffect(() => {
     try {
-      const savedSubjects = localStorage.getItem("college-os-attendance-subjects-v2");
-      const savedLogs = localStorage.getItem("college-os-attendance-logs-v2");
+      const savedSubjects = localStorage.getItem("stuhub-attendance-subjects-v2");
+      const savedLogs = localStorage.getItem("stuhub-attendance-logs-v2");
       
       const subjects = savedSubjects ? JSON.parse(savedSubjects) : DEFAULT_SUBJECTS;
       const logs = savedLogs ? JSON.parse(savedLogs) : [];

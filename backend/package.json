@@ -1,5 +1,5 @@
 {
-  "name": "@college-os/backend",
+  "name": "@stuhub/backend",
   "version": "1.0.0",
   "type": "module",
   "main": "dist/index.js",

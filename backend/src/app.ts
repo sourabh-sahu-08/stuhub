@@ -17,7 +17,7 @@ export function createApp() {
   app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
   app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 500 }));
 
-  app.get("/health", (_req, res) => res.json({ ok: true, service: "college-os-api" }));
+  app.get("/health", (_req, res) => res.json({ ok: true, service: "stuhub-api" }));
   app.use("/api/auth", authRouter);
   
   // Stubs for features to be rebuilt from scratch

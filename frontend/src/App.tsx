@@ -10,7 +10,7 @@ import { LoadingScreen } from "./components/ui/LoadingScreen";
 export function App() {
   const { user, loading } = useAuth();
 
-  if (loading) return <LoadingScreen label="Opening College OS" />;
+  if (loading) return <LoadingScreen label="Opening Stuhub" />;
 
   return (
     <Routes>

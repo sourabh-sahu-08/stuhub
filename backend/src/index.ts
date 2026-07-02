@@ -18,7 +18,7 @@ app.set("io", io);
 io.on("connection", (socket) => {
   socket.on("join", (userId: string) => socket.join(userId));
   socket.emit("notification", {
-    title: "Connected to College OS",
+    title: "Connected to Stuhub",
     body: "Realtime campus updates are live."
   });
 });
@@ -26,5 +26,5 @@ io.on("connection", (socket) => {
 await connectDatabase();
 
 server.listen(env.PORT, () => {
-  console.log(`College OS API listening on http://localhost:${env.PORT}`);
+  console.log(`Stuhub API listening on http://localhost:${env.PORT}`);
 });
