@@ -662,13 +662,57 @@ export function LoginPage() {
                   }`}>
                     <Icon size={20} />
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <h3 className={`text-sm font-bold transition ${isActive ? "text-white" : "text-slate-300"}`}>
                       {feat.title}
                     </h3>
-                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                      {feat.description}
-                    </p>
+                    {isActive ? (
+                      <div className="text-[11px] mt-1.5 leading-relaxed space-y-1">
+                        {feat.mockup.type === "assignments" && (() => {
+                          const completed = mockAssignments.filter(a => a.status === 'Submitted').length;
+                          return (
+                            <p className="text-brand-400 font-semibold animate-pulse">
+                              🟢 {completed} of {mockAssignments.length} coursework tasks completed.
+                            </p>
+                          );
+                        })()}
+                        {feat.mockup.type === "attendance" && (() => {
+                          const attPct = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 1000) / 10 : 0;
+                          return (
+                            <p className="text-amber-400 font-semibold animate-pulse">
+                              📊 Current Attendance: {attPct}%. Safe status logged.
+                            </p>
+                          );
+                        })()}
+                        {feat.mockup.type === "library" && (() => {
+                          const fileCount = feat.mockup.files?.filter((f: any) => f.name.toLowerCase().includes(librarySearch.toLowerCase())).length || 0;
+                          return (
+                            <p className="text-emerald-450 font-semibold animate-pulse">
+                              🔍 Filter: {fileCount} note files index. {downloadingFile ? `Downloading ${downloadingFile}...` : ''}
+                            </p>
+                          );
+                        })()}
+                        {feat.mockup.type === "ai" && (() => {
+                          const lastMsg = aiConversation[aiConversation.length - 1];
+                          const previewText = lastMsg ? `"${lastMsg.role === 'user' ? 'You' : 'AI'}: ${lastMsg.text.slice(0, 50)}..."` : 'Simulate prompt clicks...';
+                          return (
+                            <div className="bg-slate-950/60 p-2 rounded border border-white/5 font-mono text-[9px] text-purple-400 mt-1 animate-pulse space-y-0.5">
+                              <span className="text-[8px] uppercase tracking-wider text-slate-500 block">Live Chat Feed</span>
+                              <p className="line-clamp-2 leading-tight">{previewText}</p>
+                            </div>
+                          );
+                        })()}
+                        {feat.mockup.type === "pyq" && (
+                          <p className="text-indigo-400 font-semibold animate-pulse">
+                            {pyqScanState === 'idle' ? 'Ready to analyze. Click scan on right.' : pyqScanState === 'scanning' ? '⚡ OCR running & extracting data...' : '✅ Done. Normalization 40% weightage.'}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                        {feat.description}
+                      </p>
+                    )}
                   </div>
                 </button>
               );
