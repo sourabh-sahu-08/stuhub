@@ -20,7 +20,7 @@ npm run seed
 npm run dev
 ```
 
-The client runs at `http://localhost:5173` and the API runs at `http://localhost:5000`.
+The frontend runs at `http://localhost:5173` and the backend API runs at `http://localhost:5000`.
 
 ## Demo Accounts
 
