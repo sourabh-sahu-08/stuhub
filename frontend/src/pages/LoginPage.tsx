@@ -135,6 +135,25 @@ export function LoginPage() {
     return () => clearInterval(timer);
   }, []);
 
+  // Interactive Mockup States
+  const [mockAssignments, setMockAssignments] = useState([
+    { id: 1, title: "DBMS Assignment 3", due: "Tomorrow", status: "In Progress", weight: "10%" },
+    { id: 2, title: "OS Kernel Lab", due: "July 8", status: "Not Started", weight: "15%" },
+    { id: 3, title: "Applied AI Midterm Project", due: "Completed", status: "Submitted", weight: "20%" }
+  ]);
+  const [attendedClasses, setAttendedClasses] = useState(11);
+  const [totalClasses, setTotalClasses] = useState(14);
+  const [librarySearch, setLibrarySearch] = useState("");
+  const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+  
+  const initialMessages = [
+    { role: "user", text: "Explain binary search trees." },
+    { role: "ai", text: "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent." }
+  ];
+  const [aiConversation, setAiConversation] = useState(initialMessages);
+  const [isAiTyping, setIsAiTyping] = useState(false);
+  const [pyqScanState, setPyqScanState] = useState<"idle" | "scanning" | "done">("idle");
+
   // Auth Form States
   const [name, setName] = useState("Riya Sharma");
   const [email, setEmail] = useState("student@stuhub.edu");
@@ -251,6 +270,70 @@ export function LoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Interactive Mockup Simulation Actions
+  const toggleAssignment = (id: number) => {
+    setMockAssignments(prev =>
+      prev.map(item =>
+        item.id === id
+          ? {
+              ...item,
+              status: item.status === "Submitted" ? "In Progress" : "Submitted",
+              due: item.status === "Submitted" ? "Tomorrow" : "Completed"
+            }
+          : item
+      )
+    );
+  };
+
+  const handleLogAttendance = (attended: boolean) => {
+    setTotalClasses(t => t + 1);
+    if (attended) {
+      setAttendedClasses(a => a + 1);
+    }
+  };
+
+  const handleDownloadFile = (fileName: string) => {
+    if (downloadingFile) return;
+    setDownloadingFile(fileName);
+    setTimeout(() => {
+      setDownloadingFile(null);
+    }, 1500);
+  };
+
+  const handleAiPromptClick = (promptText: string) => {
+    if (isAiTyping) return;
+    setAiConversation([
+      { role: "user", text: promptText },
+      { role: "ai", text: "Thinking..." }
+    ]);
+    setIsAiTyping(true);
+    
+    let fullResponse = "";
+    if (promptText.includes("BST")) {
+      fullResponse = "A Binary Search Tree (BST) is a tree where each node has at most two children. The left subtree has keys smaller than the node, and the right subtree has keys larger.";
+    } else if (promptText.includes("semaphore")) {
+      fullResponse = "A semaphore is a variable or abstract data type used to control access to a common resource by multiple processes in a concurrent system.";
+    } else {
+      fullResponse = "Here is a quick summary: Normalization in databases removes redundancy and improves data integrity by structuring tables logically.";
+    }
+
+    setTimeout(() => {
+      setAiConversation([
+        { role: "user", text: promptText },
+        { role: "ai", text: fullResponse }
+      ]);
+      setIsAiTyping(false);
+    }, 1200);
+  };
+
+  const handlePyqScan = () => {
+    if (pyqScanState !== "idle") return;
+    setPyqScanState("scanning");
+    setTimeout(() => {
+      setPyqScanState("done");
+    }, 2000);
   };
 
   const triggerSearch = (e: FormEvent) => {
@@ -616,93 +699,205 @@ export function LoginPage() {
                 </div>
 
                 {/* Feature specific live mockup */}
-                <div className="flex-1 flex flex-col justify-center bg-slate-950/40 rounded-xl border border-white/5 p-4 min-h-[160px]">
+                <div className="flex-1 flex flex-col justify-center bg-slate-950/40 rounded-xl border border-white/5 p-4 min-h-[180px] relative overflow-hidden">
                   {features[activeFeature].mockup.type === "assignments" && (
-                    <div className="space-y-2">
-                      {features[activeFeature].mockup.data?.map((item: any, idx: number) => (
-                        <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-white/5 text-[11px]">
-                          <div>
-                            <div className="font-bold text-slate-200">{item.title}</div>
-                            <div className="text-[9px] text-slate-500 mt-0.5">Weight: {item.weight}</div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-slate-500">{item.due}</span>
-                            <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
-                              item.status === 'Submitted' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'
-                            }`}>
-                              {item.status}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {features[activeFeature].mockup.type === "attendance" && (
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <div className="relative flex items-center justify-center h-24 w-24">
-                        <svg className="absolute w-full h-full transform -rotate-90">
-                          <circle cx="48" cy="48" r="38" className="stroke-white/5 fill-none" strokeWidth="5" />
-                          <circle cx="48" cy="48" r="38" className="stroke-brand-500 fill-none" strokeWidth="5" strokeDasharray={`${2 * Math.PI * 38}`} strokeDashoffset={`${2 * Math.PI * 38 * (1 - 0.785)}`} strokeLinecap="round" />
-                        </svg>
-                        <div className="text-center">
-                          <span className="text-lg font-black text-white block">78.5%</span>
-                          <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">Safe</span>
-                        </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-500">
+                        <span>INTERACTIVE WORKLIST</span>
+                        <span className="text-[9px] text-brand-500 uppercase font-bold">(Click row to check off)</span>
                       </div>
-                      <div className="text-[9px] text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded-full border border-white/5">
-                        Required: 75% &bull; Buffer: +3.5%
+                      <div className="space-y-2">
+                        {mockAssignments.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => toggleAssignment(item.id)}
+                            className="w-full flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`h-2 w-2 rounded-full ${item.status === 'Submitted' ? 'bg-emerald-500' : item.status === 'In Progress' ? 'bg-blue-500' : 'bg-slate-500'}`} />
+                              <div>
+                                <span className={`font-bold text-slate-200 ${item.status === 'Submitted' ? 'line-through text-slate-500' : ''}`}>
+                                  {item.title}
+                                </span>
+                                <div className="text-[9px] text-slate-500 mt-0.5">Weight: {item.weight}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-right">
+                              <span className="text-[10px] text-slate-500">{item.due}</span>
+                              <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
+                                item.status === 'Submitted' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'
+                              }`}>
+                                {item.status}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
                       </div>
                     </div>
                   )}
 
-                  {features[activeFeature].mockup.type === "library" && (
-                    <div className="space-y-2">
-                      {features[activeFeature].mockup.files?.map((file: any, idx: number) => (
-                        <div key={idx} className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-900/60 border border-white/5 text-[11px]">
-                          <div className="h-7 w-7 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
-                            <Library size={14} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="font-bold text-slate-200 truncate">{file.name}</div>
-                            <div className="text-[9px] text-slate-500">{file.size}</div>
-                          </div>
-                          <span className="text-[8px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-bold">
-                            {file.tag}
-                          </span>
+                  {features[activeFeature].mockup.type === "attendance" && (() => {
+                    const attPct = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 1000) / 10 : 0;
+                    const isSafe = attPct >= 75;
+                    return (
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <div className="flex justify-between items-center w-full text-[10px] font-bold text-slate-500 px-1">
+                          <span>LIVE TRACKER CALCULATOR</span>
+                          <span className="text-[9px] text-brand-500 uppercase">(Test attendance bunk limits)</span>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <div className="flex items-center gap-6 bg-slate-900/60 border border-white/5 p-3 rounded-xl w-full max-w-[280px]">
+                          <div className="relative flex items-center justify-center h-14 w-14 flex-shrink-0">
+                            <svg className="absolute w-full h-full transform -rotate-90">
+                              <circle cx="28" cy="28" r="22" className="stroke-white/5 fill-none" strokeWidth="4" />
+                              <circle cx="28" cy="28" r="22" className="stroke-brand-500 fill-none" strokeWidth="4" strokeDasharray={`${2 * Math.PI * 22}`} strokeDashoffset={`${2 * Math.PI * 22 * (1 - attPct / 100)}`} strokeLinecap="round" />
+                            </svg>
+                            <span className="text-[10px] font-black text-white">{attPct}%</span>
+                          </div>
+                          <div className="text-left flex-1 min-w-0">
+                            <div className="text-[10px] font-extrabold text-white truncate">Classes: {attendedClasses}/{totalClasses}</div>
+                            <div className={`text-[8.5px] font-bold uppercase tracking-wider mt-0.5 ${isSafe ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {isSafe ? 'Safe! Above 75%' : 'Warning: Below 75%'}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleLogAttendance(true)}
+                            className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg hover:bg-emerald-500/20 transition active:scale-95"
+                          >
+                            Attend Class (+)
+                          </button>
+                          <button
+                            onClick={() => handleLogAttendance(false)}
+                            className="px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold rounded-lg hover:bg-red-500/20 transition active:scale-95"
+                          >
+                            Bunk Class (-)
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {features[activeFeature].mockup.type === "library" && (() => {
+                    const filteredFiles = features[activeFeature].mockup.files?.filter((file: any) =>
+                      file.name.toLowerCase().includes(librarySearch.toLowerCase())
+                    ) || [];
+                    return (
+                      <div className="space-y-2 text-left">
+                        <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                          <span>INTERACTIVE FILE INDEX</span>
+                          <span className="text-[9px] text-brand-500 uppercase">(Filter & Download)</span>
+                        </div>
+                        <input
+                          type="text"
+                          value={librarySearch}
+                          onChange={(e) => setLibrarySearch(e.target.value)}
+                          placeholder="Search notes (e.g. DBMS, OS)..."
+                          className="w-full bg-slate-900 border border-white/5 px-2.5 py-1.5 rounded-lg text-[10px] text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-500/50 mb-2"
+                        />
+                        <div className="space-y-1.5 max-h-[110px] overflow-y-auto pr-1">
+                          {filteredFiles.map((file: any, idx: number) => (
+                            <button
+                              key={idx}
+                              onClick={() => handleDownloadFile(file.name)}
+                              disabled={downloadingFile !== null}
+                              className="w-full flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition"
+                            >
+                              <div className="h-6 w-6 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
+                                <Library size={12} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-bold text-slate-200 truncate">{file.name}</div>
+                                <div className="text-[8px] text-slate-500">{file.size}</div>
+                              </div>
+                              <span className="text-[8px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-bold">
+                                {downloadingFile === file.name ? 'Downloading...' : 'Click to Download'}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {features[activeFeature].mockup.type === "ai" && (
-                    <div className="space-y-2 flex flex-col justify-end">
-                      {features[activeFeature].mockup.messages?.map((msg: any, idx: number) => (
-                        <div key={idx} className={`p-2.5 rounded-lg text-[11px] leading-relaxed max-w-[85%] ${
-                          msg.role === 'user' ? 'bg-brand-500/10 border border-brand-500/20 text-brand-400 self-end' : 'bg-slate-900/80 border border-white/5 text-slate-300 self-start'
-                        }`}>
-                          <div className="font-extrabold text-[8px] uppercase tracking-wider text-slate-500 mb-0.5">
-                            {msg.role === 'user' ? 'You' : 'Stuhub AI'}
+                    <div className="space-y-2 flex flex-col justify-between h-full text-left">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                        <span>STUDY CO-PILOT CHAT</span>
+                        <span className="text-[9px] text-brand-500 uppercase">(Select Prompt Below)</span>
+                      </div>
+                      <div className="space-y-2 max-h-[100px] overflow-y-auto pr-1 flex-1 flex flex-col justify-end">
+                        {aiConversation.map((msg, idx) => (
+                          <div key={idx} className={`p-2 rounded-lg text-[10px] leading-relaxed max-w-[85%] ${
+                            msg.role === 'user' ? 'bg-brand-500/10 border border-brand-500/20 text-brand-400 self-end' : 'bg-slate-900/80 border border-white/5 text-slate-350 self-start'
+                          }`}>
+                            <div className="font-extrabold text-[8px] uppercase tracking-wider text-slate-500 mb-0.5">
+                              {msg.role === 'user' ? 'You' : 'Stuhub AI'}
+                            </div>
+                            {msg.text}
                           </div>
-                          {msg.text}
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                        {["Explain BST", "What is semaphore?"].map((prompt) => (
+                          <button
+                            key={prompt}
+                            onClick={() => handleAiPromptClick(prompt)}
+                            disabled={isAiTyping}
+                            className="text-[9px] bg-slate-900 border border-white/10 hover:border-brand-500/40 hover:bg-slate-900/80 text-slate-300 px-2.5 py-1 rounded-full transition active:scale-95 disabled:opacity-50"
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
 
                   {features[activeFeature].mockup.type === "pyq" && (
-                    <div className="space-y-3 px-2">
-                      {features[activeFeature].mockup.topics?.map((topic: any, idx: number) => (
-                        <div key={idx} className="space-y-1">
-                          <div className="flex justify-between text-[10px] font-bold text-slate-200">
-                            <span>{topic.name}</span>
-                            <span className="text-brand-400">{topic.pct}% Weight</span>
-                          </div>
-                          <div className="w-full bg-slate-900 rounded-full h-1 border border-white/5">
-                            <div className="bg-brand-500 h-1 rounded-full" style={{ width: `${topic.pct}%` }} />
-                          </div>
+                    <div className="space-y-3 text-left">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                        <span>GROQ VISION SCANNER</span>
+                        <span className="text-[9px] text-brand-500 uppercase">(Simulate OCR Scan)</span>
+                      </div>
+                      
+                      {pyqScanState === 'idle' && (
+                        <div className="flex flex-col items-center justify-center py-4 border border-dashed border-white/10 rounded-lg hover:border-brand-500/30 transition cursor-pointer" onClick={handlePyqScan}>
+                          <Brain size={24} className="text-brand-500/60 mb-1.5 animate-pulse" />
+                          <span className="text-[10px] font-bold text-slate-300">Click to Scan Sample Paper</span>
+                          <span className="text-[8px] text-slate-500 mt-0.5">Simulates PDF parsing & Groq API analysis</span>
                         </div>
-                      ))}
+                      )}
+
+                      {pyqScanState === 'scanning' && (
+                        <div className="relative flex flex-col items-center justify-center py-6 border border-brand-500/20 bg-brand-500/5 rounded-lg overflow-hidden">
+                          {/* Animated radar bar scanner */}
+                          <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand-500 shadow-[0_0_10px_#6366f1] animate-bounce" style={{ animationDuration: '1.5s' }} />
+                          <Brain size={24} className="text-brand-500 mb-1.5 animate-spin" style={{ animationDuration: '3s' }} />
+                          <span className="text-[10px] font-bold text-slate-300">Parsing PDF / Running Groq LLM...</span>
+                        </div>
+                      )}
+
+                      {pyqScanState === 'done' && (
+                        <div className="space-y-2.5">
+                          {features[activeFeature].mockup.topics?.map((topic: any, idx: number) => (
+                            <div key={idx} className="space-y-1">
+                              <div className="flex justify-between text-[10px] font-bold text-slate-200">
+                                <span>{topic.name}</span>
+                                <span className="text-brand-400">{topic.pct}% Weight</span>
+                              </div>
+                              <div className="w-full bg-slate-900 rounded-full h-1 border border-white/5">
+                                <div className="bg-brand-500 h-1 rounded-full animate-pulse" style={{ width: `${topic.pct}%` }} />
+                              </div>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => setPyqScanState("idle")}
+                            className="w-full text-center text-[9px] text-slate-500 hover:text-white transition font-bold"
+                          >
+                            Reset Scanner
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
