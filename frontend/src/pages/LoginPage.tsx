@@ -154,6 +154,105 @@ export function LoginPage() {
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [pyqScanState, setPyqScanState] = useState<"idle" | "scanning" | "done">("idle");
 
+  // Automated Showcase Tour Hook
+  useEffect(() => {
+    let t1: any;
+    let t2: any;
+    let t3: any;
+    let t4: any;
+    let t5: any;
+    let interval: any;
+
+    if (activeFeature === 0) { // Assignments
+      setMockAssignments([
+        { id: 1, title: "DBMS Assignment 3", due: "Tomorrow", status: "In Progress", weight: "10%" },
+        { id: 2, title: "OS Kernel Lab", due: "July 8", status: "Not Started", weight: "15%" },
+        { id: 3, title: "Applied AI Midterm Project", due: "Tomorrow", status: "In Progress", weight: "20%" }
+      ]);
+      t1 = setTimeout(() => {
+        setMockAssignments(prev =>
+          prev.map(item =>
+            item.id === 3 ? { ...item, status: "Submitted", due: "Completed" } : item
+          )
+        );
+      }, 1200);
+    }
+    
+    if (activeFeature === 1) { // Attendance
+      setAttendedClasses(0);
+      setTotalClasses(14);
+      let currentAttended = 0;
+      interval = setInterval(() => {
+        if (currentAttended < 11) {
+          currentAttended++;
+          setAttendedClasses(currentAttended);
+        } else {
+          clearInterval(interval);
+        }
+      }, 80);
+    }
+    
+    if (activeFeature === 2) { // Library
+      setLibrarySearch("");
+      setDownloadingFile(null);
+      const searchStr = "DBMS";
+      let currentStr = "";
+      let charIdx = 0;
+      interval = setInterval(() => {
+        if (charIdx < searchStr.length) {
+          currentStr += searchStr[charIdx];
+          setLibrarySearch(currentStr);
+          charIdx++;
+        } else {
+          clearInterval(interval);
+          t2 = setTimeout(() => {
+            setDownloadingFile("DBMS_Syllabus.pdf");
+            t3 = setTimeout(() => {
+              setDownloadingFile(null);
+            }, 1500);
+          }, 600);
+        }
+      }, 150);
+    }
+    
+    if (activeFeature === 3) { // AI Studio
+      setAiConversation([]);
+      setIsAiTyping(false);
+      
+      t4 = setTimeout(() => {
+        setAiConversation([{ role: "user", text: "Explain binary search trees." }]);
+        setIsAiTyping(true);
+        
+        t5 = setTimeout(() => {
+          setIsAiTyping(false);
+          setAiConversation(prev => [
+            ...prev,
+            { role: "ai", text: "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent." }
+          ]);
+        }, 1200);
+      }, 500);
+    }
+    
+    if (activeFeature === 4) { // PYQ
+      setPyqScanState("idle");
+      t1 = setTimeout(() => {
+        setPyqScanState("scanning");
+        t2 = setTimeout(() => {
+          setPyqScanState("done");
+        }, 1800);
+      }, 500);
+    }
+
+    return () => {
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
+      if (t3) clearTimeout(t3);
+      if (t4) clearTimeout(t4);
+      if (t5) clearTimeout(t5);
+      if (interval) clearInterval(interval);
+    };
+  }, [activeFeature]);
+
   // Auth Form States
   const [name, setName] = useState("Riya Sharma");
   const [email, setEmail] = useState("student@stuhub.edu");
