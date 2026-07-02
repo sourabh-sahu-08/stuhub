@@ -11,10 +11,111 @@ import {
   Sparkles,
   X,
   HelpCircle,
-  ChevronDown
+  ChevronDown,
+  Brain
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { CompleteProfileModal } from "../components/auth/CompleteProfileModal";
+
+const features = [
+  {
+    title: "Assignments Tracker",
+    shortTitle: "Assignments",
+    description: "Centralize your coursework. Monitor deadlines, track submission status, and record scores in a structured student workflow.",
+    icon: ClipboardCheck,
+    color: "from-blue-500 to-indigo-500",
+    bullets: [
+      "Deadlines alert & notification bubble",
+      "Status badges (Not Started, In Progress, Submitted)",
+      "Credit and score weighting calculations"
+    ],
+    mockup: {
+      type: "assignments",
+      data: [
+        { title: "DBMS Assignment 3", due: "Tomorrow", status: "In Progress", weight: "10%" },
+        { title: "OS Kernel Lab", due: "July 8", status: "Not Started", weight: "15%" },
+        { title: "Applied AI Midterm Project", due: "Completed", status: "Submitted", weight: "20%" }
+      ]
+    }
+  },
+  {
+    title: "Attendance Watch",
+    shortTitle: "Attendance",
+    description: "Stay on top of university attendance criteria. Log conducted classes, preview status, and ensure you remain above the safe threshold.",
+    icon: Calendar,
+    color: "from-amber-500 to-orange-500",
+    bullets: [
+      "Interactive log calendars",
+      "Custom target percentage inputs (default 75%)",
+      "Smart warnings (e.g., 'Attend 3 classes to recover')"
+    ],
+    mockup: {
+      type: "attendance",
+      pct: 78.5,
+      required: 75,
+      status: "Safe"
+    }
+  },
+  {
+    title: "Digital Library",
+    shortTitle: "Library",
+    description: "Upload, store, and organize course materials. Find uploaded notes, slides, and syllabus documents with instant text search.",
+    icon: Library,
+    color: "from-emerald-500 to-teal-500",
+    bullets: [
+      "Category tagging (Notes, Labs, Papers)",
+      "Multi-format file attachments",
+      "Quick search index"
+    ],
+    mockup: {
+      type: "library",
+      files: [
+        { name: "DBMS_Syllabus_2026.pdf", size: "1.2 MB", tag: "Syllabus" },
+        { name: "OS_Lecture_5.pdf", size: "4.8 MB", tag: "Lecture Notes" },
+        { name: "AI_Search_Algorithms.png", size: "850 KB", tag: "Diagram" }
+      ]
+    }
+  },
+  {
+    title: "AI Studio",
+    shortTitle: "AI Studio",
+    description: "Leverage custom LLM chats, summarize note files, and calculate target study planners with smart algorithms.",
+    icon: Sparkles,
+    color: "from-purple-500 to-fuchsia-500",
+    bullets: [
+      "Interactive chatbot window",
+      "Markdown and code block formatting",
+      "Semantic context parsing"
+    ],
+    mockup: {
+      type: "ai",
+      messages: [
+        { role: "user", text: "Explain binary search trees." },
+        { role: "ai", text: "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent." }
+      ]
+    }
+  },
+  {
+    title: "AI PYQ Analyzer",
+    shortTitle: "PYQ Analyzer",
+    description: "Scan previous papers, predict exam patterns, and get custom AI study plans using Groq vision API.",
+    icon: Brain,
+    color: "from-indigo-500 to-purple-500",
+    bullets: [
+      "PDF & Image vision analysis (via Groq Vision)",
+      "Automated difficulty score calculations",
+      "Predicted question bank generation"
+    ],
+    mockup: {
+      type: "pyq",
+      topics: [
+        { name: "Indexing & Hashing", pct: 40 },
+        { name: "Concurrency Control", pct: 30 },
+        { name: "Query Optimization", pct: 20 }
+      ]
+    }
+  }
+];
 
 export function LoginPage() {
   const { user, login, register, socialLogin } = useAuth();
@@ -24,6 +125,7 @@ export function LoginPage() {
   const [modalMode, setModalMode] = useState<"login" | "register">("login");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [activeFeature, setActiveFeature] = useState(0);
 
   // Auth Form States
   const [name, setName] = useState("Riya Sharma");
@@ -286,28 +388,171 @@ export function LoginPage() {
       <section id="features" className="py-24 px-6 max-w-6xl mx-auto space-y-16">
         <div className="text-center space-y-3">
           <span className="text-xs uppercase tracking-[0.25em] text-brand-500 font-extrabold">Workspace Modules</span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Overview of the Workspace</h2>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto">Explore the clean baseline elements built to structure your college academic operations.</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Dynamic Workspace Overview</h2>
+          <p className="text-slate-400 text-sm max-w-xl mx-auto">Click on any module to preview its live interactive mock-up and core student workflows.</p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { title: "Assignments", text: "Track tasks, create deadlines, submit works, and check scores within a highly organized layout.", icon: ClipboardCheck },
-            { title: "Attendance", text: "Maintain an active presence checklist for your subjects and monitor your overall semester attendance.", icon: Calendar },
-            { title: "Digital Library", text: "Upload study materials, filter notes, access previous papers, and search textbook files instantly.", icon: Library },
-            { title: "AI Studio", text: "Leverage custom LLM chats, summarize note files, and calculate target study planners with smart algorithms.", icon: Sparkles }
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.title} className="group relative p-6 rounded-xl border border-white/5 bg-slate-900/30 hover:border-brand-500/45 hover:bg-slate-900/50 transition-all duration-300 space-y-4 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(99,102,241,0.08)]">
-                <div className="h-12 w-12 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Icon size={24} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          {/* Tabs selector column (5 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-2.5 justify-center">
+            {features.map((feat, idx) => {
+              const Icon = feat.icon;
+              const isActive = activeFeature === idx;
+              return (
+                <button
+                  key={feat.title}
+                  onClick={() => setActiveFeature(idx)}
+                  className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all duration-300 ${
+                    isActive
+                      ? "bg-slate-900/60 border-brand-500/50 shadow-[0_4px_20px_rgba(99,102,241,0.08)]"
+                      : "bg-slate-900/10 border-white/5 hover:border-white/10 hover:bg-slate-900/20"
+                  }`}
+                >
+                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 transition ${
+                    isActive ? "bg-brand-500 text-white" : "bg-white/5 text-slate-400"
+                  }`}>
+                    <Icon size={20} />
+                  </div>
+                  <div>
+                    <h3 className={`text-sm font-bold transition ${isActive ? "text-white" : "text-slate-300"}`}>
+                      {feat.title}
+                    </h3>
+                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                      {feat.description}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Interactive display panel (7 cols) */}
+          <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-slate-900/40 p-6 flex flex-col justify-between shadow-[0_15px_30px_rgba(0,0,0,0.4)] relative min-h-[380px] overflow-hidden">
+            {/* Decorative background grid */}
+            <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:12px_12px] -z-10" />
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeFeature}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25 }}
+                className="flex-1 flex flex-col justify-between space-y-6"
+              >
+                <div>
+                  <h3 className="text-xl font-extrabold text-white mb-2">
+                    {features[activeFeature].title}
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {features[activeFeature].description}
+                  </p>
                 </div>
-                <h3 className="text-lg font-bold text-white group-hover:text-brand-500 transition-colors">{item.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{item.text}</p>
-              </div>
-            );
-          })}
+
+                {/* Feature specific live mockup */}
+                <div className="flex-1 flex flex-col justify-center bg-slate-950/40 rounded-xl border border-white/5 p-4 min-h-[160px]">
+                  {features[activeFeature].mockup.type === "assignments" && (
+                    <div className="space-y-2">
+                      {features[activeFeature].mockup.data?.map((item: any, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-white/5 text-[11px]">
+                          <div>
+                            <div className="font-bold text-slate-200">{item.title}</div>
+                            <div className="text-[9px] text-slate-500 mt-0.5">Weight: {item.weight}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-500">{item.due}</span>
+                            <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
+                              item.status === 'Submitted' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'
+                            }`}>
+                              {item.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {features[activeFeature].mockup.type === "attendance" && (
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <div className="relative flex items-center justify-center h-24 w-24">
+                        <svg className="absolute w-full h-full transform -rotate-90">
+                          <circle cx="48" cy="48" r="38" className="stroke-white/5 fill-none" strokeWidth="5" />
+                          <circle cx="48" cy="48" r="38" className="stroke-brand-500 fill-none" strokeWidth="5" strokeDasharray={`${2 * Math.PI * 38}`} strokeDashoffset={`${2 * Math.PI * 38 * (1 - 0.785)}`} strokeLinecap="round" />
+                        </svg>
+                        <div className="text-center">
+                          <span className="text-lg font-black text-white block">78.5%</span>
+                          <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">Safe</span>
+                        </div>
+                      </div>
+                      <div className="text-[9px] text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded-full border border-white/5">
+                        Required: 75% &bull; Buffer: +3.5%
+                      </div>
+                    </div>
+                  )}
+
+                  {features[activeFeature].mockup.type === "library" && (
+                    <div className="space-y-2">
+                      {features[activeFeature].mockup.files?.map((file: any, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-900/60 border border-white/5 text-[11px]">
+                          <div className="h-7 w-7 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
+                            <Library size={14} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="font-bold text-slate-200 truncate">{file.name}</div>
+                            <div className="text-[9px] text-slate-500">{file.size}</div>
+                          </div>
+                          <span className="text-[8px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-bold">
+                            {file.tag}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {features[activeFeature].mockup.type === "ai" && (
+                    <div className="space-y-2 flex flex-col justify-end">
+                      {features[activeFeature].mockup.messages?.map((msg: any, idx: number) => (
+                        <div key={idx} className={`p-2.5 rounded-lg text-[11px] leading-relaxed max-w-[85%] ${
+                          msg.role === 'user' ? 'bg-brand-500/10 border border-brand-500/20 text-brand-400 self-end' : 'bg-slate-900/80 border border-white/5 text-slate-300 self-start'
+                        }`}>
+                          <div className="font-extrabold text-[8px] uppercase tracking-wider text-slate-500 mb-0.5">
+                            {msg.role === 'user' ? 'You' : 'Stuhub AI'}
+                          </div>
+                          {msg.text}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {features[activeFeature].mockup.type === "pyq" && (
+                    <div className="space-y-3 px-2">
+                      {features[activeFeature].mockup.topics?.map((topic: any, idx: number) => (
+                        <div key={idx} className="space-y-1">
+                          <div className="flex justify-between text-[10px] font-bold text-slate-200">
+                            <span>{topic.name}</span>
+                            <span className="text-brand-400">{topic.pct}% Weight</span>
+                          </div>
+                          <div className="w-full bg-slate-900 rounded-full h-1 border border-white/5">
+                            <div className="bg-brand-500 h-1 rounded-full" style={{ width: `${topic.pct}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Key value list */}
+                <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-4">
+                  {features[activeFeature].bullets.map((bullet, idx) => (
+                    <div key={idx} className="flex items-start gap-1.5 text-[10px] text-slate-400 leading-tight">
+                      <span className="h-1.5 w-1.5 rounded-full bg-brand-500 mt-1.5 flex-shrink-0" />
+                      <span>{bullet}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </section>
 
