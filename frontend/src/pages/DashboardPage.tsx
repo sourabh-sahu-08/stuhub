@@ -92,14 +92,14 @@ export function DashboardPage() {
         {/* 1. JobLuxe Welcome Hero Banner with Gradient & Glows */}
         <motion.div
           variants={itemVariants}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-950 to-black p-8 sm:p-10 text-white shadow-[0_15px_30px_rgba(0,0,0,0.3)] border border-white/5"
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-950 to-black p-6 sm:p-10 text-white shadow-[0_15px_30px_rgba(0,0,0,0.3)] border border-white/5"
         >
           <div className="relative z-10 max-w-3xl space-y-6">
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3.5 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(99,102,241,0.15)]">
               <span className="h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
               STUDENT WORKSPACE ACTIVE
             </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
               Scale Your Academic Goals <br />
               <span className="text-brand-500 drop-shadow-[0_0_20px_rgba(99,102,241,0.2)]">Build Your Future</span>
             </h1>
@@ -150,7 +150,7 @@ export function DashboardPage() {
         {/* 2. Interactive Analytics / Quick Metrics Widgets */}
         <motion.div variants={itemVariants} className="grid gap-6 sm:grid-cols-3">
           {/* Live Attendance widget */}
-          <div className="panel p-6 flex flex-col justify-between hover:border-brand-500/20 transition-all duration-300">
+          <div className="panel p-4 sm:p-6 flex flex-col justify-between hover:border-brand-500/20 transition-all duration-300">
             <div>
               <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Live Attendance</p>
               <h2 className={`text-3xl font-extrabold tracking-tight mt-2 ${overallAttendance >= 75 ? "text-emerald-500" : "text-red-500"}`}>
@@ -175,7 +175,7 @@ export function DashboardPage() {
           </div>
 
           {/* Academic progress widget */}
-          <div className="panel p-6 flex flex-col justify-between hover:border-brand-500/20 transition-all duration-300">
+          <div className="panel p-4 sm:p-6 flex flex-col justify-between hover:border-brand-500/20 transition-all duration-300">
             <div>
               <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Workspace Checklist</p>
               <h2 className="text-3xl font-extrabold tracking-tight text-slate-800 dark:text-white mt-2">
@@ -196,7 +196,7 @@ export function DashboardPage() {
           </div>
 
           {/* Detention risk widget */}
-          <div className="panel p-6 flex flex-col justify-between hover:border-brand-500/20 transition-all duration-300">
+          <div className="panel p-4 sm:p-6 flex flex-col justify-between hover:border-brand-500/20 transition-all duration-300">
             <div>
               <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Detention Standings</p>
               <h2 className={`text-3xl font-extrabold tracking-tight mt-2 ${criticalCount > 0 ? "text-red-500 animate-pulse" : "text-emerald-500"}`}>

@@ -350,12 +350,12 @@ export function LoginPage() {
       {/* 6. Authentic Modal Overlay */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md p-6 rounded-2xl border border-white/10 bg-slate-900/95 shadow-2xl text-white"
+              className="relative w-full max-w-md p-5 sm:p-6 rounded-2xl border border-white/10 bg-slate-900/95 shadow-2xl text-white"
             >
               {/* Close Button */}
               <button

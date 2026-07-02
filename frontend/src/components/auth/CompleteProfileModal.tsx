@@ -83,7 +83,7 @@ export function CompleteProfileModal() {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", duration: 0.5 }}
-        className="w-full max-w-lg p-8 rounded-2xl border border-brand-500/30 bg-slate-900/90 shadow-[0_0_50px_rgba(0,184,83,0.15)] text-white my-auto"
+        className="w-full max-w-lg p-5 sm:p-8 rounded-2xl border border-brand-500/30 bg-slate-900/90 shadow-[0_0_50px_rgba(0,184,83,0.15)] text-white my-auto"
       >
         {/* Header */}
         <div className="text-center space-y-3 mb-6">
