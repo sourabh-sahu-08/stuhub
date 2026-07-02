@@ -470,6 +470,19 @@ export function LoginPage() {
     }
   ];
 
+  const listContainerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.08 }
+    }
+  };
+
+  const listItemVariants = {
+    hidden: { opacity: 0, y: 8 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120 } }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-brand-500 selection:text-white">
       {/* 1. Header Nav */}
@@ -862,17 +875,23 @@ export function LoginPage() {
                         <span>INTERACTIVE WORKLIST</span>
                         <span className="text-[9px] text-brand-500 uppercase font-bold">(Click row to check off)</span>
                       </div>
-                      <div className="space-y-2">
+                      <motion.div
+                        variants={listContainerVariants}
+                        initial="hidden"
+                        animate="show"
+                        className="space-y-2"
+                      >
                         {mockAssignments.map((item) => (
-                          <button
+                          <motion.button
+                            variants={listItemVariants}
                             key={item.id}
                             onClick={() => toggleAssignment(item.id)}
-                            className="w-full flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition"
+                            className="w-full flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition duration-300"
                           >
                             <div className="flex items-center gap-2">
-                              <span className={`h-2 w-2 rounded-full ${item.status === 'Submitted' ? 'bg-emerald-500' : item.status === 'In Progress' ? 'bg-blue-500' : 'bg-slate-500'}`} />
+                              <span className={`h-2 w-2 rounded-full transition-colors duration-300 ${item.status === 'Submitted' ? 'bg-emerald-500' : item.status === 'In Progress' ? 'bg-blue-500' : 'bg-slate-500'}`} />
                               <div>
-                                <span className={`font-bold text-slate-200 ${item.status === 'Submitted' ? 'line-through text-slate-500' : ''}`}>
+                                <span className={`font-bold text-slate-200 transition-all duration-300 ${item.status === 'Submitted' ? 'line-through text-slate-500' : ''}`}>
                                   {item.title}
                                 </span>
                                 <div className="text-[9px] text-slate-500 mt-0.5">Weight: {item.weight}</div>
@@ -880,15 +899,15 @@ export function LoginPage() {
                             </div>
                             <div className="flex items-center gap-2 text-right">
                               <span className="text-[10px] text-slate-500">{item.due}</span>
-                              <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${
+                              <span className={`text-[9px] px-2 py-0.5 rounded font-bold transition-all duration-350 ${
                                 item.status === 'Submitted' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'
                               }`}>
                                 {item.status}
                               </span>
                             </div>
-                          </button>
+                          </motion.button>
                         ))}
-                      </div>
+                      </motion.div>
                     </div>
                   )}
 
@@ -905,7 +924,17 @@ export function LoginPage() {
                           <div className="relative flex items-center justify-center h-14 w-14 flex-shrink-0">
                             <svg className="absolute w-full h-full transform -rotate-90">
                               <circle cx="28" cy="28" r="22" className="stroke-white/5 fill-none" strokeWidth="4" />
-                              <circle cx="28" cy="28" r="22" className="stroke-brand-500 fill-none" strokeWidth="4" strokeDasharray={`${2 * Math.PI * 22}`} strokeDashoffset={`${2 * Math.PI * 22 * (1 - attPct / 100)}`} strokeLinecap="round" />
+                              <circle
+                                cx="28"
+                                cy="28"
+                                r="22"
+                                className="stroke-brand-500 fill-none animate-pulse"
+                                strokeWidth="4"
+                                strokeDasharray={`${2 * Math.PI * 22}`}
+                                strokeDashoffset={`${2 * Math.PI * 22 * (1 - attPct / 100)}`}
+                                strokeLinecap="round"
+                                style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                              />
                             </svg>
                             <span className="text-[10px] font-black text-white">{attPct}%</span>
                           </div>
@@ -951,27 +980,45 @@ export function LoginPage() {
                           placeholder="Search notes (e.g. DBMS, OS)..."
                           className="w-full bg-slate-900 border border-white/5 px-2.5 py-1.5 rounded-lg text-[10px] text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-500/50 mb-2"
                         />
-                        <div className="space-y-1.5 max-h-[110px] overflow-y-auto pr-1">
+                        <motion.div
+                          variants={listContainerVariants}
+                          initial="hidden"
+                          animate="show"
+                          className="space-y-1.5 max-h-[110px] overflow-y-auto pr-1"
+                        >
                           {filteredFiles.map((file: any, idx: number) => (
-                            <button
+                            <motion.button
+                              variants={listItemVariants}
                               key={idx}
                               onClick={() => handleDownloadFile(file.name)}
                               disabled={downloadingFile !== null}
-                              className="w-full flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition"
+                              className="w-full flex flex-col gap-1.5 p-2 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition duration-300"
                             >
-                              <div className="h-6 w-6 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
-                                <Library size={12} />
+                              <div className="w-full flex items-center gap-2">
+                                <div className="h-6 w-6 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
+                                  <Library size={12} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-bold text-slate-200 truncate">{file.name}</div>
+                                  <div className="text-[8px] text-slate-500">{file.size}</div>
+                                </div>
+                                <span className="text-[8px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-bold">
+                                  {downloadingFile === file.name ? 'Downloading...' : 'Click to Download'}
+                                </span>
                               </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="font-bold text-slate-200 truncate">{file.name}</div>
-                                <div className="text-[8px] text-slate-500">{file.size}</div>
-                              </div>
-                              <span className="text-[8px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-bold">
-                                {downloadingFile === file.name ? 'Downloading...' : 'Click to Download'}
-                              </span>
-                            </button>
+                              {downloadingFile === file.name && (
+                                <div className="w-full bg-slate-950 rounded-full h-1 border border-white/5 overflow-hidden">
+                                  <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: "100%" }}
+                                    transition={{ duration: 1.5, ease: "linear" }}
+                                    className="bg-brand-500 h-1 rounded-full"
+                                  />
+                                </div>
+                              )}
+                            </motion.button>
                           ))}
-                        </div>
+                        </motion.div>
                       </div>
                     );
                   })()}
@@ -1048,8 +1095,13 @@ export function LoginPage() {
                                 <span>{topic.name}</span>
                                 <span className="text-brand-400">{topic.pct}% Weight</span>
                               </div>
-                              <div className="w-full bg-slate-900 rounded-full h-1 border border-white/5">
-                                <div className="bg-brand-500 h-1 rounded-full animate-pulse" style={{ width: `${topic.pct}%` }} />
+                              <div className="w-full bg-slate-900 rounded-full h-1.5 border border-white/5 overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${topic.pct}%` }}
+                                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                                  className="bg-brand-500 h-1.5 rounded-full"
+                                />
                               </div>
                             </div>
                           ))}
