@@ -13,7 +13,7 @@ A modern full-stack college operating system for students, teachers, and adminis
 
 ## Quick Start
 
-```bash
+```bashh
 npm install
 cp .env.example .env
 npm run seed
