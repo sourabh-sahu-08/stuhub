@@ -6,6 +6,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
 import { authRouter } from "./routes/auth.routes.js";
+import { pyqRouter } from "./routes/pyq.routes.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
 export function createApp() {
@@ -19,6 +20,7 @@ export function createApp() {
 
   app.get("/health", (_req, res) => res.json({ ok: true, service: "stuhub-api" }));
   app.use("/api/auth", authRouter);
+  app.use("/api/pyq", pyqRouter);
   
   // Stubs for features to be rebuilt from scratch
   app.use("/api/dashboard/:role", (_req, res) => res.json({ metrics: {}, notices: [] }));

@@ -6,7 +6,8 @@ import {
   Library,
   MessageSquare,
   Settings,
-  Sparkles
+  Sparkles,
+  Brain
 } from "lucide-react";
 
 export const navItems = [
@@ -14,6 +15,7 @@ export const navItems = [
   { label: "Assignments", path: "/dashboard/assignments", icon: ClipboardCheck },
   { label: "Attendance", path: "/dashboard/attendance", icon: CalendarDays },
   { label: "Digital Library", path: "/dashboard/library", icon: Library },
+  { label: "PYQ Analyzer", path: "/dashboard/pyq", icon: Brain },
   { label: "Messages", path: "/dashboard/messages", icon: MessageSquare },
   { label: "AI Studio", path: "/dashboard/ai", icon: Bot },
   { label: "Settings", path: "/dashboard/settings", icon: Settings },

@@ -3,6 +3,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { AttendancePage } from "./pages/AttendancePage";
 import { ModulePage } from "./pages/ModulePage";
+import { PyqPage } from "./pages/PyqPage";
 import { AppShell } from "./components/layout/AppShell";
 import { useAuth } from "./context/AuthContext";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
@@ -24,6 +25,7 @@ export function App() {
       >
         <Route index element={<DashboardPage />} />
         <Route path="attendance" element={<AttendancePage />} />
+        <Route path="pyq" element={<PyqPage />} />
         <Route path=":module" element={<ModulePage />} />
       </Route>
 
