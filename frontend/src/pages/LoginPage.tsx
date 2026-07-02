@@ -126,6 +126,14 @@ export function LoginPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [activeFeature, setActiveFeature] = useState(0);
+  const [currentHeroFeature, setCurrentHeroFeature] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHeroFeature((prev) => (prev + 1) % 5);
+    }, 2800);
+    return () => clearInterval(timer);
+  }, []);
 
   // Auth Form States
   const [name, setName] = useState("Riya Sharma");
@@ -396,78 +404,148 @@ export function LoginPage() {
             </div>
           </div>
 
-          {/* Right Column: Floating Mockup Cards (5 cols) */}
-          <div className="lg:col-span-5 relative w-full h-[380px] sm:h-[420px] flex items-center justify-center no-print select-none">
-            {/* 1. Floating AI Assistant Card */}
+          {/* Right Column: Floating Mockup Dashboard with Rotating Modules (5 cols) */}
+          <div className="lg:col-span-5 relative flex justify-center lg:justify-end no-print">
             <motion.div
               animate={{ y: [0, -12, 0] }}
-              transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-              className="absolute top-2 left-0 w-[240px] sm:w-[260px] bg-slate-900/40 border border-white/10 p-3.5 rounded-xl shadow-[0_15px_30px_rgba(0,0,0,0.4)] backdrop-blur-md space-y-2 z-20 hover:border-brand-500/30 transition-colors"
-            >
-              <div className="flex items-center justify-between border-b border-white/5 pb-2 text-[8px] font-bold text-slate-500 uppercase tracking-wider">
-                <span>AI assistant</span>
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              </div>
-              <div className="p-2.5 rounded-lg bg-slate-950/60 border border-white/5 text-[10px] leading-relaxed">
-                <div className="font-extrabold text-[8px] uppercase tracking-wider text-brand-400 mb-0.5">Stuhub AI</div>
-                Predicted DBMS exam question on <strong>SQL Joins</strong> has 85% probability.
-              </div>
-            </motion.div>
-
-            {/* 2. Floating Attendance Ring Card */}
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
               transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-              className="absolute top-8 right-0 sm:right-2 w-[150px] bg-slate-900/60 border border-brand-500/20 p-3.5 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-md flex items-center gap-3 z-30 hover:border-brand-500/40 transition-colors"
+              className="relative w-[340px] h-[360px] bg-slate-900/30 rounded-2xl border border-white/10 p-5 shadow-[0_30px_60px_rgba(0,0,0,0.6)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
             >
-              <div className="relative flex items-center justify-center h-10 w-10 flex-shrink-0">
-                <svg className="absolute w-full h-full transform -rotate-90">
-                  <circle cx="20" cy="20" r="16" className="stroke-white/5 fill-none" strokeWidth="3" />
-                  <circle cx="20" cy="20" r="16" className="stroke-emerald-500 fill-none" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 16}`} strokeDashoffset={`${2 * Math.PI * 16 * (1 - 0.785)}`} strokeLinecap="round" />
-                </svg>
-                <span className="text-[9px] font-black text-white">78%</span>
+              {/* Top mock title bar */}
+              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                </div>
+                <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase bg-white/5 px-2.5 py-0.5 rounded">
+                  dashboard.stuhub.io
+                </span>
               </div>
-              <div>
-                <div className="text-[9px] font-extrabold text-white">Attendance</div>
-                <div className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider mt-0.5">Safe</div>
+
+              {/* Central region with auto-rotating mockup feature */}
+              <div className="flex-1 py-5 relative flex flex-col justify-center">
+                <AnimatePresence mode="wait">
+                  {currentHeroFeature === 0 && (
+                    <motion.div
+                      key="ai-assistant"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-3 text-left"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">AI Assistant Chat</div>
+                      <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 text-[10px] leading-relaxed shadow-sm">
+                        <div className="font-extrabold text-[8px] uppercase tracking-wider text-brand-400 mb-0.5">Stuhub AI</div>
+                        Predicted DBMS exam question on <strong>SQL Joins</strong> has 85% probability.
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {currentHeroFeature === 1 && (
+                    <motion.div
+                      key="attendance"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="flex flex-col items-center justify-center space-y-3"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Attendance Monitor</div>
+                      <div className="flex items-center gap-3 bg-slate-950/60 border border-white/5 p-3 rounded-xl shadow-lg w-full max-w-[200px] text-left">
+                        <div className="relative flex items-center justify-center h-10 w-10 flex-shrink-0">
+                          <svg className="absolute w-full h-full transform -rotate-90">
+                            <circle cx="20" cy="20" r="16" className="stroke-white/5 fill-none" strokeWidth="3" />
+                            <circle cx="20" cy="20" r="16" className="stroke-emerald-500 fill-none" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 16}`} strokeDashoffset={`${2 * Math.PI * 16 * (1 - 0.78)}`} strokeLinecap="round" />
+                          </svg>
+                          <span className="text-[9px] font-black text-white">78%</span>
+                        </div>
+                        <div>
+                          <div className="text-[9px] font-extrabold text-white">Attendance</div>
+                          <div className="text-[8px] font-bold text-emerald-450 uppercase tracking-wider mt-0.5">Safe</div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {currentHeroFeature === 2 && (
+                    <motion.div
+                      key="assignments"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-3 text-left"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Assignments Tracker</div>
+                      <div className="p-3.5 rounded-xl bg-slate-950/45 border border-white/5 text-[10px] space-y-1.5 shadow-sm">
+                        <div className="flex justify-between items-center text-[8px] font-bold text-slate-500">
+                          <span>ACTIVE TASKS</span>
+                          <span className="text-brand-500">2 pending</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" readOnly className="rounded border-white/10 bg-transparent text-brand-500 focus:ring-0 focus:ring-offset-0 h-3 w-3" />
+                          <span className="text-slate-355">Submit OS lab report</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {currentHeroFeature === 3 && (
+                    <motion.div
+                      key="library"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-3 text-left"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Digital Library Repo</div>
+                      <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/60 border border-white/5 text-[10px]">
+                        <div className="h-7 w-7 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
+                          <Library size={13} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-slate-200 truncate">DBMS_Syllabus.pdf</div>
+                          <div className="text-[8px] text-slate-550">1.2 MB</div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {currentHeroFeature === 4 && (
+                    <motion.div
+                      key="pyq"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-3 text-left"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Exam PYQ Analyzer</div>
+                      <div className="border border-emerald-500/20 bg-slate-950/60 p-3.5 rounded-xl shadow-lg space-y-1.5">
+                        <div className="text-[8px] font-extrabold text-brand-400 uppercase tracking-wider flex items-center gap-1">
+                          <Brain size={10} className="text-brand-500" /> Topic Analysis
+                        </div>
+                        <p className="text-[10px] text-slate-200 font-bold leading-snug">
+                          SQL Indexing Repeated 3x in Papers
+                        </p>
+                        <div className="text-[8px] font-bold text-emerald-450 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded inline-block">
+                          High Probability
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Bottom decorative stats bar */}
+              <div className="border-t border-white/5 pt-3 flex justify-between items-center text-[10px] font-bold text-slate-500">
+                <span className="flex items-center gap-1"><Brain size={12} className="text-brand-500" /> Groq Vision Online</span>
+                <span className="text-emerald-500 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> 99.9% Up</span>
               </div>
             </motion.div>
-
-            {/* 3. Floating Assignments Task Card */}
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
-              className="absolute bottom-4 left-0 sm:left-2 w-[230px] sm:w-[250px] bg-slate-900/30 border border-white/5 p-3.5 rounded-xl shadow-[0_15px_30px_rgba(0,0,0,0.4)] backdrop-blur-md space-y-2 z-10 hover:border-brand-500/20 transition-colors"
-            >
-              <div className="flex justify-between items-center text-[8px] font-bold text-slate-500 uppercase tracking-wider">
-                <span>Active Tasks</span>
-                <span className="text-brand-500">2 pending</span>
-              </div>
-              <div className="flex items-center gap-2 text-[10px]">
-                <input type="checkbox" readOnly className="rounded border-white/10 bg-transparent text-brand-500 focus:ring-0 focus:ring-offset-0 h-3 w-3" />
-                <span className="text-slate-355 truncate">Submit OS lab report</span>
-              </div>
-            </motion.div>
-
-            {/* 4. Floating PYQ Exam Predictor Tag */}
-            <motion.div
-              animate={{ y: [0, -14, 0] }}
-              transition={{ repeat: Infinity, duration: 5.5, ease: "easeInOut" }}
-              className="absolute bottom-12 right-0 w-[160px] sm:w-[170px] border border-emerald-500/10 bg-slate-950/60 p-3.5 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-md space-y-1.5 z-20 hover:border-emerald-500/30 transition-colors"
-            >
-              <div className="text-[8px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                <Brain size={10} className="text-brand-500" /> PYQ Analysis
-              </div>
-              <p className="text-[10px] text-slate-200 font-bold leading-snug">
-                SQL Indexing Repeated 3x
-              </p>
-              <div className="text-[8px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded inline-block">
-                High Probability
-              </div>
-            </motion.div>
-
-            {/* Background glowing particles/blobs for depth */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-36 w-36 rounded-full bg-brand-500/5 blur-[50px] -z-10" />
           </div>
         </div>
       </section>
