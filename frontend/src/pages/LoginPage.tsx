@@ -323,63 +323,140 @@ export function LoginPage() {
       </header>
 
       {/* 2. Hero Section */}
-      <section id="home" className="relative min-h-[85vh] flex items-center justify-center px-6 py-16 overflow-hidden">
+      <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden">
         {/* Background Image with Blurred Gradient Overlay */}
         <div className="absolute inset-0 z-0">
           <img
             src="/workspace_background.jpg"
             alt="Collaborative Workspace"
-            className="w-full h-full object-cover filter brightness-[0.25] contrast-[1.05]"
+            className="w-full h-full object-cover filter brightness-[0.2] contrast-[1.05]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
+          
+          {/* Glowing colorful ambient background blobs */}
+          <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-brand-500/10 blur-[120px] -z-10 animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-purple-500/10 blur-[120px] -z-10 animate-pulse" style={{ animationDuration: '4s' }} />
         </div>
 
-        <div className="relative z-10 max-w-4xl text-center space-y-8">
-          {/* Active Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(99,102,241,0.1)]">
-            <span className="h-2 w-2 rounded-full bg-brand-500 animate-ping" />
-            STUHUB STUDENT ENVIRONMENT IS ACTIVE
+        <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Column: Heading & Controls (7 cols) */}
+          <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
+            {/* Active Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 100 }}
+              className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(99,102,241,0.15)]"
+            >
+              <span className="h-2.5 w-2.5 rounded-full bg-brand-500 animate-pulse" />
+              STUHUB STUDENT ENVIRONMENT IS ACTIVE
+            </motion.div>
+
+            {/* Heading */}
+            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
+              The Command Center for <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-brand-400">
+                Academic Success
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="max-w-2xl mx-auto lg:mx-0 text-base sm:text-lg leading-relaxed text-slate-350">
+              Unify your course assignments, track attendance safeties, build digital notes libraries, and analyze previous exam papers with Groq-powered AI.
+            </p>
+
+            {/* Search Box */}
+            <form onSubmit={triggerSearch} className="max-w-lg mx-auto lg:mx-0 bg-white/5 backdrop-blur-md rounded-xl p-1.5 border border-white/10 flex items-center gap-2 shadow-2xl focus-within:border-brand-500/50 transition-all duration-300">
+              <div className="flex items-center gap-2 flex-1 px-3 text-slate-400">
+                <Search size={18} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search modules or features..."
+                  className="bg-transparent border-none outline-none text-white text-sm w-full placeholder:text-slate-455 focus:ring-0 focus:outline-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="h-10 px-5 rounded-lg bg-brand-500 text-sm font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(99,102,241,0.3)] active:scale-95"
+              >
+                Search <ArrowRight size={16} />
+              </button>
+            </form>
+
+            {/* Checkmarks */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-200 font-semibold select-none pt-2">
+              {["Assignments Tracker", "Attendance Watch", "Digital Library", "Groq PYQ Analyzer"].map((item) => (
+                <div key={item} className="flex items-center gap-2 bg-slate-900/40 border border-white/5 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                  <CheckCircle2 className="text-brand-500" size={14} />
+                  {item}
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Heading */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-white">
-            Find Your Dream Study <br />
-            <span className="text-brand-500 drop-shadow-[0_0_25px_rgba(99,102,241,0.2)]">Build Your Future</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-slate-350">
-            A beautiful, fully responsive workspace built to scale. Organize assignments, track class attendance, access libraries, and plan your schedules with intelligence.
-          </p>
-
-          {/* Search Box */}
-          <form onSubmit={triggerSearch} className="max-w-lg mx-auto bg-white/5 backdrop-blur-md rounded-xl p-1.5 border border-white/10 flex items-center gap-2 shadow-2xl focus-within:border-brand-500/50 transition-all duration-300">
-            <div className="flex items-center gap-2 flex-1 px-3 text-slate-400">
-              <Search size={18} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search modules or features..."
-                className="bg-transparent border-none outline-none text-white text-sm w-full placeholder:text-slate-400 focus:ring-0"
-              />
-            </div>
-            <button
-              type="submit"
-              className="h-10 px-5 rounded-lg bg-brand-500 text-sm font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(99,102,241,0.3)] active:scale-95"
+          {/* Right Column: Floating 3D-like Mockup Canvas (5 cols) */}
+          <div className="lg:col-span-5 relative flex justify-center lg:justify-end no-print">
+            <motion.div
+              animate={{ y: [0, -12, 0] }}
+              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              className="relative w-[340px] h-[360px] bg-slate-900/30 rounded-2xl border border-white/10 p-5 shadow-[0_30px_60px_rgba(0,0,0,0.6)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
             >
-              Search <ArrowRight size={16} />
-            </button>
-          </form>
-
-          {/* Checkmarks */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-200 font-semibold select-none pt-2">
-            {["Assignments Tracker", "Attendance Watch", "Digital Library Repo", "Smart AI Plan"].map((item) => (
-              <div key={item} className="flex items-center gap-2 bg-slate-900/40 border border-white/5 px-4 py-2 rounded-full backdrop-blur-sm">
-                <CheckCircle2 className="text-brand-500" size={18} />
-                {item}
+              {/* Top mock title bar */}
+              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                </div>
+                <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase bg-white/5 px-2.5 py-0.5 rounded">
+                  dashboard.stuhub.io
+                </span>
               </div>
-            ))}
+
+              {/* Central Mock visual elements */}
+              <div className="flex-1 py-4 space-y-3 relative">
+                {/* Simulated AI Chat bubble */}
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 max-w-[85%] text-[10px] leading-relaxed shadow-sm">
+                  <div className="font-extrabold text-[8px] uppercase tracking-wider text-brand-400 mb-0.5">Stuhub AI</div>
+                  Predicted DBMS exam question on <strong>SQL Joins</strong> has 85% probability.
+                </div>
+
+                {/* Simulated Attendance progress ring floating tag */}
+                <div className="absolute right-0 top-1 p-3 rounded-xl bg-slate-900/80 border border-brand-500/20 shadow-lg flex items-center gap-3 backdrop-blur-md">
+                  <div className="relative flex items-center justify-center h-10 w-10">
+                    <svg className="absolute w-full h-full transform -rotate-90">
+                      <circle cx="20" cy="20" r="16" className="stroke-white/5 fill-none" strokeWidth="3" />
+                      <circle cx="20" cy="20" r="16" className="stroke-emerald-500 fill-none" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 16}`} strokeDashoffset={`${2 * Math.PI * 16 * (1 - 0.785)}`} strokeLinecap="round" />
+                    </svg>
+                    <span className="text-[9px] font-black text-white">78%</span>
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-extrabold text-white">Attendance</div>
+                    <div className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider mt-0.5">Safe</div>
+                  </div>
+                </div>
+
+                {/* Simulated Task Card */}
+                <div className="p-3 rounded-xl bg-slate-950/40 border border-white/5 text-[10px] space-y-1.5 shadow-sm">
+                  <div className="flex justify-between items-center text-[8px] font-bold text-slate-500">
+                    <span>ACTIVE TASKS</span>
+                    <span className="text-brand-500">2 pending</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" readOnly className="rounded border-white/10 bg-transparent text-brand-500 focus:ring-0 focus:ring-offset-0 h-3 w-3" />
+                    <span className="text-slate-300">Submit Operating Systems lab report</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom decorative stats bar */}
+              <div className="border-t border-white/5 pt-3 flex justify-between items-center text-[10px] font-bold text-slate-500">
+                <span className="flex items-center gap-1"><Brain size={12} className="text-brand-500" /> Groq Vision Online</span>
+                <span className="text-emerald-500 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> 99.9% Up</span>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
