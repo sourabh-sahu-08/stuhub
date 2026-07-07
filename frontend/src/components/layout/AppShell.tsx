@@ -1,285 +1,433 @@
-import { Menu, Moon, Search, Sun, X, Bell, ChevronDown, LogOut, User as UserIcon } from "lucide-react";
-import { useEffect, useMemo, useState, useRef } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import {
+  Bell,
+  ChevronDown,
+  LogOut,
+  Menu,
+  User as UserIcon,
+  X,
+} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+} from "react-router-dom";
 import { io } from "socket.io-client";
+
+import { CompleteProfileModal } from "../auth/CompleteProfileModal";
 import { useAuth } from "../../context/AuthContext";
 import { navGroups } from "./navigation";
-import { CompleteProfileModal } from "../auth/CompleteProfileModal";
-import { motion, AnimatePresence } from "framer-motion";
 
 export function AppShell() {
   const { user, logout } = useAuth();
-  const [open, setOpen] = useState(false);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
+  const [toast, setToast] = useState<{
+    title: string;
+    body: string;
+  } | null>(null);
+
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close menus on route change
+  /* Close menus when route changes */
   useEffect(() => {
-    setOpen(false);
+    setMobileMenuOpen(false);
     setProfileDropdownOpen(false);
   }, [location.pathname]);
 
-  // Click outside to close profile dropdown
+  /* Close profile dropdown on outside click */
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setProfileDropdownOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
-  // Escape key listener to close mobile menu
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Lock scroll on body when mobile menu is open
+  /* Close overlays with Escape */
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        setProfileDropdownOpen(false);
+      }
     }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  /* Lock body scroll only while mobile drawer is open */
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open]);
+  }, [mobileMenuOpen]);
 
+  /* Existing socket notification logic */
   useEffect(() => {
     if (!user) return;
-    const socket = io(import.meta.env.VITE_SOCKET_URL ?? "http://localhost:5000");
+
+    const socket = io(
+      import.meta.env.VITE_SOCKET_URL ?? "http://localhost:5000"
+    );
+
     socket.emit("join", user.id);
     socket.on("notification", setToast);
+
     return () => {
       socket.disconnect();
     };
   }, [user]);
 
-  return (
-    <div className="min-h-screen w-full bg-[#09090B] text-[#e2e2e2] font-sans flex overflow-x-hidden">
-      
-      {/* Sidebar Navigation */}
-      {/* 
-        On Mobile (< 768px): position: fixed, width: min(82vw, 300px), off-screen default, z-50 overlay.
-        On Desktop (>= 768px): position: static, width: 256px (w-64), visible, flex sibling.
-      */}
-      <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 md:z-0 h-[100dvh] md:h-auto w-[min(82vw,300px)] md:w-64 flex-shrink-0 bg-[#0F0F12] border-r border-[#27272D] flex flex-col justify-between p-6 transition-transform duration-300 md:transition-none md:transform-none ${
-          open ? "translate-x-0 flex" : "-translate-x-full hidden md:flex"
-        }`}
-      >
-        <div>
-          {/* Logo / Header */}
-          <div className="flex items-center justify-between md:justify-start gap-md mb-2xl">
-            <Link to="/dashboard" className="flex items-center gap-md select-none">
-              <span className="material-symbols-outlined text-[#F5A524] text-[28px]">terminal</span>
-              <h1 className="font-display-lg text-headline-md font-bold tracking-tight text-on-surface">
-                StuHub <span className="text-primary font-mono text-xs">OS_V1</span>
-              </h1>
-            </Link>
+  const NavigationContent = ({
+    mobile = false,
+  }: {
+    mobile?: boolean;
+  }) => (
+    <>
+      <div>
+        {/* Logo */}
+        <div className="mb-8 flex items-center justify-between">
+          <Link
+            to="/dashboard"
+            className="flex min-w-0 items-center gap-2 select-none"
+            onClick={() => {
+              if (mobile) setMobileMenuOpen(false);
+            }}
+          >
+            <span className="material-symbols-outlined shrink-0 text-[28px] text-[#F5A524]">
+              terminal
+            </span>
+
+            <h1 className="truncate text-lg font-bold tracking-tight text-[#FAFAFA]">
+              StuHub{" "}
+              <span className="font-mono text-xs text-[#F5A524]">
+                OS_V1
+              </span>
+            </h1>
+          </Link>
+
+          {mobile && (
             <button
-              className="md:hidden p-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
-              onClick={() => setOpen(false)}
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="rounded-md p-2 text-[#A1A1AA] transition-colors hover:bg-[#1C1C21] hover:text-[#FAFAFA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]"
               aria-label="Close navigation"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
-          </div>
-
-          {/* Navigation Groups */}
-          <nav className="space-y-xl" aria-label="Primary">
-            {navGroups.map((group) => (
-              <div key={group.groupName}>
-                <p className="font-label-sm text-[10px] text-on-surface-variant mb-md tracking-[0.2em] opacity-40 uppercase">
-                  {group.groupName}
-                </p>
-                <div className="space-y-xs">
-                  {group.items.map((item) => (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      end={item.path === "/dashboard"}
-                      className={({ isActive }) =>
-                        `flex items-center gap-md py-sm px-md transition-colors duration-200 relative outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded ${
-                          isActive
-                            ? "text-[#FAFAFA] font-semibold"
-                            : "text-[#71717A] hover:text-on-surface"
-                        }`
-                      }
-                    >
-                      {({ isActive }) => (
-                        <>
-                          {isActive && <div className="active-indicator" />}
-                          <span
-                            className={`material-symbols-outlined text-[20px] ${
-                              isActive ? "text-[#F5A524]" : "text-[#71717A]"
-                            }`}
-                          >
-                            {item.materialIcon}
-                          </span>
-                          <span className="font-label-md text-label-md">{item.label}</span>
-                        </>
-                      )}
-                    </NavLink>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </nav>
+          )}
         </div>
 
-        {/* Sidebar Footer info */}
-        <div className="pt-md border-t border-[#27272D] flex items-center gap-sm">
-          <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
-          <span className="font-label-sm text-[10px] text-[#A1A1AA] uppercase tracking-wider">
-            Connected as {user?.role}
-          </span>
-        </div>
-      </aside>
+        {/* Navigation */}
+        <nav className="space-y-6" aria-label="Primary navigation">
+          {navGroups.map((group) => (
+            <div key={group.groupName}>
+              <p className="mb-2 px-2 text-[10px] uppercase tracking-[0.2em] text-[#71717A]">
+                {group.groupName}
+              </p>
 
-      {/* Sidebar Backdrop Overlay for mobile */}
-      {open && (
-        <div
-          className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm md:hidden transition-opacity duration-300"
-          onClick={() => setOpen(false)}
-        />
-      )}
-
-      {/* Main Content Layout Container */}
-      <div className="flex-grow flex flex-col min-w-0 max-w-full relative w-full">
-        
-        {/* Header - Sticky, acts as mobile header and desktop header */}
-        <header className="sticky top-0 z-30 h-16 bg-[#000000]/85 backdrop-blur-md border-b border-[#27272D] flex items-center justify-between px-4 sm:px-6 w-full">
-          <div className="flex items-center gap-md max-w-[60%] flex-1">
-            {/* Hamburger / Menu button (visible on mobile only) */}
-            <button
-              className="md:hidden p-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
-              onClick={() => setOpen(true)}
-              aria-label="Open navigation"
-            >
-              <Menu size={20} />
-            </button>
-
-            {/* Mobile StuHub Logo (visible on mobile only) */}
-            <Link to="/dashboard" className="flex items-center gap-1.5 md:hidden select-none mr-2">
-              <span className="material-symbols-outlined text-[#F5A524] text-[20px]">terminal</span>
-              <span className="font-bold text-sm text-white font-mono">StuHub</span>
-            </Link>
-            
-            {/* Search bar (visible on desktop and tablet, hidden on mobile) */}
-            <div className="relative w-full max-w-sm hidden md:block">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-base">
-                search
-              </span>
-              <input
-                className="w-full bg-[#16161A] border border-[#27272D] rounded pl-10 pr-3 py-1.5 text-xs focus:outline-none focus:border-primary transition-colors text-[#e2e2e2] placeholder-on-surface-variant/40"
-                placeholder="Search Workspace..."
-                type="text"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 relative">
-            {/* Notifications Button */}
-            <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all relative cursor-pointer" aria-label="Notifications">
-              notifications
-              <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
-                9
-              </span>
-            </button>
-            
-            {/* Performance Mode */}
-            <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all cursor-pointer" aria-label="Performance Mode">
-              bolt
-            </button>
-
-            {/* Profile Avatar Control (Compact on mobile) */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 bg-[#16161A] border border-[#27272D] p-1 sm:px-3 sm:py-1.5 rounded hover:border-[#808080] transition-colors cursor-pointer select-none"
-              >
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded bg-surface-container-highest overflow-hidden border border-outline flex items-center justify-center font-bold text-xs uppercase text-primary">
-                  {user?.avatar ? (
-                    <img className="w-full h-full object-cover" src={user.avatar} alt={user.name} />
-                  ) : (
-                    user?.name.slice(0, 1)
-                  )}
-                </div>
-                {/* Username label hidden on mobile */}
-                <div className="hidden md:flex flex-col text-left">
-                  <span className="text-xs font-semibold text-on-surface truncate max-w-[90px]">
-                    {user?.name}
-                  </span>
-                  <span className="text-[9px] text-[#A1A1AA] uppercase tracking-wider font-mono">
-                    {user?.role}
-                  </span>
-                </div>
-                <ChevronDown size={12} className="text-on-surface-variant hidden md:block" />
-              </button>
-
-              {/* Profile Dropdown Panel */}
-              <AnimatePresence>
-                {profileDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-2 w-56 rounded border border-outline bg-[#0F0F12] shadow-2xl p-2.5 z-50 text-xs space-y-2.5"
+              <div className="space-y-1">
+                {group.items.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.path === "/dashboard"}
+                    onClick={() => {
+                      if (mobile) setMobileMenuOpen(false);
+                    }}
+                    className={({ isActive }) =>
+                      [
+                        "relative flex min-w-0 items-center gap-3 rounded-md px-2 py-2",
+                        "transition-colors duration-150",
+                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]",
+                        isActive
+                          ? "font-semibold text-[#FAFAFA]"
+                          : "text-[#71717A] hover:bg-[#16161A] hover:text-[#FAFAFA]",
+                      ].join(" ")
+                    }
                   >
-                    <div className="pb-2 border-b border-[#27272D] px-2 pt-1">
-                      <p className="font-bold text-white truncate">{user?.name}</p>
-                      <p className="text-[10px] text-on-surface-variant truncate font-mono mt-0.5">{user?.email}</p>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <Link
-                        to="/dashboard/profile"
-                        className="flex items-center gap-2 p-2 rounded hover:bg-[#16161A] text-on-surface transition-colors"
-                      >
-                        <UserIcon size={14} className="text-primary" />
-                        <span>My Profile</span>
-                      </Link>
-                      <button
-                        onClick={logout}
-                        className="w-full flex items-center gap-2 p-2 rounded hover:bg-red-500/10 text-red-500 transition-colors text-left cursor-pointer"
-                      >
-                        <LogOut size={14} />
-                        <span>Exit Portal</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        </header>
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <span className="absolute -left-3 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-full bg-[#F5A524]" />
+                        )}
 
-        {/* Content Viewport Canvas */}
-        <main className="flex-grow p-4 sm:p-8 min-w-0 w-full overflow-x-hidden">
-          <Outlet />
-        </main>
+                        <span
+                          className={[
+                            "material-symbols-outlined shrink-0 text-[20px]",
+                            isActive
+                              ? "text-[#F5A524]"
+                              : "text-[#71717A]",
+                          ].join(" ")}
+                        >
+                          {item.materialIcon}
+                        </span>
+
+                        <span className="truncate text-sm">
+                          {item.label}
+                        </span>
+                      </>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          ))}
+        </nav>
       </div>
 
-      {/* Toast alert system notifications */}
+      {/* Footer */}
+      <div className="mt-8 flex items-center gap-2 border-t border-[#27272D] pt-4">
+        <span className="h-2 w-2 shrink-0 rounded-full bg-[#22C55E]" />
+
+        <span className="truncate text-[10px] uppercase tracking-wider text-[#A1A1AA]">
+          Connected as {user?.role}
+        </span>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-[100dvh] w-full overflow-x-hidden bg-[#09090B] text-[#E2E2E2]">
+      <div className="flex min-h-[100dvh] w-full">
+        {/* =====================================================
+            DESKTOP SIDEBAR
+            Completely removed below md breakpoint
+        ====================================================== */}
+        <aside className="hidden h-[100dvh] w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-[#27272D] bg-[#0F0F12] p-6 md:sticky md:top-0 md:flex">
+          <NavigationContent />
+        </aside>
+
+        {/* =====================================================
+            MOBILE DRAWER
+            Fixed overlay — never reserves layout width
+        ====================================================== */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              <motion.button
+                type="button"
+                aria-label="Close navigation backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm md:hidden"
+              />
+
+              <motion.aside
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{
+                  duration: 0.25,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-[min(82vw,300px)] flex-col justify-between overflow-y-auto border-r border-[#27272D] bg-[#0F0F12] p-6 md:hidden"
+              >
+                <NavigationContent mobile />
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* =====================================================
+            MAIN APPLICATION REGION
+        ====================================================== */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Header */}
+          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[#27272D] bg-black/85 px-4 backdrop-blur-md sm:px-6">
+            {/* Left side */}
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              {/* Mobile menu button */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="shrink-0 rounded-md p-2 text-[#A1A1AA] transition-colors hover:bg-[#16161A] hover:text-[#F5A524] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524] md:hidden"
+                aria-label="Open navigation"
+              >
+                <Menu size={20} />
+              </button>
+
+              {/* Mobile logo */}
+              <Link
+                to="/dashboard"
+                className="flex min-w-0 items-center gap-2 md:hidden"
+              >
+                <span className="material-symbols-outlined shrink-0 text-[20px] text-[#F5A524]">
+                  terminal
+                </span>
+
+                <span className="truncate font-mono text-sm font-bold text-white">
+                  StuHub
+                </span>
+              </Link>
+
+              {/* Desktop search */}
+              <div className="relative hidden w-full max-w-sm md:block">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-[#71717A]">
+                  search
+                </span>
+
+                <input
+                  type="text"
+                  placeholder="Search Workspace..."
+                  className="w-full rounded-md border border-[#27272D] bg-[#16161A] py-2 pl-10 pr-3 text-xs text-[#E2E2E2] outline-none transition-colors placeholder:text-[#71717A] focus:border-[#F5A524]"
+                />
+              </div>
+            </div>
+
+            {/* Right side */}
+            <div className="ml-3 flex shrink-0 items-center gap-2 sm:gap-3">
+              {/* Notifications */}
+              <button
+                type="button"
+                className="relative rounded-md p-2 text-[#A1A1AA] transition-colors hover:bg-[#16161A] hover:text-[#F5A524] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]"
+                aria-label="Notifications"
+              >
+                <Bell size={19} />
+
+                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-bold text-white">
+                  9
+                </span>
+              </button>
+
+              {/* Profile */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setProfileDropdownOpen((current) => !current)
+                  }
+                  className="flex items-center gap-2 rounded-md border border-[#27272D] bg-[#16161A] p-1.5 transition-colors hover:border-[#52525B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524] md:px-3"
+                  aria-expanded={profileDropdownOpen}
+                  aria-label="Open profile menu"
+                >
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded bg-[#292929] text-xs font-bold uppercase text-[#F5A524]">
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user?.name ?? "User"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      user?.name?.slice(0, 1) ?? "U"
+                    )}
+                  </div>
+
+                  <div className="hidden min-w-0 flex-col text-left md:flex">
+                    <span className="max-w-[110px] truncate text-xs font-semibold text-[#FAFAFA]">
+                      {user?.name}
+                    </span>
+
+                    <span className="text-[9px] uppercase tracking-wider text-[#A1A1AA]">
+                      {user?.role}
+                    </span>
+                  </div>
+
+                  <ChevronDown
+                    size={13}
+                    className="hidden shrink-0 text-[#71717A] md:block"
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {profileDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-[min(14rem,calc(100vw-2rem))] rounded-md border border-[#27272D] bg-[#0F0F12] p-2.5 shadow-2xl"
+                    >
+                      <div className="border-b border-[#27272D] px-2 pb-2 pt-1">
+                        <p className="truncate text-xs font-bold text-white">
+                          {user?.name}
+                        </p>
+
+                        <p className="mt-0.5 truncate font-mono text-[10px] text-[#71717A]">
+                          {user?.email}
+                        </p>
+                      </div>
+
+                      <div className="mt-2 space-y-1">
+                        <Link
+                          to="/dashboard/profile"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-2 rounded-md p-2 text-xs text-[#E2E2E2] transition-colors hover:bg-[#16161A]"
+                        >
+                          <UserIcon
+                            size={14}
+                            className="text-[#F5A524]"
+                          />
+                          My Profile
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={logout}
+                          className="flex w-full items-center gap-2 rounded-md p-2 text-left text-xs text-red-500 transition-colors hover:bg-red-500/10"
+                        >
+                          <LogOut size={14} />
+                          Exit Portal
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </header>
+
+          {/* Page content */}
+          <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+            <Outlet />
+          </main>
+        </div>
+      </div>
+
+      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-4 right-6 z-50 max-w-sm rounded border border-[#27272D] bg-[#16161A] p-md shadow-lg">
-          <p className="text-sm font-bold text-primary">{toast.title}</p>
-          <p className="mt-1 text-xs text-[#A3A3A3]">{toast.body}</p>
+        <div className="fixed bottom-4 left-4 right-4 z-[60] rounded-md border border-[#27272D] bg-[#16161A] p-4 shadow-lg sm:left-auto sm:right-6 sm:max-w-sm">
+          <p className="text-sm font-bold text-[#F5A524]">
+            {toast.title}
+          </p>
+
+          <p className="mt-1 text-xs text-[#A3A3A3]">
+            {toast.body}
+          </p>
         </div>
       )}
 
-      {/* Complete Profile Guardianship */}
       <CompleteProfileModal />
     </div>
   );
 }
+
 export default AppShell;
