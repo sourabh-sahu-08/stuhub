@@ -32,13 +32,7 @@ export const navGroups: NavGroup[] = [
       { label: "PYQs", path: "/dashboard/pyq", icon: Brain, materialIcon: "psychology" }
     ]
   },
-  {
-    groupName: "CAMPUS",
-    items: [
-      { label: "Events", path: "/dashboard/events", icon: Calendar, materialIcon: "event" },
-      { label: "Announcements", path: "/dashboard/messages", icon: Bell, materialIcon: "notifications" }
-    ]
-  },
+
   {
     groupName: "PERSONAL",
     items: [
