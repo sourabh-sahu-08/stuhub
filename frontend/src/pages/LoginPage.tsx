@@ -11,10 +11,111 @@ import {
   Sparkles,
   X,
   HelpCircle,
-  ChevronDown
+  ChevronDown,
+  Brain
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { CompleteProfileModal } from "../components/auth/CompleteProfileModal";
+
+const features = [
+  {
+    title: "Assignments Tracker",
+    shortTitle: "Assignments",
+    description: "Centralize your coursework. Monitor deadlines, track submission status, and record scores in a structured student workflow.",
+    icon: ClipboardCheck,
+    color: "from-blue-500 to-indigo-500",
+    bullets: [
+      "Deadlines alert & notification bubble",
+      "Status badges (Not Started, In Progress, Submitted)",
+      "Credit and score weighting calculations"
+    ],
+    mockup: {
+      type: "assignments",
+      data: [
+        { title: "DBMS Assignment 3", due: "Tomorrow", status: "In Progress", weight: "10%" },
+        { title: "OS Kernel Lab", due: "July 8", status: "Not Started", weight: "15%" },
+        { title: "Applied AI Midterm Project", due: "Completed", status: "Submitted", weight: "20%" }
+      ]
+    }
+  },
+  {
+    title: "Attendance Watch",
+    shortTitle: "Attendance",
+    description: "Stay on top of university attendance criteria. Log conducted classes, preview status, and ensure you remain above the safe threshold.",
+    icon: Calendar,
+    color: "from-amber-500 to-orange-500",
+    bullets: [
+      "Interactive log calendars",
+      "Custom target percentage inputs (default 75%)",
+      "Smart warnings (e.g., 'Attend 3 classes to recover')"
+    ],
+    mockup: {
+      type: "attendance",
+      pct: 78.5,
+      required: 75,
+      status: "Safe"
+    }
+  },
+  {
+    title: "Digital Library",
+    shortTitle: "Library",
+    description: "Upload, store, and organize course materials. Find uploaded notes, slides, and syllabus documents with instant text search.",
+    icon: Library,
+    color: "from-emerald-500 to-teal-500",
+    bullets: [
+      "Category tagging (Notes, Labs, Papers)",
+      "Multi-format file attachments",
+      "Quick search index"
+    ],
+    mockup: {
+      type: "library",
+      files: [
+        { name: "DBMS_Syllabus_2026.pdf", size: "1.2 MB", tag: "Syllabus" },
+        { name: "OS_Lecture_5.pdf", size: "4.8 MB", tag: "Lecture Notes" },
+        { name: "AI_Search_Algorithms.png", size: "850 KB", tag: "Diagram" }
+      ]
+    }
+  },
+  {
+    title: "AI Studio",
+    shortTitle: "AI Studio",
+    description: "Leverage custom LLM chats, summarize note files, and calculate target study planners with smart algorithms.",
+    icon: Sparkles,
+    color: "from-purple-500 to-fuchsia-500",
+    bullets: [
+      "Interactive chatbot window",
+      "Markdown and code block formatting",
+      "Semantic context parsing"
+    ],
+    mockup: {
+      type: "ai",
+      messages: [
+        { role: "user", text: "Explain binary search trees." },
+        { role: "ai", text: "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent." }
+      ]
+    }
+  },
+  {
+    title: "AI PYQ Analyzer",
+    shortTitle: "PYQ Analyzer",
+    description: "Scan previous papers, predict exam patterns, and get custom AI study plans using Groq vision API.",
+    icon: Brain,
+    color: "from-indigo-500 to-purple-500",
+    bullets: [
+      "PDF & Image vision analysis (via Groq Vision)",
+      "Automated difficulty score calculations",
+      "Predicted question bank generation"
+    ],
+    mockup: {
+      type: "pyq",
+      topics: [
+        { name: "Indexing & Hashing", pct: 40 },
+        { name: "Concurrency Control", pct: 30 },
+        { name: "Query Optimization", pct: 20 }
+      ]
+    }
+  }
+];
 
 export function LoginPage() {
   const { user, login, register, socialLogin } = useAuth();
@@ -24,6 +125,146 @@ export function LoginPage() {
   const [modalMode, setModalMode] = useState<"login" | "register">("login");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [activeFeature, setActiveFeature] = useState(0);
+  const [currentHeroFeature, setCurrentHeroFeature] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHeroFeature((prev) => (prev + 1) % 5);
+    }, 2800);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Interactive Mockup States
+  const [mockAssignments, setMockAssignments] = useState([
+    { id: 1, title: "DBMS Assignment 3", due: "Tomorrow", status: "In Progress", weight: "10%" },
+    { id: 2, title: "OS Kernel Lab", due: "July 8", status: "Not Started", weight: "15%" },
+    { id: 3, title: "Applied AI Midterm Project", due: "Completed", status: "Submitted", weight: "20%" }
+  ]);
+  const [attendedClasses, setAttendedClasses] = useState(11);
+  const [totalClasses, setTotalClasses] = useState(14);
+  const [librarySearch, setLibrarySearch] = useState("");
+  const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+  
+  const initialMessages = [
+    { role: "user", text: "Explain binary search trees." },
+    { role: "ai", text: "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent." }
+  ];
+  const [aiConversation, setAiConversation] = useState(initialMessages);
+  const [isAiTyping, setIsAiTyping] = useState(false);
+  const [pyqScanState, setPyqScanState] = useState<"idle" | "scanning" | "done">("idle");
+
+  // Automated Showcase Tour Hook
+  useEffect(() => {
+    let t1: any;
+    let t2: any;
+    let t3: any;
+    let t4: any;
+    let t5: any;
+    let interval: any;
+
+    if (activeFeature === 0) { // Assignments
+      setMockAssignments([
+        { id: 1, title: "DBMS Assignment 3", due: "Tomorrow", status: "In Progress", weight: "10%" },
+        { id: 2, title: "OS Kernel Lab", due: "July 8", status: "Not Started", weight: "15%" },
+        { id: 3, title: "Applied AI Midterm Project", due: "Tomorrow", status: "In Progress", weight: "20%" }
+      ]);
+      t1 = setTimeout(() => {
+        setMockAssignments(prev =>
+          prev.map(item =>
+            item.id === 3 ? { ...item, status: "Submitted", due: "Completed" } : item
+          )
+        );
+      }, 1200);
+    }
+    
+    if (activeFeature === 1) { // Attendance
+      setAttendedClasses(0);
+      setTotalClasses(14);
+      let currentAttended = 0;
+      interval = setInterval(() => {
+        if (currentAttended < 11) {
+          currentAttended++;
+          setAttendedClasses(currentAttended);
+        } else {
+          clearInterval(interval);
+        }
+      }, 80);
+    }
+    
+    if (activeFeature === 2) { // Library
+      setLibrarySearch("");
+      setDownloadingFile(null);
+      const searchStr = "DBMS";
+      let currentStr = "";
+      let charIdx = 0;
+      interval = setInterval(() => {
+        if (charIdx < searchStr.length) {
+          currentStr += searchStr[charIdx];
+          setLibrarySearch(currentStr);
+          charIdx++;
+        } else {
+          clearInterval(interval);
+          t2 = setTimeout(() => {
+            setDownloadingFile("DBMS_Syllabus.pdf");
+            t3 = setTimeout(() => {
+              setDownloadingFile(null);
+            }, 1500);
+          }, 600);
+        }
+      }, 150);
+    }
+    
+    if (activeFeature === 3) { // AI Studio
+      setAiConversation([]);
+      setIsAiTyping(false);
+      
+      t4 = setTimeout(() => {
+        setAiConversation([{ role: "user", text: "Explain binary search trees." }]);
+        setIsAiTyping(true);
+        
+        t5 = setTimeout(() => {
+          setIsAiTyping(false);
+          const responseText = "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent.";
+          const words = responseText.split(" ");
+          let wordIdx = 0;
+          let typedText = "";
+          
+          interval = setInterval(() => {
+            if (wordIdx < words.length) {
+              typedText += (wordIdx === 0 ? "" : " ") + words[wordIdx];
+              setAiConversation([
+                { role: "user", text: "Explain binary search trees." },
+                { role: "ai", text: typedText }
+              ]);
+              wordIdx++;
+            } else {
+              clearInterval(interval);
+            }
+          }, 80);
+        }, 1000);
+      }, 400);
+    }
+    
+    if (activeFeature === 4) { // PYQ
+      setPyqScanState("idle");
+      t1 = setTimeout(() => {
+        setPyqScanState("scanning");
+        t2 = setTimeout(() => {
+          setPyqScanState("done");
+        }, 1800);
+      }, 500);
+    }
+
+    return () => {
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
+      if (t3) clearTimeout(t3);
+      if (t4) clearTimeout(t4);
+      if (t5) clearTimeout(t5);
+      if (interval) clearInterval(interval);
+    };
+  }, [activeFeature]);
 
   // Auth Form States
   const [name, setName] = useState("Riya Sharma");
@@ -143,6 +384,70 @@ export function LoginPage() {
     }
   };
 
+  // Interactive Mockup Simulation Actions
+  const toggleAssignment = (id: number) => {
+    setMockAssignments(prev =>
+      prev.map(item =>
+        item.id === id
+          ? {
+              ...item,
+              status: item.status === "Submitted" ? "In Progress" : "Submitted",
+              due: item.status === "Submitted" ? "Tomorrow" : "Completed"
+            }
+          : item
+      )
+    );
+  };
+
+  const handleLogAttendance = (attended: boolean) => {
+    setTotalClasses(t => t + 1);
+    if (attended) {
+      setAttendedClasses(a => a + 1);
+    }
+  };
+
+  const handleDownloadFile = (fileName: string) => {
+    if (downloadingFile) return;
+    setDownloadingFile(fileName);
+    setTimeout(() => {
+      setDownloadingFile(null);
+    }, 1500);
+  };
+
+  const handleAiPromptClick = (promptText: string) => {
+    if (isAiTyping) return;
+    setAiConversation([
+      { role: "user", text: promptText },
+      { role: "ai", text: "Thinking..." }
+    ]);
+    setIsAiTyping(true);
+    
+    let fullResponse = "";
+    if (promptText.includes("BST")) {
+      fullResponse = "A Binary Search Tree (BST) is a tree where each node has at most two children. The left subtree has keys smaller than the node, and the right subtree has keys larger.";
+    } else if (promptText.includes("semaphore")) {
+      fullResponse = "A semaphore is a variable or abstract data type used to control access to a common resource by multiple processes in a concurrent system.";
+    } else {
+      fullResponse = "Here is a quick summary: Normalization in databases removes redundancy and improves data integrity by structuring tables logically.";
+    }
+
+    setTimeout(() => {
+      setAiConversation([
+        { role: "user", text: promptText },
+        { role: "ai", text: fullResponse }
+      ]);
+      setIsAiTyping(false);
+    }, 1200);
+  };
+
+  const handlePyqScan = () => {
+    if (pyqScanState !== "idle") return;
+    setPyqScanState("scanning");
+    setTimeout(() => {
+      setPyqScanState("done");
+    }, 2000);
+  };
+
   const triggerSearch = (e: FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -164,6 +469,19 @@ export function LoginPage() {
       a: "Absolutely! Stuhub is fully responsive and designed to work on everything from large desktop monitors to mobile phone screens with premium glassmorphic overlays."
     }
   ];
+
+  const listContainerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.08 }
+    }
+  };
+
+  const listItemVariants = {
+    hidden: { opacity: 0, y: 8 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120 } }
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-brand-500 selection:text-white">
@@ -221,63 +539,221 @@ export function LoginPage() {
       </header>
 
       {/* 2. Hero Section */}
-      <section id="home" className="relative min-h-[85vh] flex items-center justify-center px-6 py-16 overflow-hidden">
+      <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden">
         {/* Background Image with Blurred Gradient Overlay */}
         <div className="absolute inset-0 z-0">
           <img
             src="/workspace_background.jpg"
             alt="Collaborative Workspace"
-            className="w-full h-full object-cover filter brightness-[0.25] contrast-[1.05]"
+            className="w-full h-full object-cover filter brightness-[0.2] contrast-[1.05]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
+          
+          {/* Glowing colorful ambient background blobs */}
+          <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-brand-500/10 blur-[120px] -z-10 animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-purple-500/10 blur-[120px] -z-10 animate-pulse" style={{ animationDuration: '4s' }} />
         </div>
 
-        <div className="relative z-10 max-w-4xl text-center space-y-8">
-          {/* Active Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(99,102,241,0.1)]">
-            <span className="h-2 w-2 rounded-full bg-brand-500 animate-ping" />
-            STUHUB STUDENT ENVIRONMENT IS ACTIVE
+        <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Column: Heading & Controls (7 cols) */}
+          <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
+            {/* Active Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 100 }}
+              className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(99,102,241,0.15)]"
+            >
+              <span className="h-2.5 w-2.5 rounded-full bg-brand-500 animate-pulse" />
+              STUHUB STUDENT ENVIRONMENT IS ACTIVE
+            </motion.div>
+
+            {/* Heading */}
+            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
+              The Command Center for <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-brand-400">
+                Academic Success
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="max-w-2xl mx-auto lg:mx-0 text-base sm:text-lg leading-relaxed text-slate-350">
+              Unify your course assignments, track attendance safeties, build digital notes libraries, and analyze previous exam papers with Groq-powered AI.
+            </p>
+
+            {/* Search Box */}
+            <form onSubmit={triggerSearch} className="max-w-lg mx-auto lg:mx-0 bg-white/5 backdrop-blur-md rounded-xl p-1.5 border border-white/10 flex items-center gap-2 shadow-2xl focus-within:border-brand-500/50 transition-all duration-300">
+              <div className="flex items-center gap-2 flex-1 px-3 text-slate-400">
+                <Search size={18} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search modules or features..."
+                  className="bg-transparent border-none outline-none text-white text-sm w-full placeholder:text-slate-455 focus:ring-0 focus:outline-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="h-10 px-5 rounded-lg bg-brand-500 text-sm font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(99,102,241,0.3)] active:scale-95"
+              >
+                Search <ArrowRight size={16} />
+              </button>
+            </form>
+
+            {/* Checkmarks */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-200 font-semibold select-none pt-2">
+              {["Assignments Tracker", "Attendance Watch", "Digital Library", "Groq PYQ Analyzer"].map((item) => (
+                <div key={item} className="flex items-center gap-2 bg-slate-900/40 border border-white/5 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                  <CheckCircle2 className="text-brand-500" size={14} />
+                  {item}
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Heading */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-white">
-            Find Your Dream Study <br />
-            <span className="text-brand-500 drop-shadow-[0_0_25px_rgba(99,102,241,0.2)]">Build Your Future</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-slate-350">
-            A beautiful, fully responsive workspace built to scale. Organize assignments, track class attendance, access libraries, and plan your schedules with intelligence.
-          </p>
-
-          {/* Search Box */}
-          <form onSubmit={triggerSearch} className="max-w-lg mx-auto bg-white/5 backdrop-blur-md rounded-xl p-1.5 border border-white/10 flex items-center gap-2 shadow-2xl focus-within:border-brand-500/50 transition-all duration-300">
-            <div className="flex items-center gap-2 flex-1 px-3 text-slate-400">
-              <Search size={18} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search modules or features..."
-                className="bg-transparent border-none outline-none text-white text-sm w-full placeholder:text-slate-400 focus:ring-0"
-              />
-            </div>
-            <button
-              type="submit"
-              className="h-10 px-5 rounded-lg bg-brand-500 text-sm font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(99,102,241,0.3)] active:scale-95"
+          {/* Right Column: Floating Mockup Dashboard with Rotating Modules (5 cols) */}
+          <div className="lg:col-span-5 relative flex justify-center lg:justify-end no-print">
+            <motion.div
+              animate={{ y: [0, -12, 0] }}
+              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              className="relative w-[340px] h-[360px] bg-slate-900/30 rounded-2xl border border-white/10 p-5 shadow-[0_30px_60px_rgba(0,0,0,0.6)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
             >
-              Search <ArrowRight size={16} />
-            </button>
-          </form>
-
-          {/* Checkmarks */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-200 font-semibold select-none pt-2">
-            {["Assignments Tracker", "Attendance Watch", "Digital Library Repo", "Smart AI Plan"].map((item) => (
-              <div key={item} className="flex items-center gap-2 bg-slate-900/40 border border-white/5 px-4 py-2 rounded-full backdrop-blur-sm">
-                <CheckCircle2 className="text-brand-500" size={18} />
-                {item}
+              {/* Top mock title bar */}
+              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                </div>
+                <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase bg-white/5 px-2.5 py-0.5 rounded">
+                  dashboard.stuhub.io
+                </span>
               </div>
-            ))}
+
+              {/* Central region with auto-rotating mockup feature */}
+              <div className="flex-1 py-5 relative flex flex-col justify-center">
+                <AnimatePresence mode="wait">
+                  {currentHeroFeature === 0 && (
+                    <motion.div
+                      key="ai-assistant"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-3 text-left"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">AI Assistant Chat</div>
+                      <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 text-[10px] leading-relaxed shadow-sm">
+                        <div className="font-extrabold text-[8px] uppercase tracking-wider text-brand-400 mb-0.5">Stuhub AI</div>
+                        Predicted DBMS exam question on <strong>SQL Joins</strong> has 85% probability.
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {currentHeroFeature === 1 && (
+                    <motion.div
+                      key="attendance"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="flex flex-col items-center justify-center space-y-3"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Attendance Monitor</div>
+                      <div className="flex items-center gap-3 bg-slate-950/60 border border-white/5 p-3 rounded-xl shadow-lg w-full max-w-[200px] text-left">
+                        <div className="relative flex items-center justify-center h-10 w-10 flex-shrink-0">
+                          <svg className="absolute w-full h-full transform -rotate-90">
+                            <circle cx="20" cy="20" r="16" className="stroke-white/5 fill-none" strokeWidth="3" />
+                            <circle cx="20" cy="20" r="16" className="stroke-emerald-500 fill-none" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 16}`} strokeDashoffset={`${2 * Math.PI * 16 * (1 - 0.78)}`} strokeLinecap="round" />
+                          </svg>
+                          <span className="text-[9px] font-black text-white">78%</span>
+                        </div>
+                        <div>
+                          <div className="text-[9px] font-extrabold text-white">Attendance</div>
+                          <div className="text-[8px] font-bold text-emerald-450 uppercase tracking-wider mt-0.5">Safe</div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {currentHeroFeature === 2 && (
+                    <motion.div
+                      key="assignments"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-3 text-left"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Assignments Tracker</div>
+                      <div className="p-3.5 rounded-xl bg-slate-950/45 border border-white/5 text-[10px] space-y-1.5 shadow-sm">
+                        <div className="flex justify-between items-center text-[8px] font-bold text-slate-500">
+                          <span>ACTIVE TASKS</span>
+                          <span className="text-brand-500">2 pending</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" readOnly className="rounded border-white/10 bg-transparent text-brand-500 focus:ring-0 focus:ring-offset-0 h-3 w-3" />
+                          <span className="text-slate-355">Submit OS lab report</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {currentHeroFeature === 3 && (
+                    <motion.div
+                      key="library"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-3 text-left"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Digital Library Repo</div>
+                      <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/60 border border-white/5 text-[10px]">
+                        <div className="h-7 w-7 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
+                          <Library size={13} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-slate-200 truncate">DBMS_Syllabus.pdf</div>
+                          <div className="text-[8px] text-slate-550">1.2 MB</div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {currentHeroFeature === 4 && (
+                    <motion.div
+                      key="pyq"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-3 text-left"
+                    >
+                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Exam PYQ Analyzer</div>
+                      <div className="border border-emerald-500/20 bg-slate-950/60 p-3.5 rounded-xl shadow-lg space-y-1.5">
+                        <div className="text-[8px] font-extrabold text-brand-400 uppercase tracking-wider flex items-center gap-1">
+                          <Brain size={10} className="text-brand-500" /> Topic Analysis
+                        </div>
+                        <p className="text-[10px] text-slate-200 font-bold leading-snug">
+                          SQL Indexing Repeated 3x in Papers
+                        </p>
+                        <div className="text-[8px] font-bold text-emerald-450 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded inline-block">
+                          High Probability
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Bottom decorative stats bar */}
+              <div className="border-t border-white/5 pt-3 flex justify-between items-center text-[10px] font-bold text-slate-500">
+                <span className="flex items-center gap-1"><Brain size={12} className="text-brand-500" /> Groq Vision Online</span>
+                <span className="text-emerald-500 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> 99.9% Up</span>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -286,28 +762,373 @@ export function LoginPage() {
       <section id="features" className="py-24 px-6 max-w-6xl mx-auto space-y-16">
         <div className="text-center space-y-3">
           <span className="text-xs uppercase tracking-[0.25em] text-brand-500 font-extrabold">Workspace Modules</span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Overview of the Workspace</h2>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto">Explore the clean baseline elements built to structure your college academic operations.</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Dynamic Workspace Overview</h2>
+          <p className="text-slate-400 text-sm max-w-xl mx-auto">Click on any module to preview its live interactive mock-up and core student workflows.</p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { title: "Assignments", text: "Track tasks, create deadlines, submit works, and check scores within a highly organized layout.", icon: ClipboardCheck },
-            { title: "Attendance", text: "Maintain an active presence checklist for your subjects and monitor your overall semester attendance.", icon: Calendar },
-            { title: "Digital Library", text: "Upload study materials, filter notes, access previous papers, and search textbook files instantly.", icon: Library },
-            { title: "AI Studio", text: "Leverage custom LLM chats, summarize note files, and calculate target study planners with smart algorithms.", icon: Sparkles }
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.title} className="group relative p-6 rounded-xl border border-white/5 bg-slate-900/30 hover:border-brand-500/45 hover:bg-slate-900/50 transition-all duration-300 space-y-4 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(99,102,241,0.08)]">
-                <div className="h-12 w-12 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Icon size={24} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          {/* Tabs selector column (5 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-2.5 justify-center">
+            {features.map((feat, idx) => {
+              const Icon = feat.icon;
+              const isActive = activeFeature === idx;
+              return (
+                <button
+                  key={feat.title}
+                  onClick={() => setActiveFeature(idx)}
+                  className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all duration-300 ${
+                    isActive
+                      ? "bg-slate-900/60 border-brand-500/50 shadow-[0_4px_20px_rgba(99,102,241,0.08)]"
+                      : "bg-slate-900/10 border-white/5 hover:border-white/10 hover:bg-slate-900/20"
+                  }`}
+                >
+                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 transition ${
+                    isActive ? "bg-brand-500 text-white" : "bg-white/5 text-slate-400"
+                  }`}>
+                    <Icon size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-sm font-bold transition ${isActive ? "text-white" : "text-slate-300"}`}>
+                      {feat.title}
+                    </h3>
+                    {isActive ? (
+                      <div className="text-[11px] mt-1.5 leading-relaxed space-y-1">
+                        {feat.mockup.type === "assignments" && (() => {
+                          const completed = mockAssignments.filter(a => a.status === 'Submitted').length;
+                          return (
+                            <p className="text-brand-400 font-semibold animate-pulse">
+                              🟢 {completed} of {mockAssignments.length} coursework tasks completed.
+                            </p>
+                          );
+                        })()}
+                        {feat.mockup.type === "attendance" && (() => {
+                          const attPct = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 1000) / 10 : 0;
+                          return (
+                            <p className="text-amber-400 font-semibold animate-pulse">
+                              📊 Current Attendance: {attPct}%. Safe status logged.
+                            </p>
+                          );
+                        })()}
+                        {feat.mockup.type === "library" && (() => {
+                          const fileCount = feat.mockup.files?.filter((f: any) => f.name.toLowerCase().includes(librarySearch.toLowerCase())).length || 0;
+                          return (
+                            <p className="text-emerald-450 font-semibold animate-pulse">
+                              🔍 Filter: {fileCount} note files index. {downloadingFile ? `Downloading ${downloadingFile}...` : ''}
+                            </p>
+                          );
+                        })()}
+                        {feat.mockup.type === "ai" && (() => {
+                          const lastMsg = aiConversation[aiConversation.length - 1];
+                          const previewText = lastMsg ? `"${lastMsg.role === 'user' ? 'You' : 'AI'}: ${lastMsg.text.slice(0, 50)}..."` : 'Simulate prompt clicks...';
+                          return (
+                            <div className="bg-slate-950/60 p-2 rounded border border-white/5 font-mono text-[9px] text-purple-400 mt-1 animate-pulse space-y-0.5">
+                              <span className="text-[8px] uppercase tracking-wider text-slate-500 block">Live Chat Feed</span>
+                              <p className="line-clamp-2 leading-tight">{previewText}</p>
+                            </div>
+                          );
+                        })()}
+                        {feat.mockup.type === "pyq" && (
+                          <p className="text-indigo-400 font-semibold animate-pulse">
+                            {pyqScanState === 'idle' ? 'Ready to analyze. Click scan on right.' : pyqScanState === 'scanning' ? '⚡ OCR running & extracting data...' : '✅ Done. Normalization 40% weightage.'}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                        {feat.description}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Interactive display panel (7 cols) */}
+          <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-slate-900/40 p-6 flex flex-col justify-between shadow-[0_15px_30px_rgba(0,0,0,0.4)] relative min-h-[380px] overflow-hidden">
+            {/* Decorative background grid */}
+            <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:12px_12px] -z-10" />
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeFeature}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25 }}
+                className="flex-1 flex flex-col justify-between space-y-6"
+              >
+                <div>
+                  <h3 className="text-xl font-extrabold text-white mb-2">
+                    {features[activeFeature].title}
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {features[activeFeature].description}
+                  </p>
                 </div>
-                <h3 className="text-lg font-bold text-white group-hover:text-brand-500 transition-colors">{item.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{item.text}</p>
-              </div>
-            );
-          })}
+
+                {/* Feature specific live mockup */}
+                <div className="flex-1 flex flex-col justify-center bg-slate-950/40 rounded-xl border border-white/5 p-4 min-h-[180px] relative overflow-hidden">
+                  {features[activeFeature].mockup.type === "assignments" && (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-500">
+                        <span>INTERACTIVE WORKLIST</span>
+                        <span className="text-[9px] text-brand-500 uppercase font-bold">(Click row to check off)</span>
+                      </div>
+                      <motion.div
+                        variants={listContainerVariants}
+                        initial="hidden"
+                        animate="show"
+                        className="space-y-2"
+                      >
+                        {mockAssignments.map((item) => (
+                          <motion.button
+                            variants={listItemVariants}
+                            key={item.id}
+                            onClick={() => toggleAssignment(item.id)}
+                            className="w-full flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition duration-300"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`h-2 w-2 rounded-full transition-colors duration-300 ${item.status === 'Submitted' ? 'bg-emerald-500' : item.status === 'In Progress' ? 'bg-blue-500' : 'bg-slate-500'}`} />
+                              <div>
+                                <span className={`font-bold text-slate-200 transition-all duration-300 ${item.status === 'Submitted' ? 'line-through text-slate-500' : ''}`}>
+                                  {item.title}
+                                </span>
+                                <div className="text-[9px] text-slate-500 mt-0.5">Weight: {item.weight}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-right">
+                              <span className="text-[10px] text-slate-500">{item.due}</span>
+                              <span className={`text-[9px] px-2 py-0.5 rounded font-bold transition-all duration-350 ${
+                                item.status === 'Submitted' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'
+                              }`}>
+                                {item.status}
+                              </span>
+                            </div>
+                          </motion.button>
+                        ))}
+                      </motion.div>
+                    </div>
+                  )}
+
+                  {features[activeFeature].mockup.type === "attendance" && (() => {
+                    const attPct = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 1000) / 10 : 0;
+                    const isSafe = attPct >= 75;
+                    return (
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <div className="flex justify-between items-center w-full text-[10px] font-bold text-slate-500 px-1">
+                          <span>LIVE TRACKER CALCULATOR</span>
+                          <span className="text-[9px] text-brand-500 uppercase">(Test attendance bunk limits)</span>
+                        </div>
+                        <div className="flex items-center gap-6 bg-slate-900/60 border border-white/5 p-3 rounded-xl w-full max-w-[280px]">
+                          <div className="relative flex items-center justify-center h-14 w-14 flex-shrink-0">
+                            <svg className="absolute w-full h-full transform -rotate-90">
+                              <circle cx="28" cy="28" r="22" className="stroke-white/5 fill-none" strokeWidth="4" />
+                              <circle
+                                cx="28"
+                                cy="28"
+                                r="22"
+                                className="stroke-brand-500 fill-none animate-pulse"
+                                strokeWidth="4"
+                                strokeDasharray={`${2 * Math.PI * 22}`}
+                                strokeDashoffset={`${2 * Math.PI * 22 * (1 - attPct / 100)}`}
+                                strokeLinecap="round"
+                                style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                              />
+                            </svg>
+                            <span className="text-[10px] font-black text-white">{attPct}%</span>
+                          </div>
+                          <div className="text-left flex-1 min-w-0">
+                            <div className="text-[10px] font-extrabold text-white truncate">Classes: {attendedClasses}/{totalClasses}</div>
+                            <div className={`text-[8.5px] font-bold uppercase tracking-wider mt-0.5 ${isSafe ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {isSafe ? 'Safe! Above 75%' : 'Warning: Below 75%'}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleLogAttendance(true)}
+                            className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg hover:bg-emerald-500/20 transition active:scale-95"
+                          >
+                            Attend Class (+)
+                          </button>
+                          <button
+                            onClick={() => handleLogAttendance(false)}
+                            className="px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold rounded-lg hover:bg-red-500/20 transition active:scale-95"
+                          >
+                            Bunk Class (-)
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {features[activeFeature].mockup.type === "library" && (() => {
+                    const filteredFiles = features[activeFeature].mockup.files?.filter((file: any) =>
+                      file.name.toLowerCase().includes(librarySearch.toLowerCase())
+                    ) || [];
+                    return (
+                      <div className="space-y-2 text-left">
+                        <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                          <span>INTERACTIVE FILE INDEX</span>
+                          <span className="text-[9px] text-brand-500 uppercase">(Filter & Download)</span>
+                        </div>
+                        <input
+                          type="text"
+                          value={librarySearch}
+                          onChange={(e) => setLibrarySearch(e.target.value)}
+                          placeholder="Search notes (e.g. DBMS, OS)..."
+                          className="w-full bg-slate-900 border border-white/5 px-2.5 py-1.5 rounded-lg text-[10px] text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-500/50 mb-2"
+                        />
+                        <motion.div
+                          variants={listContainerVariants}
+                          initial="hidden"
+                          animate="show"
+                          className="space-y-1.5 max-h-[110px] overflow-y-auto pr-1"
+                        >
+                          {filteredFiles.map((file: any, idx: number) => (
+                            <motion.button
+                              variants={listItemVariants}
+                              key={idx}
+                              onClick={() => handleDownloadFile(file.name)}
+                              disabled={downloadingFile !== null}
+                              className="w-full flex flex-col gap-1.5 p-2 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition duration-300"
+                            >
+                              <div className="w-full flex items-center gap-2">
+                                <div className="h-6 w-6 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
+                                  <Library size={12} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-bold text-slate-200 truncate">{file.name}</div>
+                                  <div className="text-[8px] text-slate-500">{file.size}</div>
+                                </div>
+                                <span className="text-[8px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-bold">
+                                  {downloadingFile === file.name ? 'Downloading...' : 'Click to Download'}
+                                </span>
+                              </div>
+                              {downloadingFile === file.name && (
+                                <div className="w-full bg-slate-950 rounded-full h-1 border border-white/5 overflow-hidden">
+                                  <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: "100%" }}
+                                    transition={{ duration: 1.5, ease: "linear" }}
+                                    className="bg-brand-500 h-1 rounded-full"
+                                  />
+                                </div>
+                              )}
+                            </motion.button>
+                          ))}
+                        </motion.div>
+                      </div>
+                    );
+                  })()}
+
+                  {features[activeFeature].mockup.type === "ai" && (
+                    <div className="space-y-2 flex flex-col justify-between h-full text-left">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                        <span>STUDY CO-PILOT CHAT</span>
+                        <span className="text-[9px] text-brand-500 uppercase">(Select Prompt Below)</span>
+                      </div>
+                      <div className="space-y-2 max-h-[100px] overflow-y-auto pr-1 flex-1 flex flex-col justify-end">
+                        {aiConversation.map((msg, idx) => (
+                          <div key={idx} className={`p-2 rounded-lg text-[10px] leading-relaxed max-w-[85%] ${
+                            msg.role === 'user' ? 'bg-brand-500/10 border border-brand-500/20 text-brand-400 self-end' : 'bg-slate-900/80 border border-white/5 text-slate-350 self-start'
+                          }`}>
+                            <div className="font-extrabold text-[8px] uppercase tracking-wider text-slate-500 mb-0.5">
+                              {msg.role === 'user' ? 'You' : 'Stuhub AI'}
+                            </div>
+                            {msg.text}
+                          </div>
+                        ))}
+                        {isAiTyping && (
+                          <div className="p-2 rounded-lg bg-slate-900/80 border border-white/5 text-slate-300 self-start flex items-center gap-1 shadow-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                        {["Explain BST", "What is semaphore?"].map((prompt) => (
+                          <button
+                            key={prompt}
+                            onClick={() => handleAiPromptClick(prompt)}
+                            disabled={isAiTyping}
+                            className="text-[9px] bg-slate-900 border border-white/10 hover:border-brand-500/40 hover:bg-slate-900/80 text-slate-300 px-2.5 py-1 rounded-full transition active:scale-95 disabled:opacity-50"
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {features[activeFeature].mockup.type === "pyq" && (
+                    <div className="space-y-3 text-left">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                        <span>GROQ VISION SCANNER</span>
+                        <span className="text-[9px] text-brand-500 uppercase">(Simulate OCR Scan)</span>
+                      </div>
+                      
+                      {pyqScanState === 'idle' && (
+                        <div className="flex flex-col items-center justify-center py-4 border border-dashed border-white/10 rounded-lg hover:border-brand-500/30 transition cursor-pointer" onClick={handlePyqScan}>
+                          <Brain size={24} className="text-brand-500/60 mb-1.5 animate-pulse" />
+                          <span className="text-[10px] font-bold text-slate-300">Click to Scan Sample Paper</span>
+                          <span className="text-[8px] text-slate-500 mt-0.5">Simulates PDF parsing & Groq API analysis</span>
+                        </div>
+                      )}
+
+                      {pyqScanState === 'scanning' && (
+                        <div className="relative flex flex-col items-center justify-center py-6 border border-brand-500/20 bg-brand-500/5 rounded-lg overflow-hidden">
+                          {/* Animated radar bar scanner */}
+                          <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand-500 shadow-[0_0_10px_#6366f1] animate-bounce" style={{ animationDuration: '1.5s' }} />
+                          <Brain size={24} className="text-brand-500 mb-1.5 animate-spin" style={{ animationDuration: '3s' }} />
+                          <span className="text-[10px] font-bold text-slate-300">Parsing PDF / Running Groq LLM...</span>
+                        </div>
+                      )}
+
+                      {pyqScanState === 'done' && (
+                        <div className="space-y-2.5">
+                          {features[activeFeature].mockup.topics?.map((topic: any, idx: number) => (
+                            <div key={idx} className="space-y-1">
+                              <div className="flex justify-between text-[10px] font-bold text-slate-200">
+                                <span>{topic.name}</span>
+                                <span className="text-brand-400">{topic.pct}% Weight</span>
+                              </div>
+                              <div className="w-full bg-slate-900 rounded-full h-1.5 border border-white/5 overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${topic.pct}%` }}
+                                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                                  className="bg-brand-500 h-1.5 rounded-full"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => setPyqScanState("idle")}
+                            className="w-full text-center text-[9px] text-slate-500 hover:text-white transition font-bold"
+                          >
+                            Reset Scanner
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Key value list */}
+                <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-4">
+                  {features[activeFeature].bullets.map((bullet, idx) => (
+                    <div key={idx} className="flex items-start gap-1.5 text-[10px] text-slate-400 leading-tight">
+                      <span className="h-1.5 w-1.5 rounded-full bg-brand-500 mt-1.5 flex-shrink-0" />
+                      <span>{bullet}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </section>
 
