@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PYQ Library | StuHub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Geist:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #000000;
+            color: #e3e2e2;
+            font-family: 'Geist', sans-serif;
+        }
+        .void-bg { background-color: #000000; }
+        .surface-l1 { background-color: #1B1B1B; }
+        .surface-l2 { background-color: #292929; }
+        .border-base { border: 1px solid #333333; }
+        .transition-standard { transition: all 0.2s ease-in-out; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000000; }
+        ::-webkit-scrollbar-thumb { background: #333333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FFA31A; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#ffb964",
+                        "on-primary-container": "#683f00",
+                        "tertiary-container": "#b9b7b7",
+                        "on-background": "#e3e2e2",
+                        "surface-dim": "#121414",
+                        "on-secondary-fixed-variant": "#474746",
+                        "primary-fixed": "#ffddba",
+                        "inverse-on-surface": "#303031",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#e5e2e1",
+                        "outline-variant": "#534434",
+                        "surface-container-highest": "#343535",
+                        "surface-container-low": "#1b1c1c",
+                        "surface-variant": "#343535",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "error-container": "#93000a",
+                        "background": "#121414",
+                        "on-secondary": "#313030",
+                        "on-surface": "#e3e2e2",
+                        "on-tertiary-fixed-variant": "#474746",
+                        "inverse-primary": "#875300",
+                        "tertiary-fixed": "#e4e2e1",
+                        "on-primary": "#482a00",
+                        "primary-container": "#ffa31a",
+                        "surface-container-high": "#292a2a",
+                        "surface": "#121414",
+                        "on-surface-variant": "#d9c3ad",
+                        "outline": "#a18d7a",
+                        "surface-container-lowest": "#0d0e0f",
+                        "secondary-container": "#474746",
+                        "on-tertiary": "#303030",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "primary": "#ffc98e",
+                        "surface-bright": "#383939",
+                        "on-primary-fixed": "#2b1700",
+                        "on-secondary-container": "#b7b5b4",
+                        "on-tertiary-container": "#494848",
+                        "primary-fixed-dim": "#ffb964",
+                        "on-error": "#690005",
+                        "surface-container": "#1f2020",
+                        "tertiary": "#d5d3d2",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#663e00",
+                        "on-secondary-fixed": "#1b1b1b",
+                        "secondary": "#c8c6c5",
+                        "inverse-surface": "#e3e2e2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "gutter": "24px",
+                        "base": "4px",
+                        "margin-desktop": "40px",
+                        "3xl": "64px",
+                        "2xl": "48px",
+                        "margin-mobile": "16px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "label-sm": ["JetBrains Mono"],
+                        "headline-md": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "label-md": ["JetBrains Mono"],
+                        "body-md": ["Geist"],
+                        "body-sm": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background">
+<!-- SideNavBar Anchor -->
+<aside class="bg-secondary-fixed-variant dark:bg-secondary-fixed-variant h-screen w-64 fixed left-0 top-0 flex flex-col h-full py-lg px-md z-50">
+<div class="mb-3xl">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 bg-primary-container flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-on-primary-container text-md" data-weight="fill">school</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary">StuHub</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Student OS</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-xs">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-md px-md py-sm transition-colors duration-200 ease-in-out hover:bg-surface-container-high dark:hover:bg-surface-container-high hover:text-primary text-on-surface-variant font-medium group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm transition-colors duration-200 ease-in-out hover:bg-surface-container-high dark:hover:bg-surface-container-high hover:text-primary text-on-surface-variant font-medium group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">event_available</span>
+<span class="font-label-md text-label-md">Attendance</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm transition-colors duration-200 ease-in-out hover:bg-surface-container-high dark:hover:bg-surface-container-high hover:text-primary text-on-surface-variant font-medium group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">description</span>
+<span class="font-label-md text-label-md">Notes</span>
+</a>
+<!-- Active State for PYQ Library -->
+<a class="flex items-center gap-md px-md py-sm transition-colors duration-200 ease-in-out text-primary font-bold border-r-2 border-primary bg-surface-container-high group" href="#">
+<span class="material-symbols-outlined" data-weight="fill">library_books</span>
+<span class="font-label-md text-label-md">PYQ Library</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm transition-colors duration-200 ease-in-out hover:bg-surface-container-high dark:hover:bg-surface-container-high hover:text-primary text-on-surface-variant font-medium group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">psychology</span>
+<span class="font-label-md text-label-md">AI Analyzer</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm transition-colors duration-200 ease-in-out hover:bg-surface-container-high dark:hover:bg-surface-container-high hover:text-primary text-on-surface-variant font-medium group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">calendar_today</span>
+<span class="font-label-md text-label-md">Events</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm transition-colors duration-200 ease-in-out hover:bg-surface-container-high dark:hover:bg-surface-container-high hover:text-primary text-on-surface-variant font-medium group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">campaign</span>
+<span class="font-label-md text-label-md">Announcements</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm transition-colors duration-200 ease-in-out hover:bg-surface-container-high dark:hover:bg-surface-container-high hover:text-primary text-on-surface-variant font-medium group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">bookmark</span>
+<span class="font-label-md text-label-md">Saved</span>
+</a>
+</nav>
+<div class="pt-lg border-t border-surface-container-highest">
+<div class="flex items-center gap-md px-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-primary">
+<span class="material-symbols-outlined text-primary">person</span>
+</div>
+<div class="overflow-hidden">
+<p class="font-label-md text-label-md text-on-surface truncate">Alex Rivera</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant truncate">CSE - Semester 5</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopAppBar Anchor -->
+<header class="bg-secondary-fixed-variant dark:bg-secondary-fixed-variant border-b border-surface-container-highest dark:border-surface-container-highest h-16 fixed top-0 right-0 z-40 flex items-center justify-between px-gutter ml-64 w-[calc(100%-16rem)]">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container-low border border-surface-container-highest rounded px-10 py-sm font-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-on-surface-variant" placeholder="Search for subjects, topics, or codes..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<button class="flex items-center gap-xs text-on-surface-variant hover:text-primary transition-colors group">
+<span class="material-symbols-outlined">bolt</span>
+<span class="font-label-sm text-label-sm uppercase tracking-tighter">Pro</span>
+</button>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-margin-desktop min-h-[calc(100vh-4rem)] void-bg">
+<!-- Header Section -->
+<div class="flex items-end justify-between mb-2xl">
+<div>
+<nav class="flex items-center gap-xs text-on-surface-variant font-label-sm mb-sm uppercase tracking-widest">
+<span>Library</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span class="text-primary">Previous Year Questions</span>
+</nav>
+<h2 class="font-display-lg text-display-lg text-on-surface">PYQ Library</h2>
+</div>
+<div class="flex gap-md">
+<button class="bg-surface-container-high border border-surface-container-highest px-lg py-sm font-label-md text-on-surface flex items-center gap-sm hover:border-outline transition-standard">
+<span class="material-symbols-outlined">history</span>
+                    Recent Activity
+                </button>
+<button class="bg-primary-container text-on-primary-fixed px-lg py-sm font-label-md font-bold flex items-center gap-sm hover:bg-surface-tint transition-standard">
+<span class="material-symbols-outlined">upload</span>
+                    Contribute Paper
+                </button>
+</div>
+</div>
+<!-- Advanced Filters Bar -->
+<section class="mb-2xl">
+<div class="bg-surface-container-high border border-surface-container-highest p-md flex flex-wrap items-center gap-md">
+<div class="flex-1 min-w-[200px]">
+<p class="font-label-sm text-on-surface-variant mb-xs ml-1 uppercase">Filter by Branch</p>
+<select class="w-full bg-[#1B1B1B] border border-[#333333] text-on-surface rounded px-md py-sm font-body-md focus:border-primary focus:ring-0 appearance-none">
+<option>Computer Science (CSE)</option>
+<option>Electronics (ECE)</option>
+<option>Mechanical (ME)</option>
+<option>Electrical (EE)</option>
+<option>Civil (CE)</option>
+</select>
+</div>
+<div class="flex-1 min-w-[150px]">
+<p class="font-label-sm text-on-surface-variant mb-xs ml-1 uppercase">Semester</p>
+<select class="w-full bg-[#1B1B1B] border border-[#333333] text-on-surface rounded px-md py-sm font-body-md focus:border-primary focus:ring-0">
+<option>3rd Semester</option>
+<option>4th Semester</option>
+<option>5th Semester</option>
+<option>6th Semester</option>
+<option>All</option>
+</select>
+</div>
+<div class="flex-1 min-w-[150px]">
+<p class="font-label-sm text-on-surface-variant mb-xs ml-1 uppercase">Year</p>
+<select class="w-full bg-[#1B1B1B] border border-[#333333] text-on-surface rounded px-md py-sm font-body-md focus:border-primary focus:ring-0">
+<option>2023</option>
+<option>2022</option>
+<option>2021</option>
+<option>2020</option>
+<option>All Years</option>
+</select>
+</div>
+<div class="flex-1 min-w-[200px]">
+<p class="font-label-sm text-on-surface-variant mb-xs ml-1 uppercase">Subject</p>
+<select class="w-full bg-[#1B1B1B] border border-[#333333] text-on-surface rounded px-md py-sm font-body-md focus:border-primary focus:ring-0">
+<option>Digital Logic &amp; Design</option>
+<option>Data Structures</option>
+<option>Operating Systems</option>
+<option>Discrete Mathematics</option>
+</select>
+</div>
+<div class="flex items-end self-end h-[42px]">
+<button class="bg-[#1B1B1B] border border-primary text-primary px-lg h-full font-label-md flex items-center justify-center hover:bg-primary-container hover:text-on-primary-fixed transition-standard">
+                        Reset
+                    </button>
+</div>
+</div>
+</section>
+<!-- Document Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-lg">
+<!-- Card 1 -->
+<div class="bg-[#292929] border border-[#333333] p-lg flex flex-col group hover:border-[#808080] transition-standard">
+<div class="flex items-start justify-between mb-lg">
+<div class="w-12 h-12 bg-[#1B1B1B] border border-[#333333] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">picture_as_pdf</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm bg-[#1B1B1B] border border-[#333333] text-[#A3A3A3] px-sm py-xs mb-xs">CODE: CS301</span>
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-[#FFA31A]"></span>
+<span class="font-label-sm text-[#A3A3A3]">Verified</span>
+</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">End Semester 2023 - Digital Logic</h3>
+<div class="flex flex-wrap gap-sm mb-xl">
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">account_tree</span> CSE
+                    </span>
+<span class="text-[#333333]">•</span>
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">layers</span> 3rd Sem
+                    </span>
+<span class="text-[#333333]">•</span>
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">schedule</span> Added 2 days ago
+                    </span>
+</div>
+<div class="mt-auto grid grid-cols-3 gap-sm pt-lg border-t border-[#333333]">
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">visibility</span>
+<span class="font-label-sm">Preview</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary border-x border-[#333333]">
+<span class="material-symbols-outlined">download</span>
+<span class="font-label-sm">Download</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-label-sm">Save</span>
+</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-[#292929] border border-[#333333] p-lg flex flex-col group hover:border-[#808080] transition-standard">
+<div class="flex items-start justify-between mb-lg">
+<div class="w-12 h-12 bg-[#1B1B1B] border border-[#333333] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">picture_as_pdf</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm bg-[#1B1B1B] border border-[#333333] text-[#A3A3A3] px-sm py-xs mb-xs">CODE: CS304</span>
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-[#FFA31A]"></span>
+<span class="font-label-sm text-[#A3A3A3]">Verified</span>
+</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Mid Semester 2023 - Data Structures</h3>
+<div class="flex flex-wrap gap-sm mb-xl">
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">account_tree</span> CSE
+                    </span>
+<span class="text-[#333333]">•</span>
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">layers</span> 3rd Sem
+                    </span>
+<span class="text-[#333333]">•</span>
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">schedule</span> Added 5 days ago
+                    </span>
+</div>
+<div class="mt-auto grid grid-cols-3 gap-sm pt-lg border-t border-[#333333]">
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">visibility</span>
+<span class="font-label-sm">Preview</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary border-x border-[#333333]">
+<span class="material-symbols-outlined">download</span>
+<span class="font-label-sm">Download</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-label-sm">Save</span>
+</button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-[#292929] border border-[#333333] p-lg flex flex-col group hover:border-[#808080] transition-standard">
+<div class="flex items-start justify-between mb-lg">
+<div class="w-12 h-12 bg-[#1B1B1B] border border-[#333333] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">picture_as_pdf</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm bg-[#1B1B1B] border border-[#333333] text-[#A3A3A3] px-sm py-xs mb-xs">CODE: MATH102</span>
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-[#FFA31A]"></span>
+<span class="font-label-sm text-[#A3A3A3]">Verified</span>
+</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">End Semester 2022 - Calculus III</h3>
+<div class="flex flex-wrap gap-sm mb-xl">
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">account_tree</span> ALL
+                    </span>
+<span class="text-[#333333]">•</span>
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">layers</span> 2nd Sem
+                    </span>
+<span class="text-[#333333]">•</span>
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">schedule</span> Added 1 week ago
+                    </span>
+</div>
+<div class="mt-auto grid grid-cols-3 gap-sm pt-lg border-t border-[#333333]">
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">visibility</span>
+<span class="font-label-sm">Preview</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary border-x border-[#333333]">
+<span class="material-symbols-outlined">download</span>
+<span class="font-label-sm">Download</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-label-sm">Save</span>
+</button>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-[#292929] border border-[#333333] p-lg flex flex-col group hover:border-[#808080] transition-standard">
+<div class="flex items-start justify-between mb-lg">
+<div class="w-12 h-12 bg-[#1B1B1B] border border-[#333333] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">picture_as_pdf</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm bg-[#1B1B1B] border border-[#333333] text-[#A3A3A3] px-sm py-xs mb-xs">CODE: EC202</span>
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-[#FFA31A]"></span>
+<span class="font-label-sm text-[#A3A3A3]">Verified</span>
+</div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">End Semester 2023 - Signal Processing</h3>
+<div class="flex flex-wrap gap-sm mb-xl">
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">account_tree</span> ECE
+                    </span>
+<span class="text-[#333333]">•</span>
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">layers</span> 4th Sem
+                    </span>
+<span class="text-[#333333]">•</span>
+<span class="font-label-sm text-[#A3A3A3] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">schedule</span> Added 2 weeks ago
+                    </span>
+</div>
+<div class="mt-auto grid grid-cols-3 gap-sm pt-lg border-t border-[#333333]">
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">visibility</span>
+<span class="font-label-sm">Preview</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary border-x border-[#333333]">
+<span class="material-symbols-outlined">download</span>
+<span class="font-label-sm">Download</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-xs py-sm hover:bg-[#1B1B1B] transition-standard text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-label-sm">Save</span>
+</button>
+</div>
+</div>
+<!-- Empty/Contribute Card -->
+<div class="border-2 border-dashed border-[#333333] p-lg flex flex-col items-center justify-center text-center group hover:border-primary hover:bg-[#1B1B1B] transition-standard cursor-pointer">
+<div class="w-16 h-16 bg-[#1B1B1B] border border-[#333333] flex items-center justify-center mb-md group-hover:border-primary transition-standard">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary text-3xl">add</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface-variant group-hover:text-on-surface mb-xs">Contribute Paper</h3>
+<p class="font-body-sm text-on-surface-variant max-w-[200px]">Help your peers by uploading missing PYQs from your exams.</p>
+</div>
+</section>
+<!-- Pagination / Footer Status -->
+<div class="mt-3xl flex items-center justify-between border-t border-[#333333] pt-lg">
+<p class="font-label-md text-[#A3A3A3]">Showing 12 of 156 documents</p>
+<div class="flex items-center gap-sm">
+<button class="w-10 h-10 border border-[#333333] flex items-center justify-center text-[#A3A3A3] hover:text-primary hover:border-primary transition-standard">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex items-center gap-xs">
+<button class="w-10 h-10 bg-primary text-on-primary font-label-md">1</button>
+<button class="w-10 h-10 border border-[#333333] text-[#A3A3A3] font-label-md hover:bg-[#1B1B1B]">2</button>
+<button class="w-10 h-10 border border-[#333333] text-[#A3A3A3] font-label-md hover:bg-[#1B1B1B]">3</button>
+<span class="text-[#333333]">...</span>
+<button class="w-10 h-10 border border-[#333333] text-[#A3A3A3] font-label-md hover:bg-[#1B1B1B]">14</button>
+</div>
+<button class="w-10 h-10 border border-[#333333] flex items-center justify-center text-[#A3A3A3] hover:text-primary hover:border-primary transition-standard">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Floating AI Prompt -->
+<div class="fixed bottom-lg right-lg z-50">
+<button class="bg-primary-container text-on-primary-fixed shadow-xl h-14 px-lg flex items-center gap-md hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-weight="fill">psychology</span>
+<span class="font-label-md font-bold uppercase">Analyze this library with AI</span>
+</button>
+</div>
+<script>
+        // Micro-interaction for hover states
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.style.transform = 'scale(0.97)';
+            });
+            el.addEventListener('mouseup', () => {
+                el.style.transform = '';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = '';
+            });
+        });
+
+        // Search Input Animation
+        const searchInput = document.querySelector('input[type="text"]');
+        const searchContainer = searchInput.parentElement;
+        searchInput.addEventListener('focus', () => {
+            searchContainer.classList.add('scale-[1.01]');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchContainer.classList.remove('scale-[1.01]');
+        });
+    </script>
+</body></html>
