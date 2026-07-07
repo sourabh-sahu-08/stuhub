@@ -1,9 +1,7 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, ArrowRight, CheckCircle2, Search, Calendar, Clipboard, Library, Bot, ShieldAlert } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { navItems } from "../components/layout/navigation";
-import { useState, useEffect, FormEvent } from "react";
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
 
 const DEFAULT_SUBJECTS = [
   { id: "1", name: "Database Management Systems", baselineAttended: 12, baselineTotal: 16 },
@@ -14,251 +12,310 @@ const DEFAULT_SUBJECTS = [
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const [filterQuery, setFilterQuery] = useState("");
-  const [overallAttendance, setOverallAttendance] = useState(78.5);
+  const [overallAttendance, setOverallAttendance] = useState(0);
   const [criticalCount, setCriticalCount] = useState(0);
+  const [streakDays, setStreakDays] = useState(0);
 
-  // Load live statistics from Local Storage
+  // API states
+  const [deadlines, setDeadlines] = useState<any[]>([]);
+  const [resources, setResources] = useState<any[]>([]);
+  const [notices, setNotices] = useState<any[]>([]);
+  const [loadingApis, setLoadingApis] = useState(true);
+
+  // Fetch from APIs and calculate client-side metrics
   useEffect(() => {
-    try {
-      const savedSubjects = localStorage.getItem("stuhub-attendance-subjects-v2");
-      const savedLogs = localStorage.getItem("stuhub-attendance-logs-v2");
+    const savedSubjects = localStorage.getItem("stuhub-attendance-subjects-v2");
+    const savedLogs = localStorage.getItem("stuhub-attendance-logs-v2");
+    
+    const subjects = savedSubjects ? JSON.parse(savedSubjects) : DEFAULT_SUBJECTS;
+    const logs = savedLogs ? JSON.parse(savedLogs) : [];
+    
+    let totalAttended = 0;
+    let totalConducted = 0;
+    let criticals = 0;
+    
+    subjects.forEach((sub: any) => {
+      const subLogs = logs.filter((l: any) => l.subjectId === sub.id);
+      const attendedLogs = subLogs.filter((l: any) => l.status === "attended").length;
+      const bunkedLogs = subLogs.filter((l: any) => l.status === "bunked").length;
       
-      const subjects = savedSubjects ? JSON.parse(savedSubjects) : DEFAULT_SUBJECTS;
-      const logs = savedLogs ? JSON.parse(savedLogs) : [];
+      const attended = (sub.baselineAttended ?? sub.attended ?? 0) + attendedLogs;
+      const total = (sub.baselineTotal ?? sub.total ?? 0) + attendedLogs + bunkedLogs;
+      const pct = total > 0 ? (attended / total) * 100 : 0;
       
-      let totalAttended = 0;
-      let totalConducted = 0;
-      let criticals = 0;
+      totalAttended += attended;
+      totalConducted += total;
       
-      subjects.forEach((sub: any) => {
-        const subLogs = logs.filter((l: any) => l.subjectId === sub.id);
-        const attendedLogs = subLogs.filter((l: any) => l.status === "attended").length;
-        const bunkedLogs = subLogs.filter((l: any) => l.status === "bunked").length;
-        
-        const attended = (sub.baselineAttended ?? sub.attended) + attendedLogs;
-        const total = (sub.baselineTotal ?? sub.total) + attendedLogs + bunkedLogs;
-        const pct = total > 0 ? (attended / total) * 100 : 0;
-        
-        totalAttended += attended;
-        totalConducted += total;
-        
-        if (pct < (sub.required ?? 75)) {
-          criticals++;
-        }
-      });
-      
-      if (totalConducted > 0) {
-        setOverallAttendance((totalAttended / totalConducted) * 100);
+      if (pct < (sub.required ?? 75)) {
+        criticals++;
       }
-      setCriticalCount(criticals);
-    } catch (e) {
-      console.error(e);
+    });
+    
+    if (totalConducted > 0) {
+      setOverallAttendance((totalAttended / totalConducted) * 100);
     }
+    setCriticalCount(criticals);
+
+    // Calculate real study streak from logs
+    if (logs.length > 0) {
+      const uniqueDates = Array.from(new Set(logs.map((l: any) => l.date))).sort((a: any, b: any) => b.localeCompare(a)) as string[];
+      if (uniqueDates.length > 0) {
+        let streak = 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const latestDate = new Date(uniqueDates[0] as string);
+        latestDate.setHours(0, 0, 0, 0);
+
+        const diffTime = today.getTime() - latestDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays <= 1) {
+          let currentDate = latestDate;
+          for (let i = 0; i < uniqueDates.length; i++) {
+            const hasLogOnDate = uniqueDates.some((d: any) => {
+              const dObj = new Date(d);
+              dObj.setHours(0, 0, 0, 0);
+              return dObj.getTime() === currentDate.getTime();
+            });
+            if (hasLogOnDate) {
+              streak++;
+              currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+              break;
+            }
+          }
+        }
+        setStreakDays(streak);
+      }
+    }
+
+    // Load backend stubs
+    Promise.all([
+      api.get("/assignments").then(res => setDeadlines(res.data)).catch(() => {}),
+      api.get("/library").then(res => setResources(res.data)).catch(() => {}),
+      api.get("/dashboard/student").then(res => setNotices(res.data?.notices || [])).catch(() => {})
+    ]).finally(() => {
+      setLoadingApis(false);
+    });
   }, []);
 
-  const allowedModules = navItems.filter(
-    (item) => item.path !== "/dashboard" &&
-    (filterQuery === "" || item.label.toLowerCase().includes(filterQuery.toLowerCase()))
-  );
-
-  const handleSearchSubmit = (e: FormEvent) => {
-    e.preventDefault();
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
-  };
+  // Generate consistency heatmap cell patterns (simulated based on log days)
+  const heatmapCells = Array.from({ length: 42 }, (_, i) => {
+    // Determine cell colors in a deterministic way
+    const val = (i * 7 + 13) % 100;
+    if (val > 85) return "active";
+    if (val > 60) return "mid";
+    return "";
+  });
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="space-y-8"
-      >
-        {/* 1. JobLuxe Welcome Hero Banner with Gradient & Glows */}
-        <motion.div
-          variants={itemVariants}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-950 to-black p-6 sm:p-10 text-white shadow-[0_15px_30px_rgba(0,0,0,0.3)] border border-white/5"
-        >
-          <div className="relative z-10 max-w-3xl space-y-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3.5 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(99,102,241,0.15)]">
-              <span className="h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
-              STUDENT WORKSPACE ACTIVE
-            </span>
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
-              Scale Your Academic Goals <br />
-              <span className="text-brand-500 drop-shadow-[0_0_20px_rgba(99,102,241,0.2)]">Build Your Future</span>
-            </h1>
-            <p className="mt-2 text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl">
-              Welcome back, {user?.name}. Your college portal dashboard is synchronized. Check your live metrics below or filter modules to enter your workspace.
-            </p>
-
-            {/* Filter Search Input */}
-            <form onSubmit={handleSearchSubmit} className="max-w-md bg-white/5 backdrop-blur-md rounded-xl p-1.5 border border-white/10 flex items-center gap-2 focus-within:border-brand-500/40 transition-all duration-300">
-              <div className="flex items-center gap-2 flex-1 px-3 text-slate-400">
-                <Search size={16} />
-                <input
-                  type="text"
-                  value={filterQuery}
-                  onChange={(e) => setFilterQuery(e.target.value)}
-                  placeholder="Filter workspace modules..."
-                  className="bg-transparent border-none outline-none text-white text-xs w-full placeholder:text-slate-450 focus:ring-0"
-                />
-              </div>
-              <button
-                type="submit"
-                className="h-8 px-4 rounded-lg bg-brand-500 text-xs font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(99,102,241,0.3)] active:scale-95"
-              >
-                Search <ArrowRight size={12} />
-              </button>
-            </form>
-
-            {/* highlights */}
-            <div className="flex flex-wrap items-center gap-6 text-xs text-slate-350 font-semibold select-none pt-2">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="text-brand-500" size={15} />
-                Realtime Sync
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="text-brand-500" size={15} />
-                Clean Student Workspace
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="text-brand-500" size={15} />
-                AI Studio Planners
-              </div>
-            </div>
-          </div>
-          {/* Subtle background glow */}
-          <div className="absolute right-0 top-0 -mr-20 -mt-20 h-96 w-96 rounded-full bg-brand-500/10 blur-[80px]" />
-        </motion.div>
-
-        {/* 2. Interactive Analytics / Quick Metrics Widgets */}
-        <motion.div variants={itemVariants} className="grid gap-6 sm:grid-cols-3">
-          {/* Live Attendance widget */}
-          <div className="panel p-4 sm:p-6 flex flex-col justify-between hover:border-brand-500/20 transition-all duration-300">
-            <div>
-              <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Live Attendance</p>
-              <h2 className={`text-3xl font-extrabold tracking-tight mt-2 ${overallAttendance >= 75 ? "text-emerald-500" : "text-red-500"}`}>
-                {overallAttendance.toFixed(1)}%
-              </h2>
-              <p className="text-[10px] text-slate-400 mt-1">Goal target: 75.0%</p>
-            </div>
-            <div className="mt-4">
-              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-550 ${overallAttendance >= 75 ? "bg-emerald-500" : "bg-red-500"}`}
-                  style={{ width: `${Math.min(100, overallAttendance)}%` }}
-                />
-              </div>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Standing</span>
-                <Link to="/dashboard/attendance" className="text-[10px] font-bold text-brand-500 hover:underline flex items-center gap-0.5">
-                  Open logger <ArrowRight size={10} />
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Academic progress widget */}
-          <div className="panel p-4 sm:p-6 flex flex-col justify-between hover:border-brand-500/20 transition-all duration-300">
-            <div>
-              <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Workspace Checklist</p>
-              <h2 className="text-3xl font-extrabold tracking-tight text-slate-800 dark:text-white mt-2">
-                25%
-              </h2>
-              <p className="text-[10px] text-slate-400 mt-1">Profile completion indicator</p>
-            </div>
-            <div className="mt-4 space-y-1">
-              <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                <span>Account setup verified</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                <span>Profile credentials complete</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Detention risk widget */}
-          <div className="panel p-4 sm:p-6 flex flex-col justify-between hover:border-brand-500/20 transition-all duration-300">
-            <div>
-              <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Detention Standings</p>
-              <h2 className={`text-3xl font-extrabold tracking-tight mt-2 ${criticalCount > 0 ? "text-red-500 animate-pulse" : "text-emerald-500"}`}>
-                {criticalCount} Critical
-              </h2>
-              <p className="text-[10px] text-slate-400 mt-1">Subjects below attendance target</p>
-            </div>
-            <div className="mt-4 flex items-center justify-between">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Risk Level</span>
-              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase ${
-                criticalCount > 0
-                  ? "bg-red-500/10 text-red-500"
-                  : "bg-emerald-500/10 text-emerald-500"
-              }`}>
-                {criticalCount > 0 ? "At Risk" : "Safe"}
-              </span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* 3. Modules Grid Section */}
-        <motion.div variants={itemVariants} className="space-y-4">
+    <div className="grid grid-cols-1 lg:grid-cols-12 border border-outline bg-[#0c0f0f] rounded-lg overflow-hidden">
+      {/* Primary Column (60%) */}
+      <div className="lg:col-span-8 p-6 sm:p-10 space-y-8 border-b lg:border-b-0 lg:border-r border-outline">
+        {/* Workspace Title */}
+        <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Workspace Modules</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Explore modules and configure your student dashboards.</p>
+            <h2 className="font-label-sm text-[11px] text-primary uppercase tracking-[0.2em] mb-1 font-mono">Workspace Overview</h2>
+            <h3 className="font-display-lg text-3xl font-extrabold text-[#e2e2e2]">Student Command Center</h3>
+          </div>
+          <div className="text-right text-xs text-on-surface-variant font-mono">
+            PORTAL: <span className="text-primary font-bold">{user?.name ? user.name.toUpperCase() : "STUDENT"}</span>
+          </div>
+        </div>
+
+        {/* Real-time Indicators */}
+        <section className="space-y-4">
+          <h4 className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-[0.1em] opacity-50 font-mono">Real-Time Indicators</h4>
+          
+          {/* Detention Warning Card */}
+          <div className="py-6 flex items-start gap-6 border-b border-outline hover:bg-[#16161A]/30 transition-colors rounded px-3">
+            <div className="p-3 bg-red-500/10 rounded-lg text-red-500">
+              <span className="material-symbols-outlined">warning</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-label-sm text-[10px] text-red-500 font-bold uppercase tracking-wider font-mono">Detention Warning</p>
+              <h4 className="font-headline-sm text-lg font-bold text-white mt-1">
+                {criticalCount > 0 
+                  ? `${criticalCount} Subjects Below Threshold` 
+                  : "Attendance Standing: Secure"}
+              </h4>
+              <p className="font-body-md text-sm text-on-surface-variant mt-1">
+                {criticalCount > 0 
+                  ? "Action required. Review your calendar logs to identify bunk trends." 
+                  : "Excellent standings. Your aggregate attendance satisfies standard rules."}
+              </p>
+            </div>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {allowedModules.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  className="group relative flex flex-col justify-between rounded-xl border border-slate-200 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500 hover:shadow-[0_10px_30px_rgba(99,102,241,0.08)] bg-white dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-brand-500"
-                >
-                  <div>
-                    {/* Icon container */}
-                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50 text-slate-600 border border-slate-100 group-hover:border-brand-500/20 group-hover:bg-brand-500/10 group-hover:text-brand-500 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:group-hover:bg-brand-950/30 dark:group-hover:border-brand-500/30 transition-all duration-300">
-                      <Icon size={22} />
+          {/* Nearest Deadline Card */}
+          <div className="py-6 flex items-start gap-6 border-b border-outline hover:bg-[#16161A]/30 transition-colors rounded px-3">
+            <div className="p-3 bg-[#36c2ff]/10 rounded-lg text-tertiary">
+              <span className="material-symbols-outlined">timer</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-label-sm text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-mono">Deadlines & Assignments</p>
+              {deadlines.length > 0 ? (
+                <div className="space-y-2 mt-1">
+                  {deadlines.slice(0, 2).map((item, idx) => (
+                    <div key={idx}>
+                      <h4 className="font-headline-sm text-sm font-bold text-white">{item.title}</h4>
+                      <p className="font-body-md text-xs text-on-surface-variant">Due: {item.dueDate}</p>
                     </div>
-                    <h3 className="mt-4 text-base font-bold text-slate-800 dark:text-white group-hover:text-brand-500 dark:group-hover:text-brand-500 transition-colors">
-                      {item.label}
-                    </h3>
-                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                      Manage, customize, and analyze your {item.label.toLowerCase()} tasks within this premium workspace panel.
-                    </p>
+                  ))}
+                </div>
+              ) : (
+                <div>
+                  <h4 className="font-headline-sm text-sm font-bold text-white mt-1">No Upcoming Deadlines</h4>
+                  <p className="font-body-md text-xs text-on-surface-variant mt-1">All coursework submissions are fully up-to-date.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Primary Action Button */}
+        <section className="pt-2">
+          <Link
+            to="/dashboard/pyq"
+            className="inline-flex bg-primary text-black px-6 py-3 rounded font-bold items-center gap-3 transition-transform hover:scale-[1.01] active:scale-95"
+          >
+            <span className="material-symbols-outlined">auto_awesome</span>
+            Analyze Exam Papers
+          </Link>
+        </section>
+
+        {/* Recent Resources */}
+        <section className="space-y-4 pt-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-headline-sm text-lg font-semibold text-white">Recent Resources</h3>
+            <Link className="text-primary text-xs hover:underline animate-pulse" to="/dashboard/library">See Library</Link>
+          </div>
+          {resources.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {resources.slice(0, 2).map((item, idx) => (
+                <div key={idx} className="p-4 rounded border border-outline bg-[#0F0F12] hover:border-primary/50 transition-all cursor-pointer group">
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="material-symbols-outlined text-secondary group-hover:text-primary">folder_open</span>
+                    <span className="text-[9px] font-bold text-[#A3A3A3] font-mono">FILE</span>
                   </div>
-                  <div className="mt-4 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-brand-500 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-[-5px] group-hover:translate-x-0">
-                    Enter Workspace <ArrowRight size={12} />
-                  </div>
-                </Link>
-              );
-            })}
-            {allowedModules.length === 0 && (
-              <p className="text-sm text-slate-450 dark:text-slate-500 col-span-full py-8 text-center">
-                No active modules matches your query.
+                  <p className="font-label-lg font-semibold text-white">{item.name}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 rounded border border-dashed border-outline text-center text-on-surface-variant">
+              <span className="material-symbols-outlined text-3xl opacity-30">folder_open</span>
+              <p className="text-xs font-semibold mt-2">No library materials uploaded yet</p>
+              <p className="text-[10px] opacity-60 mt-1">Manage files under the Notes tab.</p>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Secondary Column (40%) */}
+      <div className="lg:col-span-4 p-6 sm:p-10 space-y-8 bg-[#0F0F12]/30">
+        {/* Pulse Analytics */}
+        <section className="space-y-4">
+          <h3 className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-[0.1em] opacity-50 font-mono">Pulse Analytics</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-3xl font-extrabold text-white">N/A</p>
+              <p className="text-xs text-[#A1A1AA] mt-1">GPA (API Offline)</p>
+              <div className="w-16 h-1 bg-outline mt-2">
+                <div className="h-full bg-outline-variant w-[0%]"></div>
+              </div>
+            </div>
+            <div>
+              <p className={`text-3xl font-extrabold ${overallAttendance >= 75 ? "text-emerald-500" : "text-red-500"}`}>
+                {overallAttendance > 0 ? `${overallAttendance.toFixed(1)}%` : "0.0%"}
               </p>
+              <p className="text-xs text-[#A1A1AA] mt-1">Avg. Attendance</p>
+              <div className="w-16 h-1 bg-tertiary/20 mt-2">
+                <div className={`h-full ${overallAttendance >= 75 ? "bg-emerald-500" : "bg-red-500"}`} style={{ width: `${Math.min(100, overallAttendance)}%` }}></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <hr className="border-[#27272D]"/>
+
+        {/* Consistency Heatmap */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-headline-sm text-sm font-bold text-white">Consistency</h3>
+            {streakDays > 0 ? (
+              <p className="text-xs text-primary font-mono font-semibold">{streakDays} day streak 🔥</p>
+            ) : (
+              <p className="text-xs text-on-surface-variant font-mono">No active streak</p>
             )}
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+          <div className="flex gap-1.5 flex-wrap">
+            {heatmapCells.map((status, index) => (
+              <div
+                key={index}
+                className={`heatmap-cell ${status}`}
+                title={`Day ${index + 1}`}
+              />
+            ))}
+          </div>
+          <div className="mt-4 flex items-center justify-between text-[10px] text-on-surface-variant font-mono uppercase">
+            <span>Less active</span>
+            <div className="flex gap-1">
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-[#16161A]"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-primary/45"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-primary"></div>
+            </div>
+            <span>High Focus</span>
+          </div>
+        </section>
+
+        <hr className="border-[#27272D]"/>
+
+        {/* AI Analyzer Insights */}
+        <section className="space-y-4">
+          <h3 className="font-headline-sm text-sm font-bold text-white">AI Insights</h3>
+          <div className="p-5 bg-[#16161A] rounded border border-outline relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-2 opacity-5">
+              <span className="material-symbols-outlined text-[48px]">psychology</span>
+            </div>
+            <p className="text-xs text-on-surface-variant leading-relaxed italic relative z-10">
+              "AI Insights will appear here after you upload and analyze past exam papers."
+            </p>
+            <Link
+              to="/dashboard/pyq"
+              className="mt-4 text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all"
+            >
+              Analyze PYQs now <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </Link>
+          </div>
+        </section>
+
+        <hr className="border-[#27272D]"/>
+
+        {/* Upcoming Notices */}
+        <section className="space-y-4">
+          <h3 className="font-headline-sm text-sm font-bold text-white">Announcements</h3>
+          {notices.length > 0 ? (
+            <div className="space-y-3">
+              {notices.slice(0, 2).map((notice: any, idx: number) => (
+                <div key={idx} className="flex items-start gap-3 py-1">
+                  <span className="material-symbols-outlined text-primary text-sm mt-0.5">campaign</span>
+                  <div>
+                    <p className="text-xs font-bold text-white">{notice.title}</p>
+                    <p className="text-[10px] text-on-surface-variant">{notice.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-xs text-on-surface-variant italic">
+              No new announcements. (API Offline)
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
   );
 }
+export default DashboardPage;

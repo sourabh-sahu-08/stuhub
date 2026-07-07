@@ -116,16 +116,16 @@ export function PyqUpload({ onAnalyze, loading, loadingStep }: PyqUploadProps) {
               onDragLeave={handleDrag}
               onDrop={handleDrop}
               onClick={!file ? triggerFileSelect : undefined}
-              className={`relative overflow-hidden rounded-2xl border-2 border-dashed p-8 text-center cursor-pointer transition-all duration-300 ${
+              className={`relative overflow-hidden rounded border-2 border-dashed p-8 text-center cursor-pointer transition-all duration-300 ${
                 isDragActive
-                  ? "border-brand-500 bg-brand-500/5 dark:bg-brand-500/10"
+                  ? "border-primary bg-primary/5"
                   : file
-                  ? "border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30 cursor-default"
-                  : "border-slate-300 dark:border-slate-800 bg-white/50 dark:bg-slate-900/10 hover:border-brand-400 hover:bg-slate-50 dark:hover:bg-slate-900/20"
+                  ? "border-outline bg-[#0F0F12] cursor-default"
+                  : "border-[#27272D] bg-[#16161A]/40 hover:border-primary/50 hover:bg-[#16161A]/80"
               }`}
             >
               {/* Grid background effect */}
-              <div className="absolute inset-0 -z-10 opacity-[0.05] dark:opacity-[0.03] bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:16px_16px]" />
+              <div className="absolute inset-0 -z-10 opacity-[0.05] bg-[radial-gradient(#F5A524_1px,transparent_1px)] [background-size:16px_16px]" />
 
               <input
                 ref={fileInputRef}
@@ -137,14 +137,14 @@ export function PyqUpload({ onAnalyze, loading, loadingStep }: PyqUploadProps) {
 
               {!file ? (
                 <div className="space-y-4">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-950/40 text-brand-500 shadow-sm">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded bg-primary/10 text-primary shadow-sm">
                     <Upload size={24} />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Drag & drop your question paper here, or <span className="text-brand-500 hover:underline">browse</span>
+                    <p className="text-sm font-semibold text-[#e2e2e2]">
+                      Drag & drop your question paper here, or <span className="text-primary hover:underline">browse</span>
                     </p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                    <p className="text-xs text-on-surface-variant">
                       Supports PDF, PNG, JPG, or JPEG (Max 10MB)
                     </p>
                   </div>
@@ -154,11 +154,11 @@ export function PyqUpload({ onAnalyze, loading, loadingStep }: PyqUploadProps) {
                   {/* File preview */}
                   <div className="flex-shrink-0">
                     {previewUrl ? (
-                      <div className="relative h-28 w-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-slate-100">
+                      <div className="relative h-28 w-24 rounded overflow-hidden border border-outline shadow-sm bg-[#16161A]">
                         <img src={previewUrl} alt="Preview" className="h-full w-full object-cover" />
                       </div>
                     ) : (
-                      <div className="flex h-28 w-24 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900 text-brand-500 shadow-sm">
+                      <div className="flex h-28 w-24 items-center justify-center rounded border border-outline bg-[#16161A] text-primary shadow-sm">
                         <FileText size={36} />
                       </div>
                     )}
@@ -166,10 +166,10 @@ export function PyqUpload({ onAnalyze, loading, loadingStep }: PyqUploadProps) {
 
                   {/* File details */}
                   <div className="flex-1 min-w-0 space-y-1">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                    <p className="text-sm font-bold text-white truncate">
                       {file.name}
                     </p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                    <p className="text-xs text-on-surface-variant font-mono uppercase">
                       {formatSize(file.size)} &bull; {file.type.split("/")[1].toUpperCase()}
                     </p>
                     <button
@@ -177,7 +177,7 @@ export function PyqUpload({ onAnalyze, loading, loadingStep }: PyqUploadProps) {
                         e.stopPropagation();
                         handleRemove();
                       }}
-                      className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors shadow-sm"
+                      className="mt-2 inline-flex items-center gap-1.5 rounded border border-outline bg-[#16161A] px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-500/10 transition-colors shadow-sm cursor-pointer"
                     >
                       <X size={14} /> Remove File
                     </button>
@@ -195,7 +195,7 @@ export function PyqUpload({ onAnalyze, loading, loadingStep }: PyqUploadProps) {
               >
                 <button
                   onClick={handleSubmit}
-                  className="w-full sm:w-auto min-w-[200px] flex items-center justify-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-600 px-6 h-12 text-sm font-bold text-white shadow-soft transition-all hover:shadow-[0_5px_20px_rgba(99,102,241,0.4)]"
+                  className="w-full sm:w-auto min-w-[200px] flex items-center justify-center gap-2 rounded bg-primary hover:opacity-90 px-6 h-12 text-sm font-bold text-black shadow-lg cursor-pointer"
                 >
                   <Sparkles size={16} /> Analyze Question Paper
                 </button>
@@ -208,17 +208,17 @@ export function PyqUpload({ onAnalyze, loading, loadingStep }: PyqUploadProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 p-8 shadow-soft backdrop-blur-md space-y-8"
+            className="rounded border border-outline bg-[#0F0F12] p-8 shadow-lg space-y-8"
           >
             <div className="text-center space-y-3">
-              <div className="relative mx-auto h-16 w-16 flex items-center justify-center rounded-2xl bg-brand-50 dark:bg-brand-950/40 text-brand-500 shadow-sm overflow-hidden">
-                <Loader2 size={32} className="animate-spin text-brand-500" />
+              <div className="relative mx-auto h-16 w-16 flex items-center justify-center rounded bg-primary/10 text-primary shadow-sm overflow-hidden">
+                <Loader2 size={32} className="animate-spin text-primary" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                <h3 className="text-lg font-extrabold text-white">
                   Analyzing Document
                 </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500">
+                <p className="text-xs text-on-surface-variant">
                   Our AI engine is processing your paper. This may take up to a minute.
                 </p>
               </div>
@@ -235,17 +235,17 @@ export function PyqUpload({ onAnalyze, loading, loadingStep }: PyqUploadProps) {
                   <div
                     key={stepName}
                     className={`flex items-center gap-3 transition-opacity duration-300 ${
-                      isFuture ? "opacity-40" : "opacity-100"
+                      isFuture ? "opacity-30" : "opacity-100"
                     }`}
                   >
                     {/* Circle Indicator */}
                     <div
                       className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                         isCompleted
-                          ? "bg-emerald-500 text-white shadow-soft"
+                          ? "bg-emerald-500 text-black shadow-sm"
                           : isActive
-                          ? "bg-brand-500 text-white animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                          ? "bg-primary text-black animate-pulse"
+                          : "bg-[#16161A] border border-[#27272D] text-on-surface-variant"
                       }`}
                     >
                       {isCompleted ? <Check size={14} /> : index + 1}
@@ -255,10 +255,10 @@ export function PyqUpload({ onAnalyze, loading, loadingStep }: PyqUploadProps) {
                     <span
                       className={`text-sm font-semibold transition-colors duration-300 ${
                         isActive
-                          ? "text-brand-500 dark:text-brand-400 font-bold"
+                          ? "text-primary font-bold"
                           : isCompleted
-                          ? "text-slate-700 dark:text-slate-300 line-through decoration-slate-300 dark:decoration-slate-700"
-                          : "text-slate-500 dark:text-slate-400"
+                          ? "text-[#A1A1AA] line-through"
+                          : "text-on-surface-variant"
                       }`}
                     >
                       {stepName}

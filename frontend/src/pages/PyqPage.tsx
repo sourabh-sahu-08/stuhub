@@ -136,10 +136,10 @@ export function PyqPage() {
         {/* New Analysis Trigger */}
         <button
           onClick={() => setActiveAnalysis(null)}
-          className={`flex items-center justify-center gap-2 rounded-xl px-4 h-12 text-sm font-bold shadow-soft transition-all w-full ${
+          className={`flex items-center justify-center gap-2 rounded px-4 h-12 text-sm font-bold transition-all w-full cursor-pointer ${
             activeAnalysis === null
-              ? "bg-brand-500 text-white shadow-[0_5px_15px_rgba(99,102,241,0.3)] cursor-default"
-              : "border border-slate-200 dark:border-slate-800 bg-white hover:bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/50"
+              ? "bg-primary text-black shadow-lg cursor-default"
+              : "border border-outline bg-[#16161A] hover:bg-[#1C1C21] text-white"
           }`}
         >
           <Plus size={16} /> Analyze New Paper
@@ -147,31 +147,31 @@ export function PyqPage() {
 
         {/* Search Input */}
         <div className="relative">
-          <Search size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
+          <Search size={16} className="absolute left-3.5 top-3.5 text-on-surface-variant" />
           <input
             type="text"
             placeholder="Search papers, subjects..."
             value={searchQuery}
             onChange={handleSearchChange}
-            className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 bg-white/50 dark:border-slate-800 dark:bg-slate-900/30 text-sm font-semibold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+            className="w-full h-11 pl-10 pr-4 rounded border border-outline bg-[#16161A] text-sm focus:outline-none focus:border-primary text-white"
           />
         </div>
 
         {/* List Content */}
-        <div className="flex-1 overflow-y-auto rounded-2xl border border-slate-200/60 dark:border-slate-800 bg-white/40 dark:bg-slate-900/10 p-3 min-h-[300px] lg:max-h-[60vh] space-y-2">
-          <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-2 mt-1">
+        <div className="flex-1 overflow-y-auto rounded border border-outline bg-[#0F0F12] p-3 min-h-[300px] lg:max-h-[60vh] space-y-2">
+          <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant px-2 mt-1 font-mono">
             Analysis History
           </h3>
           
           {historyLoading ? (
-            <div className="flex flex-col items-center justify-center h-48 text-slate-400 text-xs">
-              <span className="animate-pulse">Loading past analysis...</span>
+            <div className="flex flex-col items-center justify-center h-48 text-on-surface-variant text-xs font-mono">
+              <span className="animate-pulse">LOADING HISTORY...</span>
             </div>
           ) : historyList.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-center px-4">
-              <Brain size={24} className="text-slate-300 dark:text-slate-700 mb-2" />
-              <p className="text-xs font-semibold text-slate-400">No records found</p>
-              <p className="text-[10px] text-slate-500 mt-1">Upload a paper above to start analyzing.</p>
+              <Brain size={24} className="text-on-surface-variant mb-2 opacity-40" />
+              <p className="text-xs font-semibold text-on-surface-variant">No records found</p>
+              <p className="text-[10px] text-on-surface-variant opacity-60 mt-1">Upload a paper above to start analyzing.</p>
             </div>
           ) : (
             <div className="space-y-1.5 overflow-hidden">
@@ -181,23 +181,23 @@ export function PyqPage() {
                   <div
                     key={item._id}
                     onClick={() => loadAnalysis(item._id)}
-                    className={`group relative flex items-center justify-between rounded-lg p-2.5 cursor-pointer transition ${
+                    className={`group relative flex items-center justify-between rounded p-2.5 cursor-pointer transition ${
                       isActive
-                        ? "bg-brand-500/10 text-brand-500 dark:bg-brand-500/20"
-                        : "hover:bg-slate-50 dark:hover:bg-slate-900/30 text-slate-700 dark:text-slate-300"
+                        ? "bg-primary/10 border border-primary/20 text-primary"
+                        : "hover:bg-[#16161A] border border-transparent text-[#e2e2e2]"
                     }`}
                   >
                     <div className="min-w-0 flex-1 pr-4">
                       <p className="text-xs font-bold truncate">{item.paperName}</p>
-                      <p className="text-[10px] text-slate-400 truncate mt-0.5">{item.subject}</p>
-                      <div className="flex items-center gap-1.5 text-[9px] text-slate-400 mt-1">
+                      <p className="text-[10px] text-on-surface-variant truncate mt-0.5">{item.subject}</p>
+                      <div className="flex items-center gap-1.5 text-[9px] text-on-surface-variant mt-1 font-mono">
                         <Calendar size={10} />
                         {new Date(item.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                     <button
                       onClick={(e) => handleDelete(item._id, e)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 dark:hover:bg-red-950/20 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/10 text-on-surface-variant hover:text-red-500 transition-all cursor-pointer"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -232,7 +232,7 @@ export function PyqPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="rounded-2xl border border-slate-200/60 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30 p-6 md:p-10 shadow-soft backdrop-blur-md min-h-[60vh] flex flex-col justify-center print:hidden"
+              className="rounded border border-outline bg-[#0F0F12] p-6 md:p-10 shadow-lg min-h-[60vh] flex flex-col justify-center print:hidden"
             >
               <PyqUpload
                 onAnalyze={handleAnalyze}

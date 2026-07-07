@@ -5,20 +5,13 @@ import {
   ArrowLeft,
   Trash2,
   Edit3,
-  Plus,
   RotateCcw,
   Printer,
-  Search,
-  AlertTriangle,
-  CheckCircle,
-  Info,
-  BookOpen,
   Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
-  HelpCircle,
-  UserCheck
+  Info,
+  Sliders
 } from "lucide-react";
 import {
   BarChart,
@@ -28,10 +21,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend
+  Cell
 } from "recharts";
 import { useAuth } from "../context/AuthContext";
 
@@ -90,11 +80,10 @@ export function AttendancePage() {
   const [baselineTotal, setBaselineTotal] = useState<number | "">("");
   const [required, setRequired] = useState(75);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // Search/Sort/Filter States
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"lowest" | "highest" | "none">("none");
-  const [filterCritical, setFilterCritical] = useState(false);
+  // Simulation State
+  const [whatIfActive, setWhatIfActive] = useState(false);
 
   // Persist State to Local Storage
   useEffect(() => {
@@ -112,8 +101,13 @@ export function AttendancePage() {
     const bunkedLogs = subLogs.filter(l => l.status === "bunked").length;
     const leaveLogs = subLogs.filter(l => l.status === "leave").length;
 
-    const total = sub.baselineTotal + attendedLogs + bunkedLogs;
-    const attended = sub.baselineAttended + attendedLogs;
+    // What-If Simulation adds 5 classes (attended or bunked depending on current standings)
+    const simulatedHeld = whatIfActive ? 5 : 0;
+    // Assume simulated classes are attended to check peak potential
+    const simulatedAttended = whatIfActive ? 5 : 0;
+
+    const total = sub.baselineTotal + attendedLogs + bunkedLogs + simulatedHeld;
+    const attended = sub.baselineAttended + attendedLogs + simulatedAttended;
     const percentage = total > 0 ? (attended / total) * 100 : 0;
 
     const reqFraction = sub.required / 100;
@@ -165,35 +159,9 @@ export function AttendancePage() {
   const criticalSubjectsCount = computedSubjects.filter(s => s.status === "critical").length;
   const warningSubjectsCount = computedSubjects.filter(s => s.status === "warning").length;
 
-  // Smart Recommendations
-  const getSmartRecommendations = () => {
-    const recs: string[] = [];
-    if (subjects.length === 0) {
-      return ["Add your course subjects below to start logging and tracking attendance!"];
-    }
-
-    if (overallPercentage < 75) {
-      recs.push(`Warning: Your overall attendance is ${overallPercentage.toFixed(1)}% (below criteria). Try to mark upcoming classes as Attended.`);
-    }
-
-    computedSubjects.forEach(sub => {
-      if (sub.status === "critical" && sub.attend > 0) {
-        recs.push(`DBMS Priority: Attend the next ${sub.attend} classes of "${sub.name}" to satisfy your ${sub.required}% target.`);
-      } else if (sub.status === "warning" && sub.attend > 0) {
-        recs.push(`Standing Warning: You are near the border in "${sub.name}". Attend ${sub.attend} upcoming classes to secure safety.`);
-      } else if (sub.status === "safe" && sub.skip === 0) {
-        recs.push(`Border alert: Skipping even 1 session of "${sub.name}" will pull you below criteria.`);
-      } else if (sub.status === "safe" && sub.skip > 0) {
-        recs.push(`Buffer: You have a safe cushion of ${sub.skip} classes in "${sub.name}".`);
-      }
-    });
-
-    if (criticalSubjectsCount === 0 && warningSubjectsCount === 0) {
-      recs.unshift("Excellent standing! All subjects currently meet your requirements. Keep it up!");
-    }
-
-    return recs.slice(0, 5);
-  };
+  // Bunk Engine metrics
+  const totalBuffer = computedSubjects.reduce((sum, s) => sum + (s.status === "safe" ? s.skip : 0), 0);
+  const consecutiveSkip = Math.max(0, Math.floor((overallPercentage - 75) / 2));
 
   // Save Subject
   const handleSaveSubject = (e: FormEvent) => {
@@ -231,6 +199,7 @@ export function AttendancePage() {
     setName("");
     setBaselineAttended("");
     setBaselineTotal("");
+    setIsFormOpen(false);
   };
 
   // Edit Mode Trigger
@@ -240,9 +209,10 @@ export function AttendancePage() {
     setBaselineAttended(sub.baselineAttended);
     setBaselineTotal(sub.baselineTotal);
     setRequired(sub.required);
+    setIsFormOpen(true);
   };
 
-  // Delete Subject & associated logs
+  // Delete Subject
   const deleteSubject = (id: string) => {
     if (confirm("Delete this subject? This will also remove all its calendar logs.")) {
       setSubjects(prev => prev.filter(sub => sub.id !== id));
@@ -256,19 +226,20 @@ export function AttendancePage() {
     }
   };
 
+  // Log Bunk Action from card
+  const logQuickBunk = (subjectId: string) => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    toggleLogStatus(todayStr, subjectId, "bunked");
+  };
+
   // Add / Modify Calendar Log
   const toggleLogStatus = (dateStr: string, subjectId: string, status: "attended" | "bunked" | "leave") => {
     setLogs(prev => {
-      // Filter out existing log for this date and subject
       const filtered = prev.filter(l => !(l.date === dateStr && l.subjectId === subjectId));
-      
-      // Check if clicked the same active status (means user wants to clear it)
       const existing = prev.find(l => l.date === dateStr && l.subjectId === subjectId);
       if (existing && existing.status === status) {
         return filtered; // cleared
       }
-
-      // Add updated status log
       const newLog: AttendanceLog = {
         id: `${dateStr}_${subjectId}`,
         date: dateStr,
@@ -298,22 +269,12 @@ export function AttendancePage() {
     }
   };
 
-  // Filter/Sort logic
-  const processedSubjects = computedSubjects
-    .filter(sub => sub.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    .filter(sub => !filterCritical || sub.status === "critical")
-    .sort((a, b) => {
-      if (sortBy === "lowest") return a.percentage - b.percentage;
-      if (sortBy === "highest") return b.percentage - a.percentage;
-      return 0;
-    });
-
-  // Calendar Day Rendering Helpers
+  // Calendar rendering math
   const year = calendarDate.getFullYear();
   const month = calendarDate.getMonth();
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayIndex = new Date(year, month, 1).getDay(); // 0 is Sunday
+  const firstDayIndex = new Date(year, month, 1).getDay();
   const prevMonthDays = new Date(year, month, 0).getDate();
 
   const monthNames = [
@@ -322,54 +283,40 @@ export function AttendancePage() {
   ];
 
   const calendarGrid = [];
-
-  // Previous Month Days (Padding)
   for (let i = firstDayIndex; i > 0; i--) {
-    calendarGrid.push({
-      day: prevMonthDays - i + 1,
-      isCurrentMonth: false,
-      dateString: ""
-    });
+    calendarGrid.push({ day: prevMonthDays - i + 1, isCurrentMonth: false, dateString: "" });
   }
-
-  // Current Month Days
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-    calendarGrid.push({
-      day: d,
-      isCurrentMonth: true,
-      dateString: dateStr
-    });
+    calendarGrid.push({ day: d, isCurrentMonth: true, dateString: dateStr });
   }
-
-  // Next Month Days (Padding)
-  const totalCells = 42; // 6 rows of 7 days
+  const totalCells = 42;
   const nextMonthPadding = totalCells - calendarGrid.length;
   for (let i = 1; i <= nextMonthPadding; i++) {
-    calendarGrid.push({
-      day: i,
-      isCurrentMonth: false,
-      dateString: ""
-    });
+    calendarGrid.push({ day: i, isCurrentMonth: false, dateString: "" });
   }
 
-  // Check logs for specific date
   const getLogsForDate = (dateStr: string) => {
     return logs.filter(l => l.date === dateStr);
   };
 
-  // Recharts Chart Formats
-  const barChartData = computedSubjects.map(sub => ({
-    name: sub.name.length > 15 ? `${sub.name.slice(0, 15)}...` : sub.name,
-    "Current Attendance": parseFloat(sub.percentage.toFixed(1)),
-    "Required Attendance": sub.required
+  // Recharts formats
+  const chartData = computedSubjects.map(sub => ({
+    name: sub.name.length > 12 ? `${sub.name.slice(0, 12)}...` : sub.name,
+    Presence: parseFloat(sub.percentage.toFixed(1))
   }));
 
-  const pieChartData = [
-    { name: "Safe", value: safeSubjectsCount, color: "#10b981" },
-    { name: "Warning", value: warningSubjectsCount, color: "#f59e0b" },
-    { name: "Critical", value: criticalSubjectsCount, color: "#ef4444" }
-  ].filter(d => d.value > 0);
+  // Circ Gauge properties (283 circumference)
+  const offset = 283 - (overallPercentage / 100) * 283;
+  let standingColor = "#22C55E";
+  let standingLabel = "OPTIMAL";
+  if (overallPercentage < 75) {
+    standingColor = "#EF4444";
+    standingLabel = "CRITICAL";
+  } else if (overallPercentage < 80) {
+    standingColor = "#F5A524";
+    standingLabel = "CAUTION";
+  }
 
   return (
     <div className="space-y-8 print:bg-white print:text-black">
@@ -380,7 +327,7 @@ export function AttendancePage() {
             background: white !important;
             color: black !important;
           }
-          header, aside, footer, button, form, .no-print {
+          header, aside, footer, button, form, .no-print, .actions-cell {
             display: none !important;
           }
           .print-full-width {
@@ -391,151 +338,259 @@ export function AttendancePage() {
         }
       `}</style>
 
-      {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 no-print">
+      {/* Header section */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 no-print border-b border-[#27272D] pb-6">
         <div className="flex items-center gap-4">
           <Link
             to="/dashboard"
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 shadow-sm"
+            className="flex h-9 w-9 items-center justify-center rounded border border-[#27272D] bg-[#16161A] text-[#FAFAFA] transition hover:bg-[#1C1C21]"
             aria-label="Back to Dashboard"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={16} />
           </Link>
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-brand-500">
-              Workspace Dashboard
-            </span>
-            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Attendance Command Center
-            </h1>
+            <h2 className="font-label-sm text-[10px] text-primary uppercase tracking-[0.2em] mb-1 font-mono">Module: AJEX-V1</h2>
+            <h1 className="font-display-lg text-2xl sm:text-3xl font-extrabold text-white">Smart Attendance Matrix</h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          {/* Simulation Toggle Switch */}
+          <div className="flex items-center gap-2 bg-[#16161A] border border-[#27272D] px-3 py-1.5 rounded">
+            <Sliders size={14} className="text-primary" />
+            <span className="text-[10px] font-bold font-mono text-[#A3A3A3] uppercase">Simulation (+5 classes)</span>
+            <input
+              type="checkbox"
+              id="whatIfToggle"
+              checked={whatIfActive}
+              onChange={(e) => setWhatIfActive(e.target.checked)}
+              className="w-8 h-4 rounded-full bg-[#27272D] border-none text-primary cursor-pointer focus:ring-0 focus:outline-none"
+            />
+          </div>
+
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 h-10 px-4 rounded-lg bg-white border border-slate-200 dark:border-slate-800 dark:bg-slate-900 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-xs font-semibold shadow-sm transition"
+            className="flex items-center gap-2 h-9 px-4 rounded bg-[#16161A] border border-[#27272D] text-[#FAFAFA] hover:bg-[#1C1C21] text-xs font-semibold font-mono"
           >
-            <Printer size={16} /> Print Audit
+            <Printer size={14} /> PDF AUDIT
           </button>
           <button
             onClick={handleResetData}
-            className="flex items-center gap-2 h-10 px-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 text-xs font-semibold shadow-sm transition"
+            className="flex items-center gap-2 h-9 px-4 rounded bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 text-xs font-semibold font-mono"
           >
-            <RotateCcw size={16} /> Reset Data
+            <RotateCcw size={14} /> RESET
           </button>
         </div>
       </div>
 
-      {/* Printable Report Header */}
-      <div className="hidden print:block mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-950">Stuhub Student Portal</h1>
-        <p className="text-sm text-slate-600 mt-1">Official Student Attendance Audit Report</p>
-        <div className="mt-4 border-b border-slate-300 pb-3 flex justify-between text-xs text-slate-500">
-          <span>Student: {user?.name} ({user?.email})</span>
-          <span>Date: {new Date().toLocaleDateString()}</span>
+      {/* Overview Cards (Gauge + Bunk engine + Chart) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 print-full-width">
+        {/* Gauge circle card */}
+        <div className="col-span-12 lg:col-span-4 panel p-6 flex flex-col items-center justify-center text-center">
+          <div className="relative w-48 h-48 mb-6">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" fill="transparent" r="45" stroke="#16161A" strokeWidth="8"></circle>
+              <circle
+                cx="50"
+                cy="50"
+                fill="transparent"
+                r="45"
+                stroke={standingColor}
+                strokeDasharray="283"
+                strokeDashoffset={offset}
+                strokeLinecap="square"
+                strokeWidth="8"
+                className="transition-all duration-700"
+              ></circle>
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-3xl font-extrabold text-white leading-none">{overallPercentage.toFixed(1)}%</span>
+              <span className="text-[10px] text-on-surface-variant font-mono uppercase tracking-wider mt-1">Aggregate</span>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-white">
+              Academic Status: <span style={{ color: standingColor }} className="font-bold">{standingLabel}</span>
+            </p>
+            <p className="text-xs text-on-surface-variant max-w-[240px]">
+              You are {Math.abs(overallPercentage - 75).toFixed(1)}% {overallPercentage >= 75 ? "above" : "below"} the mandatory criteria.
+            </p>
+          </div>
+        </div>
+
+        {/* Bunk engine cards */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
+          <div className="panel p-5 flex-1 flex flex-col justify-between">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-primary text-xl">calculate</span>
+              <h4 className="text-xs font-bold text-[#A3A3A3] uppercase tracking-wider font-mono">Bunk Probability Engine</h4>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="p-3 bg-[#0d0d0d] rounded border border-outline">
+                <p className="text-[10px] text-on-surface-variant font-mono uppercase">Safe to Skip</p>
+                <p className="text-3xl font-extrabold text-primary mt-1 font-mono">{String(consecutiveSkip).padStart(2, "0")}</p>
+                <p className="text-[9px] text-[#A1A1AA] mt-1 leading-snug">Consecutive classes possible before criteria check</p>
+              </div>
+              <div className="p-3 bg-[#0d0d0d] rounded border border-outline">
+                <p className="text-[10px] text-on-surface-variant font-mono uppercase">Buffer Count</p>
+                <p className="text-3xl font-extrabold text-white mt-1 font-mono">{String(totalBuffer).padStart(2, "0")}</p>
+                <p className="text-[9px] text-[#A1A1AA] mt-1 leading-snug">Total leeway buffer remaining across modules</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Temporal bar chart */}
+        <div className="col-span-12 lg:col-span-4 panel p-5 flex flex-col h-[260px] no-print">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-primary text-xl">trending_up</span>
+              <h4 className="text-xs font-bold text-[#A3A3A3] uppercase tracking-wider font-mono">Subject Presence Check</h4>
+            </div>
+            <span className="px-2 py-0.5 bg-[#16161A] border border-outline rounded font-mono text-[9px] text-on-surface-variant">CSE</span>
+          </div>
+          <div className="flex-1 w-full text-xs">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
+                <CartesianGrid stroke="#27272D" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" stroke="#A1A1AA" tickLine={false} tick={{ fontSize: 9 }} />
+                <YAxis stroke="#A1A1AA" tickLine={false} tick={{ fontSize: 9 }} domain={[0, 100]} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#16161A", borderColor: "#27272D", color: "#e2e2e2" }}
+                  itemStyle={{ color: "#FFA31A" }}
+                />
+                <Bar dataKey="Presence" radius={[2, 2, 0, 0]}>
+                  {chartData.map((entry, idx) => (
+                    <Cell
+                      key={`cell-${idx}`}
+                      fill={entry.Presence >= 75 ? "#F5A524" : "#EF4444"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
-      {/* 2. Overview Summary Cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 print-full-width">
-        <div className="panel p-4 sm:p-6 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Overall Attendance</p>
-            <h2 className={`text-4xl font-extrabold tracking-tight mt-2 ${overallPercentage >= 75 ? "text-emerald-500" : "text-red-500"}`}>
-              {overallPercentage.toFixed(1)}%
-            </h2>
-          </div>
-          <div className="mt-4">
-            <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className={`h-full transition-all duration-550 ${overallPercentage >= 75 ? "bg-emerald-500" : "bg-red-500"}`}
-                style={{ width: `${Math.min(100, overallPercentage)}%` }}
-              />
-            </div>
-            <p className="text-[10px] text-slate-400 mt-1.5 font-medium">Standard criteria: 75.0%</p>
-          </div>
-        </div>
-
-        <div className="panel p-4 sm:p-6 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Course Standings</p>
-            <div className="flex items-center gap-3 mt-3">
-              <div className="flex flex-col">
-                <span className="text-2xl font-extrabold text-emerald-500">{safeSubjectsCount}</span>
-                <span className="text-[9px] uppercase font-bold text-slate-400">Safe</span>
-              </div>
-              <div className="h-8 border-r border-slate-200 dark:border-slate-800" />
-              <div className="flex flex-col">
-                <span className="text-2xl font-extrabold text-amber-500">{warningSubjectsCount}</span>
-                <span className="text-[9px] uppercase font-bold text-slate-400">Warning</span>
-              </div>
-              <div className="h-8 border-r border-slate-200 dark:border-slate-800" />
-              <div className="flex flex-col">
-                <span className="text-2xl font-extrabold text-red-500">{criticalSubjectsCount}</span>
-                <span className="text-[9px] uppercase font-bold text-slate-400">Critical</span>
-              </div>
-            </div>
-          </div>
-          <p className="text-[10px] text-slate-400 font-medium">Total Subjects: {subjects.length}</p>
-        </div>
-
-        <div className="panel p-4 sm:p-6 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Logged Classes</p>
-            <div className="flex items-baseline gap-1 mt-2">
-              <span className="text-3xl font-extrabold text-slate-850 dark:text-white">{totalAttended}</span>
-              <span className="text-sm font-semibold text-slate-400">/ {totalConducted}</span>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-1.5 font-medium">Attended vs conducted (including calendar counts).</p>
-          </div>
-          <div className="h-1 bg-slate-100 dark:bg-slate-800 rounded-full" />
-        </div>
-
-        <div className="panel p-4 sm:p-6 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Average Attendance</p>
-            <h2 className="text-3xl font-extrabold text-slate-850 dark:text-white mt-2">
-              {subjects.length > 0
-                ? (computedSubjects.reduce((sum, s) => sum + s.percentage, 0) / subjects.length).toFixed(1)
-                : "0.0"
-              }%
-            </h2>
-            <p className="text-[10px] text-slate-400 mt-1.5 font-medium">Mathematical average of individual subjects.</p>
-          </div>
-          <div className="h-1 bg-slate-100 dark:bg-slate-800 rounded-full" />
-        </div>
+      {/* Module breakdown title */}
+      <div className="pt-2 flex items-center gap-md">
+        <div className="h-[1px] flex-1 bg-[#27272D]"></div>
+        <h4 className="font-label-md text-xs text-[#A3A3A3] uppercase tracking-[0.3em] font-mono">Module-Specific Breakdown</h4>
+        <div className="h-[1px] flex-1 bg-[#27272D]"></div>
       </div>
 
-      {/* 3. Interactive Calendar & Logs Panel (Crucial Add) */}
-      <div className="grid gap-6 md:grid-cols-3 no-print">
-        {/* Calendar Grid (Spans 2 cols) */}
-        <div className="panel p-4 sm:p-6 md:col-span-2 space-y-4">
+      {/* Subject cards grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {computedSubjects.map(sub => {
+          const isDanger = sub.percentage < sub.required;
+          const statusBg = isDanger ? "bg-red-500/10 border-red-500/30 text-red-500" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-500";
+          const barColor = isDanger ? "bg-red-500" : "bg-primary";
+
+          return (
+            <div key={sub.id} className="panel p-5 flex flex-col justify-between transform transition-all hover:border-[#808080]">
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="min-w-0">
+                    <h5 className="font-headline-md text-base font-bold text-white truncate">{sub.name}</h5>
+                    <p className="text-[10px] text-on-surface-variant font-mono uppercase mt-0.5">ID: SUB-{sub.id.slice(-4)}</p>
+                  </div>
+                  <div className={`px-2 py-0.5 border rounded text-[9px] font-bold uppercase ${statusBg}`}>
+                    {isDanger ? "Warning" : "Safe"}
+                  </div>
+                </div>
+
+                <div className="flex items-end justify-between mb-2">
+                  <span className="text-3xl font-extrabold text-white">{Math.round(sub.percentage)}%</span>
+                  <span className="text-xs text-on-surface-variant font-mono">
+                    {sub.attended}/{sub.total} Held
+                  </span>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full h-1.5 bg-[#09090B] border border-outline overflow-hidden mb-4">
+                  <div className={`h-full ${barColor}`} style={{ width: `${Math.min(100, sub.percentage)}%` }} />
+                </div>
+
+                {isDanger && (
+                  <p className="text-[10px] text-red-500 mb-4 flex items-center gap-1 font-mono">
+                    <span className="material-symbols-outlined text-xs">priority_high</span>
+                    Attendance below {sub.required}% target
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-4 flex gap-3 pt-3 border-t border-[#27272D] no-print">
+                <button
+                  onClick={() => logQuickBunk(sub.id)}
+                  className="flex-1 py-1.5 bg-[#16161A] border border-[#27272D] text-white font-mono text-[10px] font-bold hover:bg-primary hover:text-black transition-all cursor-pointer"
+                >
+                  LOG BUNK
+                </button>
+                <button
+                  onClick={() => startEdit(sub)}
+                  className="p-1.5 bg-[#16161A] border border-[#27272D] text-[#A3A3A3] hover:text-white rounded cursor-pointer"
+                  title="Configure"
+                >
+                  <Edit3 size={13} />
+                </button>
+                <button
+                  onClick={() => deleteSubject(sub.id)}
+                  className="p-1.5 bg-[#16161A] border border-[#27272D] text-[#A3A3A3] hover:text-red-500 rounded cursor-pointer"
+                  title="Delete"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Configure module card */}
+        <button
+          onClick={() => {
+            setEditingId(null);
+            setName("");
+            setBaselineAttended("");
+            setBaselineTotal("");
+            setIsFormOpen(true);
+          }}
+          className="panel border-dashed border-2 p-6 flex flex-col items-center justify-center text-on-surface-variant hover:text-primary hover:bg-[#16161A]/50 transition-all cursor-pointer min-h-[180px] no-print"
+        >
+          <span className="material-symbols-outlined text-[40px] mb-2 text-primary">add_circle</span>
+          <span className="text-xs uppercase font-bold tracking-wider font-mono">Configure New Module</span>
+        </button>
+      </div>
+
+      {/* Attendance logger calendars section */}
+      <div className="grid gap-6 md:grid-cols-3 no-print pt-4">
+        {/* Calendar picker matrix */}
+        <div className="panel p-5 md:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <CalendarIcon className="text-brand-500" size={20} /> Attendance Logger Calendar
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
+              <CalendarIcon className="text-primary" size={16} /> Attendance logger calendar
             </h3>
             
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCalendarDate(new Date(year, month - 1, 1))}
-                className="h-8 w-8 rounded border border-slate-200 dark:border-slate-850 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
+                className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={14} />
               </button>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-250 min-w-[100px] text-center">
+              <span className="text-xs font-bold text-white min-w-[100px] text-center font-mono">
                 {monthNames[month]} {year}
               </span>
               <button
                 onClick={() => setCalendarDate(new Date(year, month + 1, 1))}
-                className="h-8 w-8 rounded border border-slate-200 dark:border-slate-850 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
+                className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white"
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={14} />
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 py-1">
+          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-[#A1A1AA] py-1 font-mono">
             <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
@@ -555,28 +610,28 @@ export function AttendancePage() {
                   key={idx}
                   disabled={!cell.isCurrentMonth}
                   onClick={() => cell.dateString && setSelectedDateStr(cell.dateString)}
-                  className={`relative min-h-[38px] sm:min-h-[50px] p-1 sm:p-1.5 rounded-lg border flex flex-col items-center justify-between text-[10px] sm:text-xs transition-all ${
+                  className={`relative min-h-[38px] sm:min-h-[48px] p-1 rounded border flex flex-col items-center justify-between text-[10px] transition-all cursor-pointer ${
                     !cell.isCurrentMonth
-                      ? "border-transparent bg-transparent text-slate-300 dark:text-slate-800"
+                      ? "border-transparent bg-transparent text-slate-800"
                       : isSelected
-                      ? "border-brand-500 bg-brand-500/10 text-brand-500 shadow-sm"
-                      : "border-slate-100 dark:border-slate-900 bg-white/5 text-slate-800 dark:text-slate-200 hover:border-slate-350 dark:hover:border-slate-700"
+                      ? "border-primary bg-primary/10 text-primary shadow-sm"
+                      : "border-[#27272D] bg-[#16161A]/40 text-on-surface hover:border-[#808080]"
                   }`}
                 >
-                  <span className="font-bold self-start">{cell.day}</span>
+                  <span className="font-bold font-mono self-start">{cell.day}</span>
                   
                   {/* Status dots */}
                   {hasLogs.length > 0 && (
-                    <div className="flex flex-wrap justify-center gap-0.5 sm:gap-1 w-full max-w-[28px] sm:max-w-[36px] overflow-hidden">
+                    <div className="flex flex-wrap justify-center gap-0.5 w-full max-w-[28px] overflow-hidden">
                       {hasLogs.slice(0, 3).map((log, index) => (
                         <span
                           key={index}
-                          className={`h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${
+                          className={`h-1 w-1 rounded-full ${
                             log.status === "attended"
-                              ? "bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.5)]"
+                              ? "bg-emerald-500"
                               : log.status === "bunked"
-                              ? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.5)]"
-                              : "bg-amber-500 shadow-[0_0_4px_rgba(245,158,11,0.5)]"
+                              ? "bg-red-500"
+                              : "bg-amber-500"
                           }`}
                         />
                       ))}
@@ -588,50 +643,50 @@ export function AttendancePage() {
           </div>
         </div>
 
-        {/* Selected date log manager */}
-        <div className="panel p-4 sm:p-6 space-y-4">
+        {/* Selected Date Log Selector */}
+        <div className="panel p-5 space-y-4">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-500">Day Logger Panel</span>
-            <h3 className="text-base font-extrabold text-slate-855 dark:text-white mt-1">
-              Classes on {selectedDateStr ? new Date(selectedDateStr).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "Select a date"}
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary font-mono">Day Logger Panel</span>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider mt-1">
+              {selectedDateStr ? new Date(selectedDateStr).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "Select date"}
             </h3>
           </div>
 
-          <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
+          <div className="space-y-4 max-h-[260px] overflow-y-auto pr-1">
             {computedSubjects.map(sub => {
               const dayLog = logs.find(l => l.date === selectedDateStr && l.subjectId === sub.id);
               
               return (
-                <div key={sub.id} className="border-b border-slate-100 dark:border-slate-800/80 pb-3 space-y-2 last:border-0 last:pb-0">
-                  <p className="text-xs font-bold text-slate-750 dark:text-slate-200 truncate">{sub.name}</p>
+                <div key={sub.id} className="border-b border-[#27272D] pb-3 space-y-2 last:border-0 last:pb-0">
+                  <p className="text-xs font-semibold text-[#e2e2e2] truncate">{sub.name}</p>
                   
                   <div className="flex gap-1">
                     <button
                       onClick={() => toggleLogStatus(selectedDateStr, sub.id, "attended")}
-                      className={`flex-1 h-7 rounded text-[10px] font-bold uppercase transition ${
+                      className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
                         dayLog?.status === "attended"
-                          ? "bg-emerald-500 text-white shadow-soft"
-                          : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-400"
+                          ? "bg-emerald-500 text-black"
+                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
                       }`}
                     >
                       Attended
                     </button>
                     <button
                       onClick={() => toggleLogStatus(selectedDateStr, sub.id, "bunked")}
-                      className={`flex-1 h-7 rounded text-[10px] font-bold uppercase transition ${
+                      className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
                         dayLog?.status === "bunked"
-                          ? "bg-red-500 text-white shadow-soft"
-                          : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-400"
+                          ? "bg-red-500 text-white"
+                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
                       }`}
                     >
                       Bunked
                     </button>
                     <button
                       onClick={() => toggleLogStatus(selectedDateStr, sub.id, "leave")}
-                      className={`flex-1 h-7 rounded text-[10px] font-bold uppercase transition ${
+                      className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
                         dayLog?.status === "leave"
-                          ? "bg-amber-500 text-white shadow-soft"
-                          : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-400"
+                          ? "bg-amber-500 text-black"
+                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
                       }`}
                     >
                       Leave
@@ -639,7 +694,7 @@ export function AttendancePage() {
                     {dayLog && (
                       <button
                         onClick={() => clearLog(selectedDateStr, sub.id)}
-                        className="h-7 w-7 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition"
+                        className="h-7 w-7 rounded bg-[#16161A] border border-[#27272D] flex items-center justify-center text-xs text-[#A3A3A3] hover:text-red-500 transition cursor-pointer"
                         title="Clear log"
                       >
                         ✖
@@ -651,371 +706,111 @@ export function AttendancePage() {
             })}
           </div>
 
-          <div className="rounded-lg bg-brand-500/5 border border-brand-500/10 p-3 text-[10px] text-slate-500 dark:text-slate-400 flex items-start gap-2">
-            <Info size={14} className="shrink-0 text-brand-500 mt-0.5" />
-            <span>Marking a subject Attended adds 1 to present & conducted. Bunked adds 1 to conducted only. Leave has no calculation impact.</span>
+          <div className="rounded bg-[#16161A] border border-[#27272D] p-3 text-[10px] text-on-surface-variant flex items-start gap-2">
+            <Info size={14} className="shrink-0 text-primary mt-0.5" />
+            <span className="leading-relaxed">Attended increments present & held. Bunked increments held only. Leave has no math impact.</span>
           </div>
         </div>
       </div>
 
-      {/* 4. Smart Suggestions Box */}
-      <div className="panel p-6 bg-slate-900/5 dark:bg-slate-900/30 border-dashed border-slate-350 dark:border-slate-850">
-        <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
-          <TrendingUp className="text-brand-500" size={18} /> Attendance Insights
-        </h3>
-        <div className="mt-4 space-y-2">
-          {getSmartRecommendations().map((rec, idx) => (
-            <div key={idx} className="flex gap-2.5 items-start text-sm text-slate-600 dark:text-slate-300">
-              {rec.includes("Action Required") || rec.includes("Warning") ? (
-                <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
-              ) : rec.includes("Alert") || rec.includes("Caution") ? (
-                <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={16} />
-              ) : (
-                <CheckCircle className="text-emerald-500 shrink-0 mt-0.5" size={16} />
-              )}
-              <span>{rec}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 5. Subjects Panel: Input Form & Subject Cards Grid */}
-      <div className="grid gap-6 lg:grid-cols-3 print-full-width">
-        {/* Form Container */}
-        <div className="lg:col-span-1 no-print">
-          <div className="panel p-4 sm:p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              {editingId ? "Edit Course Subject" : "Add Course Subject"}
-            </h3>
-            
-            <form onSubmit={handleSaveSubject} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Subject Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Database Systems"
-                  className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-800 bg-white/5 px-3 text-sm focus:outline-none focus:border-brand-500 text-slate-800 dark:text-white"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
-                    Baseline Att. *
-                    <span className="group relative">
-                      <HelpCircle size={12} className="text-slate-400 cursor-help" />
-                      <span className="pointer-events-none absolute bottom-full mb-1 left-1/2 -translate-x-1/2 w-48 p-2 rounded bg-slate-900 text-[10px] text-slate-200 hidden group-hover:block z-55">
-                        Past classes you attended before logging them on this calendar.
-                      </span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    required
-                    value={baselineAttended}
-                    onChange={(e) => setBaselineAttended(e.target.value === "" ? "" : Number(e.target.value))}
-                    placeholder="e.g. 12"
-                    className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-800 bg-white/5 px-3 text-sm focus:outline-none focus:border-brand-500 text-slate-800 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
-                    Baseline Cond. *
-                    <span className="group relative">
-                      <HelpCircle size={12} className="text-slate-400 cursor-help" />
-                      <span className="pointer-events-none absolute bottom-full mb-1 left-1/2 -translate-x-1/2 w-48 p-2 rounded bg-slate-900 text-[10px] text-slate-200 hidden group-hover:block z-55">
-                        Past conducted classes before logging them on this calendar.
-                      </span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    required
-                    value={baselineTotal}
-                    onChange={(e) => setBaselineTotal(e.target.value === "" ? "" : Number(e.target.value))}
-                    placeholder="e.g. 16"
-                    className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-800 bg-white/5 px-3 text-sm focus:outline-none focus:border-brand-500 text-slate-800 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Required Attendance *</label>
-                  <span className="text-xs font-bold text-brand-500">{required}%</span>
-                </div>
-                <input
-                  type="range"
-                  min={50}
-                  max={100}
-                  step={5}
-                  value={required}
-                  onChange={(e) => setRequired(Number(e.target.value))}
-                  className="w-full accent-brand-500"
-                />
-                <div className="flex justify-between text-[10px] text-slate-400 font-semibold px-0.5 mt-0.5">
-                  <span>50%</span>
-                  <span>75% (Standard)</span>
-                  <span>100%</span>
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
+      {/* Dynamic subject creation / editing form modal overlay */}
+      <AnimatePresence>
+        {isFormOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm select-none no-print">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-md p-6 rounded border border-outline bg-[#0F0F12] text-[#e2e2e2] space-y-5 shadow-lg"
+            >
+              <div className="flex justify-between items-center pb-2 border-b border-[#27272D]">
+                <h3 className="text-base font-bold text-white font-mono uppercase tracking-wider">
+                  {editingId ? "Configure Subject Details" : "Add Course Subject"}
+                </h3>
                 <button
-                  type="submit"
-                  className="flex-1 h-10 rounded-lg bg-brand-500 text-sm font-bold text-white flex items-center justify-center gap-1.5 transition hover:bg-brand-600 shadow-sm"
+                  onClick={() => setIsFormOpen(false)}
+                  className="text-on-surface-variant hover:text-white text-xs font-bold cursor-pointer"
                 >
-                  <Plus size={16} /> {editingId ? "Save Changes" : "Add Subject"}
+                  ✖
                 </button>
-                {editingId && (
+              </div>
+
+              <form onSubmit={handleSaveSubject} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Subject Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Database Systems"
+                    className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Baseline Attended *</label>
+                    <input
+                      type="number"
+                      min={0}
+                      required
+                      value={baselineAttended}
+                      onChange={(e) => setBaselineAttended(e.target.value === "" ? "" : Number(e.target.value))}
+                      placeholder="e.g. 12"
+                      className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Baseline Conducted *</label>
+                    <input
+                      type="number"
+                      min={0}
+                      required
+                      value={baselineTotal}
+                      onChange={(e) => setBaselineTotal(e.target.value === "" ? "" : Number(e.target.value))}
+                      placeholder="e.g. 16"
+                      className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-mono">Required Attendance *</label>
+                    <span className="text-xs font-bold text-primary font-mono">{required}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={50}
+                    max={100}
+                    step={5}
+                    value={required}
+                    onChange={(e) => setRequired(Number(e.target.value))}
+                    className="w-full h-1 bg-[#16161A] rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+
+                <div className="pt-2 flex gap-3">
                   <button
                     type="button"
-                    onClick={() => {
-                      setEditingId(null);
-                      setName("");
-                      setBaselineAttended("");
-                      setBaselineTotal("");
-                      setRequired(75);
-                    }}
-                    className="h-10 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-sm font-semibold transition"
+                    onClick={() => setIsFormOpen(false)}
+                    className="flex-1 h-10 rounded border border-[#27272D] text-[#FAFAFA] text-xs font-bold uppercase tracking-wider font-mono hover:bg-[#16161A] cursor-pointer"
                   >
                     Cancel
                   </button>
-                )}
-              </div>
-            </form>
-          </div>
-        </div>
-
-        {/* Subjects Grid & Filter Options */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Filtering */}
-          <div className="panel p-4 flex flex-col md:flex-row items-center justify-between gap-4 no-print">
-            <div className="relative w-full md:max-w-xs">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search subject..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-9 rounded-lg border border-slate-200 dark:border-slate-800 bg-white/5 pl-9 pr-3 text-xs focus:outline-none focus:border-brand-500 text-slate-800 dark:text-white"
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white/5 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-700 dark:text-slate-350"
-              >
-                <option value="none">Sort: None</option>
-                <option value="lowest">Sort: Lowest Attendance</option>
-                <option value="highest">Sort: Highest Attendance</option>
-              </select>
-
-              <button
-                onClick={() => setFilterCritical(prev => !prev)}
-                className={`h-9 px-4 rounded-lg text-xs font-bold border transition ${
-                  filterCritical
-                    ? "bg-red-500/10 border-red-500/30 text-red-500"
-                    : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/50"
-                }`}
-              >
-                {filterCritical ? "Show All Subjects" : "Filter Critical"}
-              </button>
-            </div>
-          </div>
-
-          {/* Cards */}
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-            <AnimatePresence>
-              {processedSubjects.map(sub => (
-                <motion.div
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  key={sub.id}
-                  className="panel p-4 sm:p-5 space-y-4 flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-start gap-2">
-                      <h4 className="font-bold text-slate-855 dark:text-white text-base leading-snug line-clamp-1">
-                        {sub.name}
-                      </h4>
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase ${
-                        sub.status === "safe"
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          : sub.status === "warning"
-                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                          : "bg-red-500/10 text-red-600 dark:text-red-400"
-                      }`}>
-                        {sub.status}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-baseline text-xs text-slate-400">
-                      <span>Attendance:</span>
-                      <span className={`font-bold ${
-                        sub.status === "safe"
-                          ? "text-emerald-500"
-                          : sub.status === "warning"
-                          ? "text-amber-500"
-                          : "text-red-500"
-                      }`}>{sub.percentage.toFixed(1)}%</span>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-300 ${
-                          sub.status === "safe"
-                            ? "bg-emerald-500"
-                            : sub.status === "warning"
-                            ? "bg-amber-500"
-                            : "bg-red-500"
-                        }`}
-                        style={{ width: `${Math.min(100, sub.percentage)}%` }}
-                      />
-                    </div>
-
-                    <div className="flex justify-between text-[10px] text-slate-450 font-bold uppercase tracking-wide">
-                      <span>Total Classes: {sub.total}</span>
-                      <span>Attended: {sub.attended}</span>
-                      {sub.leaveCount > 0 && <span className="text-amber-500">Leaves: {sub.leaveCount}</span>}
-                    </div>
-
-                    {/* Calculations Display */}
-                    <div className="text-xs border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
-                      {sub.impossible ? (
-                        <p className="text-red-500 font-medium flex items-center gap-1">
-                          <AlertTriangle size={12} /> Impossible to achieve 100% attendance.
-                        </p>
-                      ) : sub.attend > 0 ? (
-                        <p className="text-red-500 dark:text-red-400 font-semibold flex items-center gap-1.5">
-                          <AlertTriangle size={13} className="shrink-0" />
-                          <span>Must attend next <strong className="underline">{sub.attend}</strong> classes consecutively.</span>
-                        </p>
-                      ) : sub.skip > 0 ? (
-                        <p className="text-emerald-500 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
-                          <CheckCircle size={13} className="shrink-0" />
-                          <span>Can safely skip <strong className="underline">{sub.skip}</strong> upcoming classes.</span>
-                        </p>
-                      ) : (
-                        <p className="text-amber-500 dark:text-amber-400 font-semibold flex items-center gap-1.5">
-                          <AlertTriangle size={13} className="shrink-0" />
-                          <span>Cannot skip any more classes. Attendance is at limit!</span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex justify-end gap-1.5 border-t border-slate-100 dark:border-slate-800/80 pt-3 no-print">
-                    <button
-                      onClick={() => startEdit(sub)}
-                      className="h-8 w-8 rounded bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-500 dark:text-slate-400 hover:text-brand-500 dark:hover:text-brand-500 flex items-center justify-center transition"
-                      aria-label="Edit subject details"
-                    >
-                      <Edit3 size={14} />
-                    </button>
-                    <button
-                      onClick={() => deleteSubject(sub.id)}
-                      className="h-8 w-8 rounded bg-red-500/5 hover:bg-red-500/10 text-red-400 hover:text-red-500 flex items-center justify-center transition"
-                      aria-label="Delete subject"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-
-            {processedSubjects.length === 0 && (
-              <p className="text-sm text-slate-450 dark:text-slate-500 py-8 text-center col-span-full">
-                No subjects matches your settings.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-      {/* 6. Charts Panel */}
-      <div className="grid gap-6 md:grid-cols-2 print-full-width">
-        <div className="panel p-4 sm:p-6 min-w-0 w-full">
-          <h3 className="text-sm font-bold text-slate-855 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-            <TrendingUp size={16} className="text-brand-500" /> Subject-wise Audit Chart
-          </h3>
-          <div className="h-64 w-full">
-            {subjects.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-slate-400">Add subjects to view charts</div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.1} />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} />
-                  <YAxis domain={[0, 100]} stroke="#94a3b8" fontSize={10} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#0f172a",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "8px",
-                      color: "#fff",
-                      fontSize: "11px"
-                    }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: "10px" }} />
-                  <Bar dataKey="Current Attendance" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Required Attendance" fill="#475569" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-
-        <div className="panel p-4 sm:p-6 min-w-0 w-full">
-          <h3 className="text-sm font-bold text-slate-855 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-            <BookOpen size={16} className="text-brand-500" /> Standing Distribution
-          </h3>
-          <div className="h-64 w-full flex items-center justify-center">
-            {subjects.length === 0 ? (
-              <div className="text-xs text-slate-400">Add subjects to view charts</div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieChartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={75}
-                    paddingAngle={3}
-                    dataKey="value"
+                  <button
+                    type="submit"
+                    className="flex-1 h-10 rounded bg-primary text-black text-xs font-bold uppercase tracking-wider font-mono hover:opacity-90 cursor-pointer"
                   >
-                    {pieChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#0f172a",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "8px",
-                      color: "#fff",
-                      fontSize: "11px"
-                    }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: "10px" }} verticalAlign="bottom" />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
+                    Save Module
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </div>
-        </div>
-      </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
