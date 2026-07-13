@@ -4,6 +4,7 @@ import { User } from "./models/User.js";
 import { Course, Department, Student, Subject } from "./models/Academic.js";
 import { Assignment, Attendance, Leave, Timetable } from "./models/Operations.js";
 import { Alumni, Club, Event, Notice, Notification, Placement, Resource } from "./models/Campus.js";
+import { Pyq } from "./models/Pyq.js";
 
 await connectDatabase();
 
@@ -23,7 +24,8 @@ await Promise.all([
   Resource.deleteMany({}),
   Club.deleteMany({}),
   Alumni.deleteMany({}),
-  Notification.deleteMany({})
+  Notification.deleteMany({}),
+  Pyq.deleteMany({})
 ]);
 
 const [cse, ece] = await Department.create([

@@ -7,7 +7,8 @@ import {
   Bell,
   Bookmark,
   User,
-  Settings
+  Settings,
+  Sparkles
 } from "lucide-react";
 
 export interface NavItem {
@@ -29,7 +30,8 @@ export const navGroups: NavGroup[] = [
       { label: "Home", path: "/dashboard", icon: Home, materialIcon: "home" },
       { label: "Attendance", path: "/dashboard/attendance", icon: CalendarDays, materialIcon: "calendar_today" },
       { label: "Notes", path: "/dashboard/library", icon: BookOpen, materialIcon: "folder" },
-      { label: "PYQs", path: "/dashboard/pyq", icon: Brain, materialIcon: "psychology" }
+      { label: "PYQs", path: "/dashboard/pyq", icon: Brain, materialIcon: "psychology" },
+      { label: "AI PYQ Analyzer", path: "/dashboard/pyq-analyzer", icon: Sparkles, materialIcon: "psychology_alt" }
     ]
   },
 
