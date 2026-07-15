@@ -1,23 +1,47 @@
 import {
-  Bot,
-  CalendarDays,
-  ClipboardCheck,
   Home,
-  Library,
-  MessageSquare,
-  Settings,
-  Sparkles,
-  Brain
+  CalendarDays,
+  BookOpen,
+  Brain,
+  Calendar,
+  Bell,
+  Bookmark,
+  User,
+  Settings
 } from "lucide-react";
 
-export const navItems = [
-  { label: "Dashboard", path: "/dashboard", icon: Home },
-  { label: "Assignments", path: "/dashboard/assignments", icon: ClipboardCheck },
-  { label: "Attendance", path: "/dashboard/attendance", icon: CalendarDays },
-  { label: "Digital Library", path: "/dashboard/library", icon: Library },
-  { label: "PYQ Analyzer", path: "/dashboard/pyq", icon: Brain },
-  { label: "Messages", path: "/dashboard/messages", icon: MessageSquare },
-  { label: "AI Studio", path: "/dashboard/ai", icon: Bot },
-  { label: "Settings", path: "/dashboard/settings", icon: Settings },
-  { label: "Smart Plan", path: "/dashboard/planner", icon: Sparkles }
-] satisfies Array<{ label: string; path: string; icon: typeof Home }>;
+export interface NavItem {
+  label: string;
+  path: string;
+  icon: typeof Home;
+  materialIcon: string;
+}
+
+export interface NavGroup {
+  groupName: string;
+  items: NavItem[];
+}
+
+export const navGroups: NavGroup[] = [
+  {
+    groupName: "STUDY",
+    items: [
+      { label: "Home", path: "/dashboard", icon: Home, materialIcon: "home" },
+      { label: "Attendance", path: "/dashboard/attendance", icon: CalendarDays, materialIcon: "calendar_today" },
+      { label: "Notes", path: "/dashboard/library", icon: BookOpen, materialIcon: "folder" },
+      { label: "PYQs", path: "/dashboard/pyq", icon: Brain, materialIcon: "psychology" }
+    ]
+  },
+
+  {
+    groupName: "PERSONAL",
+    items: [
+      { label: "Saved", path: "/dashboard/saved", icon: Bookmark, materialIcon: "bookmark" },
+      { label: "Profile", path: "/dashboard/profile", icon: User, materialIcon: "person" },
+      { label: "Settings", path: "/dashboard/settings", icon: Settings, materialIcon: "settings" }
+    ]
+  }
+];
+
+export const navItems = navGroups.flatMap((group) => group.items);
+

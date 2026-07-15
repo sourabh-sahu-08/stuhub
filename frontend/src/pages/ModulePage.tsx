@@ -1,79 +1,765 @@
-import { ArrowLeft, Cpu } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
-import { navItems } from "../components/layout/navigation";
+import { useState, FormEvent, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft,
+  Folder,
+  FileText,
+  Upload,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  History,
+  MoreVertical,
+  Terminal,
+  Shield,
+  Key,
+  Bell,
+  Network,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+  Sliders,
+  CheckCircle,
+  FolderPlus,
+  Bookmark,
+  Calendar,
+  Clock,
+  MapPin,
+  Flame,
+  Award,
+  BookOpen,
+  User,
+  Settings as SettingsIcon,
+  Laptop
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { navItems } from "../components/layout/navigation";
+import { api } from "../lib/api";
+
+const DEFAULT_SUBJECTS = [
+  { id: "1", name: "Database Management Systems", baselineAttended: 12, baselineTotal: 16 },
+  { id: "2", name: "Operating Systems", baselineAttended: 15, baselineTotal: 18 },
+  { id: "3", name: "Applied AI", baselineAttended: 9, baselineTotal: 15 },
+  { id: "4", name: "Computer Networks", baselineAttended: 19, baselineTotal: 22 }
+];
 
 export function ModulePage() {
   const { module } = useParams();
   const { user } = useAuth();
+
+  // Local storage loaded states
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [streakDays, setStreakDays] = useState(0);
+
+  // API states
+  const [notices, setNotices] = useState<any[]>([]);
+  const [libraryFiles, setLibraryFiles] = useState<any[]>([]);
+  const [loadingApis, setLoadingApis] = useState(true);
+
+  // Folder state for Library notes
+  const [folders, setFolders] = useState<any[]>([]);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
+
+  // Local State for settings tabs
+  const [settingsTab, setSettingsTab] = useState<"general" | "security" | "notifications" | "integration">("general");
+
+  // Local state for stealth/public toggles
+  const [stealthMode, setStealthMode] = useState(false);
+  const [publicDiscovery, setPublicDiscovery] = useState(true);
+
+  // Local state for event registration clicks
+  const [registeredEvents, setRegisteredEvents] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Load local storage values
+    const savedSubjects = localStorage.getItem("stuhub-attendance-subjects-v2");
+    const savedLogs = localStorage.getItem("stuhub-attendance-logs-v2");
+
+    const subs = savedSubjects ? JSON.parse(savedSubjects) : DEFAULT_SUBJECTS;
+    const lgs = savedLogs ? JSON.parse(savedLogs) : [];
+
+    setSubjects(subs);
+    setLogs(lgs);
+
+    // Populate notes folders from subjects
+    setFolders(subs.map((s: any) => ({
+      name: s.name,
+      count: lgs.filter((l: any) => l.subjectId === s.id).length,
+      modified: "Recently"
+    })));
+
+    // Calculate real study streak from logs
+    if (lgs.length > 0) {
+      const uniqueDates = Array.from(new Set(lgs.map((l: any) => l.date))).sort((a: any, b: any) => b.localeCompare(a)) as string[];
+      if (uniqueDates.length > 0) {
+        let streak = 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const latestDate = new Date(uniqueDates[0] as string);
+        latestDate.setHours(0, 0, 0, 0);
+
+        const diffTime = today.getTime() - latestDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays <= 1) {
+          let currentDate = latestDate;
+          for (let i = 0; i < uniqueDates.length; i++) {
+            const hasLogOnDate = uniqueDates.some((d: any) => {
+              const dObj = new Date(d);
+              dObj.setHours(0, 0, 0, 0);
+              return dObj.getTime() === currentDate.getTime();
+            });
+            if (hasLogOnDate) {
+              streak++;
+              currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+              break;
+            }
+          }
+        }
+        setStreakDays(streak);
+      }
+    }
+
+    // Load backend stubs
+    Promise.all([
+      api.get("/library").then(res => setLibraryFiles(res.data)).catch(() => {}),
+      api.get("/dashboard/student").then(res => setNotices(res.data?.notices || [])).catch(() => {})
+    ]).finally(() => {
+      setLoadingApis(false);
+    });
+  }, [module]);
+
+  const handleRegisterEvent = (eventName: string) => {
+    if (registeredEvents.includes(eventName)) {
+      setRegisteredEvents(prev => prev.filter(e => e !== eventName));
+    } else {
+      setRegisteredEvents(prev => [...prev, eventName]);
+      alert(`Success! You have registered for "${eventName}".`);
+    }
+  };
+
+  const handleAddFolder = (e: FormEvent) => {
+    e.preventDefault();
+    if (!newFolderName.trim()) return;
+    setFolders(prev => [
+      ...prev,
+      { name: newFolderName, count: 0, modified: "Just now" }
+    ]);
+    setNewFolderName("");
+    setIsNewFolderOpen(false);
+  };
+
+  // Compute aggregate attendance percentage from local state
+  const getOverallAttendance = () => {
+    let totalAttended = 0;
+    let totalConducted = 0;
+
+    subjects.forEach((sub: any) => {
+      const subLogs = logs.filter((l: any) => l.subjectId === sub.id);
+      const attendedLogs = subLogs.filter((l: any) => l.status === "attended").length;
+      const bunkedLogs = subLogs.filter((l: any) => l.status === "bunked").length;
+
+      const attended = (sub.baselineAttended ?? 0) + attendedLogs;
+      const total = (sub.baselineTotal ?? 0) + attendedLogs + bunkedLogs;
+
+      totalAttended += attended;
+      totalConducted += total;
+    });
+
+    return totalConducted > 0 ? (totalAttended / totalConducted) * 100 : 0;
+  };
+
+  const overallAttPct = getOverallAttendance();
+
+  // Switch display views based on URL param
+  const renderContent = () => {
+    switch (module) {
+      case "library":
+        return (
+          <div className="space-y-8">
+            {/* Stats Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Folders Count</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-extrabold text-white">{folders.length}</span>
+                  <span className="text-[10px] text-on-surface-variant font-mono">Subjects</span>
+                </div>
+              </div>
+              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Storage Used</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-extrabold text-white">0.0 GB</span>
+                  <span className="text-[10px] text-on-surface-variant font-mono">of 10 GB</span>
+                </div>
+                <div className="w-full h-1 bg-[#09090B] border border-outline mt-2 rounded overflow-hidden">
+                  <div className="h-full bg-primary" style={{ width: "0%" }}></div>
+                </div>
+              </div>
+              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Real-time Streak</p>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Flame size={14} className="text-primary animate-pulse" />
+                  <span className="text-xs text-white">{streakDays} Days</span>
+                </div>
+              </div>
+              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">AI Summaries</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-extrabold text-white">0</span>
+                  <span className="text-[10px] font-bold text-on-surface-variant font-mono">Pending</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Folder Grid */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Subject Folders</h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsNewFolderOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#16161A] border border-[#27272D] text-xs font-bold text-[#e2e2e2] hover:border-primary/50 transition-all cursor-pointer font-mono"
+                  >
+                    <FolderPlus size={14} /> NEW FOLDER
+                  </button>
+                </div>
+              </div>
+              
+              {folders.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {folders.map((fold, idx) => (
+                    <div key={idx} className="bg-[#0F0F12] border border-[#27272D] hover:border-[#808080] p-5 rounded transition-all cursor-pointer group flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between mb-4">
+                          <Folder className="text-[#FFA31A]" size={36} fill="#FFA31A" />
+                          <button className="text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">
+                            <MoreVertical size={14} />
+                          </button>
+                        </div>
+                        <h4 className="text-sm font-bold text-white">{fold.name}</h4>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-[#27272D] space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-on-surface-variant">
+                          <span>Logs Count</span>
+                          <span className="text-white font-semibold font-mono">{fold.count}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] text-on-surface-variant">
+                          <span>Modified</span>
+                          <span className="text-white font-semibold font-mono">{fold.modified}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
+                  No subject folders found. Configure modules in the Attendance page to generate them.
+                </div>
+              )}
+            </div>
+
+            {/* Library list table */}
+            <div className="space-y-4 pt-4">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Recently Modified Files</h3>
+              {libraryFiles.length > 0 ? (
+                <div className="border border-[#27272D] bg-[#0F0F12] rounded overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-[#16161A] border-b border-[#27272D] font-mono text-[9px] uppercase tracking-wider text-on-surface-variant">
+                        <th className="px-5 py-3 font-bold">Name</th>
+                        <th className="px-5 py-3 font-bold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#27272D] text-[#e2e2e2]">
+                      {libraryFiles.map((file, idx) => (
+                        <tr key={idx} className="hover:bg-[#16161A]/30">
+                          <td className="px-5 py-3 flex items-center gap-2">
+                            <FileText className="text-primary" size={14} />
+                            <span className="font-semibold">{file.name}</span>
+                          </td>
+                          <td className="px-5 py-3 font-mono">No Actions</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
+                  No materials uploaded. (Library API Offline)
+                </div>
+              )}
+            </div>
+
+            {/* Folder creation overlay */}
+            <AnimatePresence>
+              {isNewFolderOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm select-none">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="w-full max-w-sm p-6 rounded border border-outline bg-[#0F0F12] text-[#e2e2e2] space-y-5"
+                  >
+                    <div className="flex justify-between items-center pb-2 border-b border-[#27272D]">
+                      <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">Configure New Folder</h3>
+                      <button onClick={() => setIsNewFolderOpen(false)} className="text-on-surface-variant hover:text-white cursor-pointer">✖</button>
+                    </div>
+                    <form onSubmit={handleAddFolder} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Folder Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={newFolderName}
+                          onChange={(e) => setNewFolderName(e.target.value)}
+                          placeholder="e.g. Computer Networks"
+                          className="w-full h-10 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                        />
+                      </div>
+                      <div className="flex gap-2.5 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsNewFolderOpen(false)}
+                          className="flex-1 h-9 rounded border border-[#27272D] text-[#FAFAFA] text-xs font-semibold uppercase tracking-wider font-mono hover:bg-[#16161A] cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 h-9 rounded bg-primary text-black text-xs font-bold uppercase tracking-wider font-mono hover:opacity-90 cursor-pointer"
+                        >
+                          Create
+                        </button>
+                      </div>
+                    </form>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+
+      case "events":
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Calendar Widget */}
+            <div className="lg:col-span-8 panel p-5">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">September 2024</h3>
+                <div className="flex gap-1.5">
+                  <button className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white">
+                    <ChevronLeft size={14} />
+                  </button>
+                  <button className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white">
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-[#A1A1AA] py-1 font-mono">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span className="text-primary">Sat</span>
+                <span className="text-primary">Sun</span>
+              </div>
+              <div className="grid grid-cols-7 gap-1 border-t border-l border-[#27272D] mt-2">
+                {Array.from({ length: 30 }, (_, i) => {
+                  const day = i + 1;
+                  const isToday = day === 12;
+
+                  return (
+                    <div
+                      key={day}
+                      className={`h-16 sm:h-24 border-r border-b border-[#27272D] p-1.5 text-xs text-on-surface-variant font-mono hover:bg-[#16161A]/40 transition-colors flex flex-col justify-between ${
+                        isToday ? "bg-[#16161A] border-t-2 border-t-primary" : ""
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className={isToday ? "font-bold text-white" : ""}>{day}</span>
+                        {isToday && <span className="text-[8px] font-bold text-primary font-mono">TODAY</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Upcoming List */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+              <h3 className="text-sm font-bold text-white flex items-center justify-between font-mono uppercase tracking-wider">
+                Upcoming Events
+                <span className="font-mono text-[9px] bg-[#16161A] px-2 py-0.5 rounded border border-[#27272D] text-[#A3A3A3]">0 Active</span>
+              </h3>
+
+              <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
+                No official campus events scheduled. (API Offline)
+              </div>
+            </div>
+          </div>
+        );
+
+      case "messages":
+        return (
+          <div className="space-y-6 max-w-3xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Notification Logs</h3>
+              <span className="font-mono text-[9px] bg-[#16161A] border border-[#27272D] text-on-surface-variant px-2 py-0.5 rounded uppercase">
+                {notices.length} Alerts
+              </span>
+            </div>
+            
+            <div className="space-y-4">
+              {overallAttPct < 75 && (
+                <div className="p-5 bg-red-500/5 rounded border border-red-500/20 flex gap-4 items-start">
+                  <span className="material-symbols-outlined text-red-500 mt-0.5">warning</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">Attendance Warning</h4>
+                      <span className="text-[8px] font-mono text-red-500 uppercase font-bold px-1 bg-red-500/10 rounded">Urgent</span>
+                    </div>
+                    <p className="text-xs text-[#e2e2e2] mt-1.5">
+                      Your overall attendance aggregate is currently {overallAttPct.toFixed(1)}%, which is below the mandatory 75% baseline requirement. Review your attendance matrix to log future sessions.
+                    </p>
+                    <p className="text-[9px] text-on-surface-variant font-mono uppercase mt-2">Source: Client-Side Attendance Engine</p>
+                  </div>
+                </div>
+              )}
+
+              {notices.length > 0 ? (
+                notices.map((notice: any, idx: number) => (
+                  <div key={idx} className="p-5 bg-[#16161A] rounded border border-outline flex gap-4 items-start">
+                    <span className="material-symbols-outlined text-primary mt-0.5">campaign</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">{notice.title}</h4>
+                      </div>
+                      <p className="text-xs text-[#e2e2e2] mt-1.5">{notice.content}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
+                  No active system announcements. (Dashboard API Offline)
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case "saved":
+        return (
+          <div className="space-y-6 max-w-3xl">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Bookmarked Resources</h3>
+            <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
+              No saved bookmarks. (Saved Resources API Offline)
+            </div>
+          </div>
+        );
+
+      case "profile":
+        return (
+          <div className="space-y-8">
+            {/* Profile Overview Card */}
+            <div className="panel p-6 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
+              <div className="relative">
+                <img
+                  className="w-28 h-28 rounded border-2 border-primary object-cover"
+                  src={user?.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuCVeeEPJSdKU3MKNu7H10u4Ru4onm9eJjmu_Ss52j_nLxII1w0k8oRnHDU7-dHOwHVSh0ls6e7iETgZjo318g0ajsd5jvN9jFRnZqpfsYtlI710rRAgLGDTbC4OTv0OIRvrL1dy1J1RXyJN8DYRb8jNv4oI70al0TznBUBPGE34-3Yk2TInZ9QzCRs5n_K1s8l1O4B1TLAQcmo13WdBD7xg2Sewc_TOTVfqo3SOtMb07V3yonSTaFHqof2_fC1YI5pyacB7SYWEklg"}
+                  alt="Student Avatar"
+                />
+                <div className="absolute -bottom-1 -right-1 bg-primary text-black p-0.5 rounded-full">
+                  <span className="material-symbols-outlined text-[14px]">verified</span>
+                </div>
+              </div>
+              <div className="flex-grow text-center md:text-left space-y-1">
+                <h2 className="text-xl font-extrabold text-white">{user?.name}</h2>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-on-surface-variant text-[11px] font-mono uppercase">
+                  <div className="flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs">fingerprint</span>
+                    <span>ROLL: CS-2024-{user?.id ? user.id.slice(-4) : "0892"}</span>
+                  </div>
+                  <span className="hidden sm:inline opacity-30">•</span>
+                  <div className="flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs">school</span>
+                    <span>{user?.role || "Student"} Workspace</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Profile bento row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Cumulative GPA</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-extrabold text-white">—</span>
+                  <span className="text-[10px] text-on-surface-variant font-mono">API Offline</span>
+                </div>
+              </div>
+              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Total Credits</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-extrabold text-white">—</span>
+                  <span className="text-[10px] text-on-surface-variant font-mono">API Offline</span>
+                </div>
+                <div className="w-full h-1 bg-[#09090B] border border-outline mt-2 rounded overflow-hidden">
+                  <div className="h-full bg-outline-variant w-[0%]"></div>
+                </div>
+              </div>
+              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Study Streak</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Flame className="text-primary animate-pulse" size={18} fill="#F5A524" />
+                  <span className="text-xl font-extrabold text-white">{streakDays} Days</span>
+                </div>
+              </div>
+              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Avg Attendance</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-extrabold text-white">{overallAttPct > 0 ? `${overallAttPct.toFixed(1)}%` : "0%"}</span>
+                  <span className="text-[10px] text-primary font-mono">{overallAttPct >= 75 ? "Satisfied" : "Warning"}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Courses section from actual localStorage */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-white uppercase tracking-wider font-mono">Configured Study Subjects</h3>
+              {subjects.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {subjects.map((sub: any) => {
+                    const subLogs = logs.filter((l: any) => l.subjectId === sub.id);
+                    const attendedLogs = subLogs.filter((l: any) => l.status === "attended").length;
+                    const bunkedLogs = subLogs.filter((l: any) => l.status === "bunked").length;
+
+                    const attended = (sub.baselineAttended ?? 0) + attendedLogs;
+                    const total = (sub.baselineTotal ?? 0) + attendedLogs + bunkedLogs;
+                    const pct = total > 0 ? (attended / total) * 100 : 0;
+
+                    return (
+                      <div key={sub.id} className="p-4 bg-[#0F0F12] border border-[#27272D] rounded hover:border-[#808080] transition-all flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Laptop className="text-primary" size={20} />
+                          <div>
+                            <h4 className="text-xs font-bold text-white">{sub.name}</h4>
+                            <p className="text-[10px] text-on-surface-variant mt-0.5 font-mono uppercase">ID: SUB-{sub.id.slice(-4)}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className={`text-sm font-extrabold ${pct >= 75 ? "text-primary" : "text-red-500"}`}>{pct.toFixed(1)}%</span>
+                          <p className="text-[9px] text-on-surface-variant font-mono">{attended}/{total} classes</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
+                  No course modules configured. Add them under the Attendance tracker.
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case "settings":
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left selector */}
+            <div className="lg:col-span-3 flex flex-col gap-1.5 no-print">
+              <button
+                onClick={() => setSettingsTab("general")}
+                className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
+                  settingsTab === "general"
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : "border-[#27272D] bg-[#16161A] text-on-surface-variant hover:text-white"
+                }`}
+              >
+                <span>General</span>
+                <span className="material-symbols-outlined text-sm">settings_suggest</span>
+              </button>
+              <button
+                onClick={() => setSettingsTab("security")}
+                className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
+                  settingsTab === "security"
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : "border-[#27272D] bg-[#16161A] text-on-surface-variant hover:text-white"
+                }`}
+              >
+                <span>Security</span>
+                <span className="material-symbols-outlined text-sm">shield</span>
+              </button>
+              <button
+                onClick={() => setSettingsTab("notifications")}
+                className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
+                  settingsTab === "notifications"
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : "border-[#27272D] bg-[#16161A] text-on-surface-variant hover:text-white"
+                }`}
+              >
+                <span>Signals</span>
+                <span className="material-symbols-outlined text-sm">notifications_active</span>
+              </button>
+            </div>
+
+            {/* Right tab content */}
+            <div className="lg:col-span-9 panel p-6 min-h-[400px]">
+              {settingsTab === "general" && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mb-3">Visual Architecture</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 bg-[#16161A] border-2 border-primary rounded relative">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="text-xs font-bold text-primary font-mono uppercase">Kinetic Obsidian</h4>
+                          <span className="material-symbols-outlined text-primary text-base">check_circle</span>
+                        </div>
+                        <p className="text-[10px] text-on-surface-variant">High-contrast tactical interface designed for peak cognitive focus.</p>
+                        <div className="absolute top-0 right-0 px-2 py-0.5 bg-primary text-black font-bold font-mono text-[8px]">ACTIVE</div>
+                      </div>
+                      <div className="p-4 bg-[#16161A] border border-[#27272D] opacity-40 rounded grayscale cursor-not-allowed">
+                        <h4 className="text-xs font-bold text-[#A3A3A3] font-mono uppercase">Nova Static</h4>
+                        <p className="text-[10px] text-on-surface-variant">Monochrome blueprint aesthetic. Unavailable in current build.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[#808080] mb-2 font-mono">System Language</label>
+                    <select className="w-full max-w-xs h-10 rounded border border-outline bg-[#16161A] px-3 text-xs text-white focus:outline-none focus:border-primary">
+                      <option>English (Technical / US)</option>
+                      <option>Mandarin (Simplified)</option>
+                      <option>German (Precision)</option>
+                      <option>Japanese (Modernist)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mb-3">Profile Privacy</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3.5 bg-[#16161A] border border-[#27272D] rounded">
+                        <div>
+                          <p className="text-xs font-bold text-[#e2e2e2]">Stealth Mode</p>
+                          <p className="text-[10px] text-on-surface-variant">Hide your current activity from peers in study groups.</p>
+                        </div>
+                        <button onClick={() => setStealthMode(!stealthMode)} className="text-primary hover:opacity-85 cursor-pointer">
+                          {stealthMode ? <ToggleRight size={24} /> : <ToggleLeft size={24} className="text-on-surface-variant" />}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between p-3.5 bg-[#16161A] border border-[#27272D] rounded">
+                        <div>
+                          <p className="text-xs font-bold text-[#e2e2e2]">Public Node Discovery</p>
+                          <p className="text-[10px] text-on-surface-variant">Allow students with similar course IDs to find your profile.</p>
+                        </div>
+                        <button onClick={() => setPublicDiscovery(!publicDiscovery)} className="text-primary hover:opacity-85 cursor-pointer">
+                          {publicDiscovery ? <ToggleRight size={24} /> : <ToggleLeft size={24} className="text-on-surface-variant" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {settingsTab === "security" && (
+                <div className="space-y-6">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Access Protocols</h3>
+                  <div className="p-5 border border-[#27272D] bg-[#16161A] rounded flex gap-4 items-start">
+                    <Shield className="text-primary mt-0.5" size={24} />
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="text-xs font-bold text-[#e2e2e2]">Biometric Passkeys</h4>
+                        <p className="text-[10px] text-on-surface-variant mt-0.5">Secure your Student OS portal with hardware passkey validation.</p>
+                      </div>
+                      <button className="bg-primary text-black font-mono text-[9px] font-bold px-3 py-1.5 rounded uppercase tracking-wider hover:opacity-90 cursor-pointer">
+                        Configure Passkeys
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {settingsTab === "notifications" && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Signal Distribution</h3>
+                  <div className="divide-y divide-[#27272D] text-xs">
+                    <div className="flex items-center justify-between py-3">
+                      <span className="text-[#e2e2e2]">Real-time Deadlines Signals</span>
+                      <span className="text-primary"><ToggleRight size={22} /></span>
+                    </div>
+                    <div className="flex items-center justify-between py-3">
+                      <span className="text-[#e2e2e2]">AI Analyzer Insights Logs</span>
+                      <span className="text-primary"><ToggleRight size={22} /></span>
+                    </div>
+                    <div className="flex items-center justify-between py-3">
+                      <span className="text-[#e2e2e2]">Peer Share Notifications</span>
+                      <span className="text-primary"><ToggleRight size={22} /></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+            <h2 className="text-xl font-bold text-white">Module Construction Complete</h2>
+            <p className="text-sm text-on-surface-variant max-w-sm">Use the navigation bar to visit library, events, announcements, profile, or settings.</p>
+          </div>
+        );
+    }
+  };
 
   const currentItem = navItems.find((item) => item.path === `/${module}` || item.path === `/dashboard/${module}`);
 
   if (!currentItem) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-white">Module Not Found</h2>
-        <Link to="/" className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
-          <ArrowLeft size={16} /> Return to Dashboard
+        <h2 className="text-xl font-bold text-white">Module Not Found</h2>
+        <Link to="/dashboard" className="text-sm font-semibold text-primary flex items-center gap-1 hover:underline">
+          <ArrowLeft size={16} /> Return to Command Center
         </Link>
       </div>
     );
   }
 
-  const Icon = currentItem.icon;
-
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 border-b border-[#27272D] pb-6 no-print">
         <Link
-          to="/"
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50"
+          to="/dashboard"
+          className="flex h-9 w-9 items-center justify-center rounded border border-[#27272D] bg-[#16161A] text-[#FAFAFA] transition hover:bg-[#1C1C21]"
           aria-label="Back to Dashboard"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={16} />
         </Link>
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            {user?.role} Workspace
+          <span className="text-[10px] font-bold uppercase tracking-wider text-primary font-mono">
+            {user?.role || "Student"} Workspace
           </span>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-extrabold text-white">
             {currentItem.label}
           </h1>
         </div>
       </div>
 
-      {/* Feature Construction Canvas */}
-      <div className="relative overflow-hidden rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10 p-12 text-center min-h-[60vh] flex flex-col items-center justify-center">
-        {/* Decorative Grid Pattern */}
-        <div className="absolute inset-0 -z-10 opacity-30 dark:opacity-[0.15] bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:16px_16px]" />
-
-        <div className="max-w-md space-y-5">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-md">
-            <Icon size={32} />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-              Ready for Implementation
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              This module's placeholders and dummy data have been removed. The route is set up, authenticated, and ready to be built from scratch.
-            </p>
-          </div>
-
-          <div className="rounded-lg bg-indigo-500/5 border border-indigo-500/10 p-4 text-left">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-              <Cpu size={14} /> Developer checklist
-            </h3>
-            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-400 list-disc list-inside">
-              <li>Define database model in <code className="text-indigo-600 dark:text-indigo-400">backend/src/models/</code></li>
-              <li>Create Express routes in <code className="text-indigo-600 dark:text-indigo-400">backend/src/routes/</code></li>
-              <li>Mount routes in <code className="text-indigo-600 dark:text-indigo-400">backend/src/app.ts</code></li>
-              <li>Build user interface components right here</li>
-            </ul>
-          </div>
-        </div>
+      {/* Main content viewport */}
+      <div className="print-full-width">
+        {renderContent()}
       </div>
     </div>
   );
 }
+export default ModulePage;

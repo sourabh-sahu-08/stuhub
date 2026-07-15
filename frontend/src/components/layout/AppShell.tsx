@@ -1,150 +1,433 @@
-import { Menu, Moon, Search, Sun, X, Bell, ChevronDown, MessageSquare } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import {
+  Bell,
+  ChevronDown,
+  LogOut,
+  Menu,
+  User as UserIcon,
+  X,
+} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+} from "react-router-dom";
 import { io } from "socket.io-client";
-import { useAuth } from "../../context/AuthContext";
-import { useTheme } from "../../context/ThemeContext";
-import { navItems } from "./navigation";
+
 import { CompleteProfileModal } from "../auth/CompleteProfileModal";
+import { useAuth } from "../../context/AuthContext";
+import { navGroups } from "./navigation";
 
 export function AppShell() {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const [open, setOpen] = useState(false);
-  const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [toast, setToast] = useState<{
+    title: string;
+    body: string;
+  } | null>(null);
+
   const location = useLocation();
-  const items = useMemo(() => navItems, []);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => setOpen(false), [location.pathname]);
+  /* Close menus when route changes */
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setProfileDropdownOpen(false);
+  }, [location.pathname]);
 
+  /* Close profile dropdown on outside click */
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setProfileDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  /* Close overlays with Escape */
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        setProfileDropdownOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  /* Lock body scroll only while mobile drawer is open */
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
+  /* Existing socket notification logic */
   useEffect(() => {
     if (!user) return;
-    const socket = io(import.meta.env.VITE_SOCKET_URL ?? "http://localhost:5000");
+
+    const socket = io(
+      import.meta.env.VITE_SOCKET_URL ?? "http://localhost:5000"
+    );
+
     socket.emit("join", user.id);
     socket.on("notification", setToast);
+
     return () => {
       socket.disconnect();
     };
   }, [user]);
 
-  return (
-    <div className="min-h-screen bg-mist text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans">
-      {/* Sidebar Backdrop Overlay */}
-      {open && (
-        <div
-          className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm lg:hidden transition-opacity duration-300"
-          onClick={() => setOpen(false)}
-        />
-      )}
+  const NavigationContent = ({
+    mobile = false,
+  }: {
+    mobile?: boolean;
+  }) => (
+    <>
+      <div>
+        {/* Logo */}
+        <div className="mb-8 flex items-center justify-between">
+          <Link
+            to="/dashboard"
+            className="flex min-w-0 items-center gap-2 select-none"
+            onClick={() => {
+              if (mobile) setMobileMenuOpen(false);
+            }}
+          >
+            <span className="material-symbols-outlined shrink-0 text-[28px] text-[#F5A524]">
+              terminal
+            </span>
 
-      {/* Sidebar Navigation */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-72 border-r border-slate-200 bg-white/95 p-4 shadow-soft transition dark:border-slate-800 dark:bg-slate-950/95 lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex items-center justify-between">
-          <Link to="/dashboard" className="group flex items-center gap-2 select-none">
-            <div className="h-9 w-9 rounded-lg bg-brand-500 flex items-center justify-center font-extrabold text-white text-lg">
-              S
-            </div>
-            <div>
-              <span className="font-extrabold text-lg tracking-tight text-slate-950 dark:text-white block group-hover:text-brand-500 transition-colors">Stuhub</span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-brand-500 font-bold block -mt-1">{user?.role} Portal</span>
-            </div>
+            <h1 className="truncate text-lg font-bold tracking-tight text-[#FAFAFA]">
+              StuHub{" "}
+              <span className="font-mono text-xs text-[#F5A524]">
+                OS_V1
+              </span>
+            </h1>
           </Link>
-          <button className="focus-ring rounded-lg p-2 lg:hidden" onClick={() => setOpen(false)} aria-label="Close navigation">
-            <X size={20} />
-          </button>
-        </div>
-        <nav className="mt-6 space-y-1" aria-label="Primary">
-          {items.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) => `flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition ${isActive ? "bg-brand-500 text-white shadow-[0_5px_15px_rgba(99,102,241,0.3)]" : "text-slate-600 hover:bg-brand-500/5 hover:text-brand-500 dark:text-slate-300 dark:hover:bg-brand-500/10 dark:hover:text-brand-500"}`}
+
+          {mobile && (
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="rounded-md p-2 text-[#A1A1AA] transition-colors hover:bg-[#1C1C21] hover:text-[#FAFAFA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]"
+              aria-label="Close navigation"
             >
-              <item.icon size={18} aria-hidden />
-              {item.label}
-            </NavLink>
+              <X size={20} />
+            </button>
+          )}
+        </div>
+
+        {/* Navigation */}
+        <nav className="space-y-6" aria-label="Primary navigation">
+          {navGroups.map((group) => (
+            <div key={group.groupName}>
+              <p className="mb-2 px-2 text-[10px] uppercase tracking-[0.2em] text-[#71717A]">
+                {group.groupName}
+              </p>
+
+              <div className="space-y-1">
+                {group.items.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.path === "/dashboard"}
+                    onClick={() => {
+                      if (mobile) setMobileMenuOpen(false);
+                    }}
+                    className={({ isActive }) =>
+                      [
+                        "relative flex min-w-0 items-center gap-3 rounded-md px-2 py-2",
+                        "transition-colors duration-150",
+                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]",
+                        isActive
+                          ? "font-semibold text-[#FAFAFA]"
+                          : "text-[#71717A] hover:bg-[#16161A] hover:text-[#FAFAFA]",
+                      ].join(" ")
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <span className="absolute -left-3 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-full bg-[#F5A524]" />
+                        )}
+
+                        <span
+                          className={[
+                            "material-symbols-outlined shrink-0 text-[20px]",
+                            isActive
+                              ? "text-[#F5A524]"
+                              : "text-[#71717A]",
+                          ].join(" ")}
+                        >
+                          {item.materialIcon}
+                        </span>
+
+                        <span className="truncate text-sm">
+                          {item.label}
+                        </span>
+                      </>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
-      </aside>
+      </div>
 
-      {/* Main Content Layout */}
-      <div className="lg:pl-72">
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-mist/85 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85 sm:px-6">
-          <div className="flex items-center gap-3 justify-between">
-            <div className="flex items-center gap-3 flex-1 max-w-xl">
-              <button className="focus-ring rounded-lg p-2 lg:hidden" onClick={() => setOpen(true)} aria-label="Open navigation">
+      {/* Footer */}
+      <div className="mt-8 flex items-center gap-2 border-t border-[#27272D] pt-4">
+        <span className="h-2 w-2 shrink-0 rounded-full bg-[#22C55E]" />
+
+        <span className="truncate text-[10px] uppercase tracking-wider text-[#A1A1AA]">
+          Connected as {user?.role}
+        </span>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-[100dvh] w-full overflow-x-hidden bg-[#09090B] text-[#E2E2E2]">
+      <div className="flex min-h-[100dvh] w-full">
+        {/* =====================================================
+            DESKTOP SIDEBAR
+            Completely removed below md breakpoint
+        ====================================================== */}
+        <aside className="hidden h-[100dvh] w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-[#27272D] bg-[#0F0F12] p-6 md:sticky md:top-0 md:flex">
+          <NavigationContent />
+        </aside>
+
+        {/* =====================================================
+            MOBILE DRAWER
+            Fixed overlay — never reserves layout width
+        ====================================================== */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              <motion.button
+                type="button"
+                aria-label="Close navigation backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm md:hidden"
+              />
+
+              <motion.aside
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{
+                  duration: 0.25,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-[min(82vw,300px)] flex-col justify-between overflow-y-auto border-r border-[#27272D] bg-[#0F0F12] p-6 md:hidden"
+              >
+                <NavigationContent mobile />
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* =====================================================
+            MAIN APPLICATION REGION
+        ====================================================== */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Header */}
+          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[#27272D] bg-black/85 px-4 backdrop-blur-md sm:px-6">
+            {/* Left side */}
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              {/* Mobile menu button */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="shrink-0 rounded-md p-2 text-[#A1A1AA] transition-colors hover:bg-[#16161A] hover:text-[#F5A524] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524] md:hidden"
+                aria-label="Open navigation"
+              >
                 <Menu size={20} />
               </button>
-              <div className="hidden h-10 min-w-0 flex-1 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 sm:flex">
-                <Search size={16} />
-                Search classes, people, resources
+
+              {/* Mobile logo */}
+              <Link
+                to="/dashboard"
+                className="flex min-w-0 items-center gap-2 md:hidden"
+              >
+                <span className="material-symbols-outlined shrink-0 text-[20px] text-[#F5A524]">
+                  terminal
+                </span>
+
+                <span className="truncate font-mono text-sm font-bold text-white">
+                  StuHub
+                </span>
+              </Link>
+
+              {/* Desktop search */}
+              <div className="relative hidden w-full max-w-sm md:block">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-[#71717A]">
+                  search
+                </span>
+
+                <input
+                  type="text"
+                  placeholder="Search Workspace..."
+                  className="w-full rounded-md border border-[#27272D] bg-[#16161A] py-2 pl-10 pr-3 text-xs text-[#E2E2E2] outline-none transition-colors placeholder:text-[#71717A] focus:border-[#F5A524]"
+                />
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* Theme Toggle */}
-              <button className="focus-ring grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" onClick={toggleTheme} aria-label="Toggle theme">
-                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
+            {/* Right side */}
+            <div className="ml-3 flex shrink-0 items-center gap-2 sm:gap-3">
+              {/* Notifications */}
+              <button
+                type="button"
+                className="relative rounded-md p-2 text-[#A1A1AA] transition-colors hover:bg-[#16161A] hover:text-[#F5A524] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]"
+                aria-label="Notifications"
+              >
+                <Bell size={19} />
 
-              {/* Notification Bell with red bubble */}
-              <button className="relative focus-ring grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" aria-label="Notifications">
-                <Bell size={18} />
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
-                  9+
+                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-bold text-white">
+                  9
                 </span>
               </button>
 
-              {/* JobLuxe User Profile Card */}
-              <div className="flex min-w-0 items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-1.5 dark:border-slate-800 dark:bg-slate-900">
-                <Link to="/dashboard" className="flex items-center gap-2 min-w-0 group select-none">
-                  {/* Circular Avatar Progress Ring (25%) */}
-                  <div className="relative flex items-center justify-center h-8 w-8">
-                    <svg className="absolute w-full h-full transform -rotate-90">
-                      <circle cx="16" cy="16" r="13" className="stroke-slate-200 dark:stroke-slate-850 fill-none" strokeWidth="2" />
-                      <circle cx="16" cy="16" r="13" className="stroke-brand-500 fill-none" strokeWidth="2" strokeDasharray={`${2 * Math.PI * 13}`} strokeDashoffset={`${2 * Math.PI * 13 * (1 - 0.25)}`} strokeLinecap="round" />
-                    </svg>
-                    <div className="absolute h-6.5 w-6.5 rounded-full bg-slate-950/5 dark:bg-white/10 flex items-center justify-center text-xs font-bold uppercase">
-                      {user?.name.slice(0, 1)}
-                    </div>
+              {/* Profile */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setProfileDropdownOpen((current) => !current)
+                  }
+                  className="flex items-center gap-2 rounded-md border border-[#27272D] bg-[#16161A] p-1.5 transition-colors hover:border-[#52525B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524] md:px-3"
+                  aria-expanded={profileDropdownOpen}
+                  aria-label="Open profile menu"
+                >
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded bg-[#292929] text-xs font-bold uppercase text-[#F5A524]">
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user?.name ?? "User"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      user?.name?.slice(0, 1) ?? "U"
+                    )}
                   </div>
-                  <div className="hidden min-w-0 sm:flex items-center gap-1">
-                    <span className="truncate text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-brand-500 transition-colors">{user?.name}</span>
-                    <span className="text-[10px] text-brand-500 font-bold">25%</span>
-                    <ChevronDown size={14} className="text-slate-400 group-hover:text-brand-500 transition-colors" />
+
+                  <div className="hidden min-w-0 flex-col text-left md:flex">
+                    <span className="max-w-[110px] truncate text-xs font-semibold text-[#FAFAFA]">
+                      {user?.name}
+                    </span>
+
+                    <span className="text-[9px] uppercase tracking-wider text-[#A1A1AA]">
+                      {user?.role}
+                    </span>
                   </div>
-                </Link>
-                <div className="hidden sm:block border-l border-slate-200 dark:border-slate-800 h-5" />
-                <button className="text-xs text-slate-500 hover:text-red-500 font-medium whitespace-nowrap" onClick={logout}>Sign out</button>
+
+                  <ChevronDown
+                    size={13}
+                    className="hidden shrink-0 text-[#71717A] md:block"
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {profileDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-[min(14rem,calc(100vw-2rem))] rounded-md border border-[#27272D] bg-[#0F0F12] p-2.5 shadow-2xl"
+                    >
+                      <div className="border-b border-[#27272D] px-2 pb-2 pt-1">
+                        <p className="truncate text-xs font-bold text-white">
+                          {user?.name}
+                        </p>
+
+                        <p className="mt-0.5 truncate font-mono text-[10px] text-[#71717A]">
+                          {user?.email}
+                        </p>
+                      </div>
+
+                      <div className="mt-2 space-y-1">
+                        <Link
+                          to="/dashboard/profile"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-2 rounded-md p-2 text-xs text-[#E2E2E2] transition-colors hover:bg-[#16161A]"
+                        >
+                          <UserIcon
+                            size={14}
+                            className="text-[#F5A524]"
+                          />
+                          My Profile
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={logout}
+                          className="flex w-full items-center gap-2 rounded-md p-2 text-left text-xs text-red-500 transition-colors hover:bg-red-500/10"
+                        >
+                          <LogOut size={14} />
+                          Exit Portal
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-          <Outlet />
-        </main>
+          {/* Page content */}
+          <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+            <Outlet />
+          </main>
+        </div>
       </div>
 
-      {/* Floating Green AI Studio Assistant Button */}
-      <Link
-        to="/ai"
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg transition-transform hover:scale-110 active:scale-95 hover:bg-brand-600 hover:shadow-brand-500/20"
-        aria-label="AI Studio Assistant"
-      >
-        <MessageSquare size={24} />
-      </Link>
-
-      {/* Toast Alert */}
+      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-4 right-24 z-50 max-w-sm rounded-lg border border-slate-200 bg-white p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-sm font-bold">{toast.title}</p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{toast.body}</p>
+        <div className="fixed bottom-4 left-4 right-4 z-[60] rounded-md border border-[#27272D] bg-[#16161A] p-4 shadow-lg sm:left-auto sm:right-6 sm:max-w-sm">
+          <p className="text-sm font-bold text-[#F5A524]">
+            {toast.title}
+          </p>
+
+          <p className="mt-1 text-xs text-[#A3A3A3]">
+            {toast.body}
+          </p>
         </div>
       )}
 
-      {/* Mandatory Social Login Profile Completion Modal */}
       <CompleteProfileModal />
     </div>
   );
 }
+
+export default AppShell;

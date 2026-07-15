@@ -1,11 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 .dark {
@@ -16,24 +14,79 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f7f8fb;
+  background-color: #09090B;
+  font-family: 'Geist', sans-serif;
+  color: #E2E2E2;
 }
 
 .dark body {
-  background: #0b1020;
+  background-color: #09090B;
 }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #94a3b8 transparent;
+/* Custom Scrollbar to match Stitch UI */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #09090B;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272D;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F5A524;
 }
 
 @layer components {
   .panel {
-    @apply rounded-lg border border-slate-200/80 bg-white/90 shadow-soft backdrop-blur dark:border-slate-800 dark:bg-slate-950/80;
+    @apply rounded border border-outline bg-surface-container-low;
+  }
+
+  .bento-card {
+    @apply bg-surface-container-high border border-outline p-lg rounded-lg transition-all duration-300;
   }
 
   .focus-ring {
-    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950;
+    @apply focus:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0;
   }
+}
+
+/* Kinetic Line Active Indicators */
+.active-indicator {
+  @apply absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-primary;
+}
+
+/* Simulated Heatmap Cell animations */
+.heatmap-cell {
+  @apply w-2.5 h-2.5 rounded-[2px] bg-surface-container-lowest transition-colors duration-300;
+}
+.heatmap-cell.active {
+  @apply bg-primary;
+}
+.heatmap-cell.mid {
+  @apply bg-primary/40;
+}
+
+/* Micro-interactions & animations */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.95); }
+}
+.pulse-indicator {
+  animation: pulse-soft 2s infinite ease-in-out;
+}
+
+/* Stepper progress transitions */
+.stage-item {
+  @apply transition-opacity duration-500;
+}
+
+/* Recharts bar-grow simulator helper */
+@keyframes bar-grow {
+  from { height: 0; }
+}
+.bar-grow {
+  animation: bar-grow 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }

@@ -768,7 +768,7 @@ export function LoginPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* Tabs selector column (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-2.5 justify-center">
+          <div className="lg:col-span-5 flex flex-col gap-3 justify-center relative">
             {features.map((feat, idx) => {
               const Icon = feat.icon;
               const isActive = activeFeature === idx;
@@ -776,14 +776,23 @@ export function LoginPage() {
                 <button
                   key={feat.title}
                   onClick={() => setActiveFeature(idx)}
-                  className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all duration-300 ${
+                  className={`relative flex items-start gap-4 p-4 rounded-xl border text-left transition-all duration-300 overflow-hidden ${
                     isActive
-                      ? "bg-slate-900/60 border-brand-500/50 shadow-[0_4px_20px_rgba(99,102,241,0.08)]"
+                      ? "bg-slate-900/60 border-brand-500/35 shadow-[0_8px_30px_rgba(99,102,241,0.12)]"
                       : "bg-slate-900/10 border-white/5 hover:border-white/10 hover:bg-slate-900/20"
                   }`}
                 >
+                  {/* Sliding active tab indicator */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeFeatureIndicator"
+                      className="absolute inset-0 bg-gradient-to-r from-brand-500/10 to-transparent border-l-2 border-brand-500 pointer-events-none -z-10"
+                      transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                    />
+                  )}
+
                   <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 transition ${
-                    isActive ? "bg-brand-500 text-white" : "bg-white/5 text-slate-400"
+                    isActive ? "bg-brand-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]" : "bg-white/5 text-slate-400"
                   }`}>
                     <Icon size={20} />
                   </div>
@@ -845,9 +854,18 @@ export function LoginPage() {
           </div>
 
           {/* Interactive display panel (7 cols) */}
-          <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-slate-900/40 p-6 flex flex-col justify-between shadow-[0_15px_30px_rgba(0,0,0,0.4)] relative min-h-[380px] overflow-hidden">
+          <div className="lg:col-span-7 rounded-2xl border border-white/15 bg-slate-900/30 p-6 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative min-h-[400px] overflow-hidden backdrop-blur-md">
             {/* Decorative background grid */}
             <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:12px_12px] -z-10" />
+
+            {/* Ambient background glow mapped to active tab color */}
+            <div className={`absolute top-1/4 right-1/4 h-64 w-64 rounded-full bg-gradient-to-br ${
+              activeFeature === 0 ? 'from-blue-500/10 to-indigo-500/10' :
+              activeFeature === 1 ? 'from-amber-500/10 to-orange-500/10' :
+              activeFeature === 2 ? 'from-emerald-500/10 to-teal-500/10' :
+              activeFeature === 3 ? 'from-purple-500/10 to-fuchsia-500/10' :
+              'from-indigo-500/10 to-purple-500/10'
+            } blur-[100px] pointer-events-none transition-all duration-700 -z-10`} />
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -858,13 +876,18 @@ export function LoginPage() {
                 transition={{ duration: 0.25 }}
                 className="flex-1 flex flex-col justify-between space-y-6"
               >
-                <div>
-                  <h3 className="text-xl font-extrabold text-white mb-2">
-                    {features[activeFeature].title}
-                  </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    {features[activeFeature].description}
-                  </p>
+                {/* Upgraded Header with Active Badge */}
+                <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-1 text-left">
+                  <div>
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-brand-500 font-extrabold block">Stuhub Module &bull; Live Preview</span>
+                    <h3 className="text-xl font-extrabold text-white mt-1">
+                      {features[activeFeature].title}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-brand-500/10 border border-brand-500/20 px-3 py-1 rounded-full text-[9px] font-bold text-brand-450">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" />
+                    LIVE MODULE
+                  </div>
                 </div>
 
                 {/* Feature specific live mockup */}
@@ -1176,12 +1199,12 @@ export function LoginPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md p-5 sm:p-6 rounded-2xl border border-white/10 bg-slate-900/95 shadow-2xl text-white"
+              className="relative w-full max-w-md p-5 sm:p-6 rounded border border-outline bg-[#0F0F12] shadow-lg text-[#e2e2e2]"
             >
               {/* Close Button */}
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+                className="absolute top-4 right-4 text-on-surface-variant hover:text-white transition-colors"
               >
                 <X size={18} />
               </button>
@@ -1190,7 +1213,7 @@ export function LoginPage() {
                 <h3 className="text-2xl font-extrabold text-white">
                   {modalMode === "login" ? "Sign in to Stuhub" : "Create Account"}
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-on-surface-variant mt-1">
                   {modalMode === "login"
                     ? "Enter your credentials to access your student portal"
                     : "Fill in the details to start your workspace"}
@@ -1200,40 +1223,40 @@ export function LoginPage() {
               <form onSubmit={handleAuthSubmit} className="space-y-4">
                 {modalMode === "register" && (
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Full Name</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Full Name</label>
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm focus:outline-none focus:border-brand-500 text-white"
+                      className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
                     />
                   </div>
                 )}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Email</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Email</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm focus:outline-none focus:border-brand-500 text-white"
+                    className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Password</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Password</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm focus:outline-none focus:border-brand-500 text-white"
+                    className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
                   />
                 </div>
 
-                {error && <p className="text-xs text-red-400 font-bold p-3 bg-red-500/10 rounded-lg">{error}</p>}
+                {error && <p className="text-xs text-red-400 font-bold p-3 bg-red-500/10 rounded border border-red-500/20">{error}</p>}
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-11 rounded-lg bg-brand-500 text-sm font-bold text-white flex items-center justify-center gap-1.5 transition hover:bg-brand-600 disabled:opacity-50"
+                  className="w-full h-11 rounded bg-primary text-sm font-bold text-black flex items-center justify-center gap-1.5 hover:opacity-95 disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? "Authenticating..." : modalMode === "login" ? "Enter Workspace" : "Create Account"}
                   <ArrowRight size={16} />
@@ -1243,9 +1266,9 @@ export function LoginPage() {
               {/* Social Logins */}
               <div className="mt-4 space-y-2">
                 <div className="relative flex py-2 items-center">
-                  <div className="flex-grow border-t border-white/5"></div>
-                  <span className="flex-shrink mx-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider">or continue with</span>
-                  <div className="flex-grow border-t border-white/5"></div>
+                  <div className="flex-grow border-t border-[#27272D]"></div>
+                  <span className="flex-shrink mx-4 text-on-surface-variant text-[10px] font-bold uppercase tracking-wider font-mono">or continue with</span>
+                  <div className="flex-grow border-t border-[#27272D]"></div>
                 </div>
                 
                 {/* Official Google Sign-In Button Container */}
@@ -1255,7 +1278,7 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => handleSocialLogin("google")}
-                    className="h-11 rounded-lg border border-white/10 bg-white/5 text-[10px] font-semibold flex items-center justify-center gap-1.5 hover:bg-white/10 transition-colors"
+                    className="h-11 rounded border border-outline bg-[#16161A] text-[10px] font-semibold flex items-center justify-center gap-1.5 hover:bg-[#1C1C21] transition-colors text-white"
                   >
                     <svg className="h-4 w-4" viewBox="0 0 24 24">
                       <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.177 4.114-3.478 0-6.3-2.823-6.3-6.3 0-3.478 2.822-6.3 6.3-6.3 1.63 0 3.11.624 4.228 1.636l3.076-3.076C19.14 2.502 15.918 1.5 12.24 1.5 6.42 1.5 1.7 6.22 1.7 12s4.72 10.5 10.54 10.5c5.73 0 10.19-3.9 10.19-9.9 0-.6-.05-1.17-.16-1.715H12.24z"/>
@@ -1265,7 +1288,7 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => handleSocialLogin("github")}
-                    className="h-11 rounded-lg border border-white/10 bg-white/5 text-[10px] font-semibold flex items-center justify-center gap-1.5 hover:bg-white/10 transition-colors"
+                    className="h-11 rounded border border-outline bg-[#16161A] text-[10px] font-semibold flex items-center justify-center gap-1.5 hover:bg-[#1C1C21] transition-colors text-white"
                   >
                     <svg className="h-4 w-4 fill-white" viewBox="0 0 24 24">
                       <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
@@ -1280,7 +1303,7 @@ export function LoginPage() {
                 <div className="mt-3">
                   <button
                     onClick={handleDemoLogin}
-                    className="w-full h-11 rounded-lg border border-brand-500/20 bg-brand-500/10 text-brand-500 text-xs font-bold transition hover:bg-brand-500/20"
+                    className="w-full h-11 rounded border border-primary/20 bg-primary/5 text-primary text-xs font-bold transition hover:bg-primary/10 cursor-pointer"
                   >
                     Quick Demo Student Login
                   </button>
