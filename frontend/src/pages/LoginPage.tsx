@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -273,6 +273,10 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Tracks whether google.accounts.id.initialize() has already been called
+  // to prevent the "called multiple times" GSI warning on modal re-opens.
+  const gsiInitialized = useRef(false);
+
   // Load Google Identity Services SDK
   useEffect(() => {
     const existingScript = document.getElementById("google-gsi-client");
@@ -294,22 +298,26 @@ export function LoginPage() {
       const google = (window as any).google;
       if (google && google.accounts) {
         clearInterval(interval);
-        
-        google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
-          callback: async (response: any) => {
-            setLoading(true);
-            setError("");
-            try {
-              await socialLogin(response.credential);
-              setIsModalOpen(false);
-            } catch (err) {
-              setError("Google authentication failed. Please try again.");
-            } finally {
-              setLoading(false);
+
+        // Only call initialize() once to avoid the GSI "called multiple times" warning
+        if (!gsiInitialized.current) {
+          gsiInitialized.current = true;
+          google.accounts.id.initialize({
+            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+            callback: async (response: any) => {
+              setLoading(true);
+              setError("");
+              try {
+                await socialLogin(response.credential);
+                setIsModalOpen(false);
+              } catch (err) {
+                setError("Google authentication failed. Please try again.");
+              } finally {
+                setLoading(false);
+              }
             }
-          }
-        });
+          });
+        }
 
         const btnElement = document.getElementById("google-signin-btn");
         if (btnElement) {
