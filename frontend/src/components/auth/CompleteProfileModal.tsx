@@ -83,7 +83,7 @@ export function CompleteProfileModal() {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", duration: 0.5 }}
-        className="w-full max-w-lg p-5 sm:p-8 rounded border border-outline bg-[#0F0F12] shadow-lg text-[#e2e2e2] my-auto"
+        className="w-full max-w-lg p-5 sm:p-8 rounded border border-outline bg-surface shadow-lg text-zinc-200 my-auto"
       >
         {/* Header */}
         <div className="text-center space-y-3 mb-6">
@@ -106,7 +106,7 @@ export function CompleteProfileModal() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Sourabh Sahu"
-              className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white transition-all"
+              className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white transition-all"
             />
           </div>
 
@@ -119,7 +119,7 @@ export function CompleteProfileModal() {
               value={rollNumber}
               onChange={(e) => setRollNumber(e.target.value)}
               placeholder="e.g. CSE-2026-042"
-              className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white transition-all"
+              className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white transition-all"
             />
           </div>
 
@@ -130,13 +130,13 @@ export function CompleteProfileModal() {
               required
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white transition-all appearance-none"
+              className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white transition-all appearance-none"
             >
               {departments.length === 0 ? (
-                <option value="" disabled className="bg-[#16161A]">Loading departments...</option>
+                <option value="" disabled className="bg-surface-container">Loading departments...</option>
               ) : (
                 departments.map((dept) => (
-                  <option key={dept._id} value={dept._id} className="bg-[#16161A]">
+                  <option key={dept._id} value={dept._id} className="bg-surface-container">
                     {dept.name} ({dept.code})
                   </option>
                 ))
@@ -152,10 +152,10 @@ export function CompleteProfileModal() {
                 required
                 value={semester}
                 onChange={(e) => setSemester(Number(e.target.value))}
-                className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white transition-all"
+                className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white transition-all"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                  <option key={sem} value={sem} className="bg-[#16161A]">Semester {sem}</option>
+                  <option key={sem} value={sem} className="bg-surface-container">Semester {sem}</option>
                 ))}
               </select>
             </div>
@@ -170,7 +170,7 @@ export function CompleteProfileModal() {
                 onChange={(e) => setSection(e.target.value)}
                 placeholder="e.g. A"
                 maxLength={2}
-                className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white transition-all text-center"
+                className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white transition-all text-center"
               />
             </div>
           </div>

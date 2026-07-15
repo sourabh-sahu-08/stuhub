@@ -117,7 +117,7 @@ export function DashboardPage() {
         <div className="flex justify-between items-center">
           <div>
             <h2 className="font-label-sm text-[11px] text-primary uppercase tracking-[0.2em] mb-1 font-mono">Workspace Overview</h2>
-            <h3 className="font-display-lg text-3xl font-extrabold text-[#e2e2e2]">Student Command Center</h3>
+            <h3 className="font-display-lg text-3xl font-extrabold text-zinc-200">Student Command Center</h3>
           </div>
           <div className="text-right text-xs text-on-surface-variant font-mono">
             PORTAL: <span className="text-primary font-bold">{user?.name ? user.name.toUpperCase() : "STUDENT"}</span>
@@ -129,7 +129,7 @@ export function DashboardPage() {
           <h4 className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-[0.1em] opacity-50 font-mono">Real-Time Indicators</h4>
           
           {/* Detention Warning Card */}
-          <div className="py-6 flex items-start gap-6 border-b border-outline hover:bg-[#16161A]/30 transition-colors rounded px-3">
+          <div className="py-6 flex items-start gap-6 border-b border-outline hover:bg-surface-container/30 transition-colors rounded px-3">
             <div className="p-3 bg-red-500/10 rounded-lg text-red-500">
               <span className="material-symbols-outlined">warning</span>
             </div>
@@ -149,7 +149,7 @@ export function DashboardPage() {
           </div>
 
           {/* Nearest Deadline Card */}
-          <div className="py-6 flex items-start gap-6 border-b border-outline hover:bg-[#16161A]/30 transition-colors rounded px-3">
+          <div className="py-6 flex items-start gap-6 border-b border-outline hover:bg-surface-container/30 transition-colors rounded px-3">
             <div className="p-3 bg-[#36c2ff]/10 rounded-lg text-tertiary">
               <span className="material-symbols-outlined">timer</span>
             </div>
@@ -201,10 +201,10 @@ export function DashboardPage() {
           {resources.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {resources.slice(0, 2).map((item, idx) => (
-                <div key={idx} className="p-4 rounded border border-outline bg-[#0F0F12] hover:border-primary/50 transition-all cursor-pointer group">
+                <div key={idx} className="p-4 rounded border border-outline bg-surface hover:border-primary/50 transition-all cursor-pointer group">
                   <div className="flex justify-between items-start mb-3">
                     <span className="material-symbols-outlined text-secondary group-hover:text-primary">folder_open</span>
-                    <span className="text-[9px] font-bold text-[#A3A3A3] font-mono">FILE</span>
+                    <span className="text-[9px] font-bold text-zinc-400 font-mono">FILE</span>
                   </div>
                   <p className="font-label-lg font-semibold text-white">{item.title}</p>
                   <p className="text-[10px] text-on-surface-variant font-mono uppercase mt-0.5">{item.subject} • Sem {item.semester} ({item.branch})</p>
@@ -222,14 +222,14 @@ export function DashboardPage() {
       </div>
 
       {/* Secondary Column (40%) */}
-      <div className="lg:col-span-4 p-6 sm:p-10 space-y-8 bg-[#0F0F12]/30">
+      <div className="lg:col-span-4 p-6 sm:p-10 space-y-8 bg-surface/30">
         {/* Pulse Analytics */}
         <section className="space-y-4">
           <h3 className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-[0.1em] opacity-50 font-mono">Pulse Analytics</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-3xl font-extrabold text-white">N/A</p>
-              <p className="text-xs text-[#A1A1AA] mt-1">GPA (API Offline)</p>
+              <p className="text-xs text-zinc-400 mt-1">GPA (API Offline)</p>
               <div className="w-16 h-1 bg-outline mt-2">
                 <div className="h-full bg-outline-variant w-[0%]"></div>
               </div>
@@ -238,7 +238,7 @@ export function DashboardPage() {
               <p className={`text-3xl font-extrabold ${overallAttendance >= 75 ? "text-emerald-500" : "text-red-500"}`}>
                 {overallAttendance > 0 ? `${overallAttendance.toFixed(1)}%` : "0.0%"}
               </p>
-              <p className="text-xs text-[#A1A1AA] mt-1">Avg. Attendance</p>
+              <p className="text-xs text-zinc-400 mt-1">Avg. Attendance</p>
               <div className="w-16 h-1 bg-tertiary/20 mt-2">
                 <div className={`h-full ${overallAttendance >= 75 ? "bg-emerald-500" : "bg-red-500"}`} style={{ width: `${Math.min(100, overallAttendance)}%` }}></div>
               </div>
@@ -246,7 +246,7 @@ export function DashboardPage() {
           </div>
         </section>
 
-        <hr className="border-[#27272D]"/>
+        <hr className="border-outline"/>
 
         {/* Consistency Heatmap */}
         <section className="space-y-4">
@@ -270,7 +270,7 @@ export function DashboardPage() {
           <div className="mt-4 flex items-center justify-between text-[10px] text-on-surface-variant font-mono uppercase">
             <span>Less active</span>
             <div className="flex gap-1">
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-[#16161A]"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-surface-container"></div>
               <div className="w-2.5 h-2.5 rounded-[2px] bg-primary/45"></div>
               <div className="w-2.5 h-2.5 rounded-[2px] bg-primary"></div>
             </div>
@@ -278,12 +278,12 @@ export function DashboardPage() {
           </div>
         </section>
 
-        <hr className="border-[#27272D]"/>
+        <hr className="border-outline"/>
 
         {/* AI Analyzer Insights */}
         <section className="space-y-4">
           <h3 className="font-headline-sm text-sm font-bold text-white">AI Insights</h3>
-          <div className="p-5 bg-[#16161A] rounded border border-outline relative overflow-hidden group">
+          <div className="p-5 bg-surface-container rounded border border-outline relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-2 opacity-5">
               <span className="material-symbols-outlined text-[48px]">psychology</span>
             </div>
@@ -299,7 +299,7 @@ export function DashboardPage() {
           </div>
         </section>
 
-        <hr className="border-[#27272D]"/>
+        <hr className="border-outline"/>
 
         {/* Upcoming Notices */}
         <section className="space-y-4">

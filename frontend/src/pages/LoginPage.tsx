@@ -484,9 +484,9 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-brand-500 selection:text-white">
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-brand-500 selection:text-white">
       {/* 1. Header Nav */}
-      <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-6 py-4 flex items-center justify-between shadow-lg">
+      <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-[#272727] px-6 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-2 select-none">
           <img 
             src="/favicon.png" 
@@ -499,7 +499,7 @@ export function LoginPage() {
           </div>
         </div>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
+        <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-300">
           <a href="#home" className="hover:text-brand-500 transition-colors duration-200">Home</a>
           <a href="#features" className="hover:text-brand-500 transition-colors duration-200">Workspace Overview</a>
           <a href="#faq" className="hover:text-brand-500 transition-colors duration-200">FAQ</a>
@@ -507,7 +507,7 @@ export function LoginPage() {
 
         <div>
           {user ? (
-            <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
+            <div className="flex items-center gap-3 bg-white/5 border border-[#333333] px-3 py-1.5 rounded-lg">
               <Link to="/dashboard" className="flex items-center gap-2 group select-none">
                 {/* Circular Avatar Progress Ring (25%) */}
                 <div className="relative flex items-center justify-center h-8 w-8">
@@ -515,14 +515,14 @@ export function LoginPage() {
                     <circle cx="16" cy="16" r="13" className="stroke-white/10 fill-none" strokeWidth="2" />
                     <circle cx="16" cy="16" r="13" className="stroke-brand-500 fill-none" strokeWidth="2" strokeDasharray={`${2 * Math.PI * 13}`} strokeDashoffset={`${2 * Math.PI * 13 * (1 - 0.25)}`} strokeLinecap="round" />
                   </svg>
-                  <div className="absolute h-6.5 w-6.5 rounded-full bg-slate-950 flex items-center justify-center text-xs font-bold uppercase text-white">
+                  <div className="absolute h-6.5 w-6.5 rounded-full bg-black flex items-center justify-center text-xs font-bold uppercase text-white">
                     {user.name.slice(0, 1)}
                   </div>
                 </div>
                 <div className="hidden min-w-0 sm:flex items-center gap-1">
-                  <span className="truncate text-xs font-semibold text-slate-200 group-hover:text-brand-500 transition-colors">{user.name}</span>
+                  <span className="truncate text-xs font-semibold text-zinc-200 group-hover:text-brand-500 transition-colors">{user.name}</span>
                   <span className="text-[10px] text-brand-500 font-bold">25%</span>
-                  <ChevronDown size={14} className="text-slate-400 group-hover:text-brand-500 transition-colors" />
+                  <ChevronDown size={14} className="text-zinc-400 group-hover:text-brand-500 transition-colors" />
                 </div>
               </Link>
             </div>
@@ -549,7 +549,7 @@ export function LoginPage() {
             alt="Collaborative Workspace"
             className="w-full h-full object-cover filter brightness-[0.2] contrast-[1.05]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
           
           {/* Glowing colorful ambient background blobs */}
           <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-brand-500/10 blur-[120px] -z-10 animate-pulse" />
@@ -573,26 +573,26 @@ export function LoginPage() {
             {/* Heading */}
             <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
               The Command Center for <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-brand-400">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-zinc-200 to-brand-400">
                 Academic Success
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="max-w-2xl mx-auto lg:mx-0 text-base sm:text-lg leading-relaxed text-slate-350">
+            <p className="max-w-2xl mx-auto lg:mx-0 text-base sm:text-lg leading-relaxed text-zinc-350">
               Unify your course assignments, track attendance safeties, build digital notes libraries, and analyze previous exam papers with Groq-powered AI.
             </p>
 
             {/* Search Box */}
-            <form onSubmit={triggerSearch} className="max-w-lg mx-auto lg:mx-0 bg-white/5 backdrop-blur-md rounded-xl p-1.5 border border-white/10 flex items-center gap-2 shadow-2xl focus-within:border-brand-500/50 transition-all duration-300">
-              <div className="flex items-center gap-2 flex-1 px-3 text-slate-400">
+            <form onSubmit={triggerSearch} className="max-w-lg mx-auto lg:mx-0 bg-white/5 backdrop-blur-md rounded-xl p-1.5 border border-[#333333] flex items-center gap-2 shadow-2xl focus-within:border-brand-500/50 transition-all duration-300">
+              <div className="flex items-center gap-2 flex-1 px-3 text-zinc-400">
                 <Search size={18} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search modules or features..."
-                  className="bg-transparent border-none outline-none text-white text-sm w-full placeholder:text-slate-455 focus:ring-0 focus:outline-none"
+                  className="bg-transparent border-none outline-none text-white text-sm w-full placeholder:text-zinc-455 focus:ring-0 focus:outline-none"
                 />
               </div>
               <button
@@ -604,9 +604,9 @@ export function LoginPage() {
             </form>
 
             {/* Checkmarks */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-200 font-semibold select-none pt-2">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-zinc-200 font-semibold select-none pt-2">
               {["Assignments Tracker", "Attendance Watch", "Digital Library", "Groq PYQ Analyzer"].map((item) => (
-                <div key={item} className="flex items-center gap-2 bg-slate-900/40 border border-white/5 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                <div key={item} className="flex items-center gap-2 bg-[#0a0a0a]/40 border border-[#272727] px-3 py-1.5 rounded-full backdrop-blur-sm">
                   <CheckCircle2 className="text-brand-500" size={14} />
                   {item}
                 </div>
@@ -619,16 +619,16 @@ export function LoginPage() {
             <motion.div
               animate={{ y: [0, -12, 0] }}
               transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-              className="relative w-[340px] h-[360px] bg-slate-900/30 rounded-2xl border border-white/10 p-5 shadow-[0_30px_60px_rgba(0,0,0,0.6)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
+              className="relative w-[340px] h-[360px] bg-[#0a0a0a]/30 rounded-2xl border border-[#333333] p-5 shadow-[0_30px_60px_rgba(0,0,0,0.6)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
             >
               {/* Top mock title bar */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <div className="flex items-center justify-between border-b border-[#272727] pb-3">
                 <div className="flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
                   <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
                 </div>
-                <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase bg-white/5 px-2.5 py-0.5 rounded">
+                <span className="text-[9px] font-bold text-zinc-500 tracking-wider uppercase bg-white/5 px-2.5 py-0.5 rounded">
                   dashboard.stuhub.io
                 </span>
               </div>
@@ -645,8 +645,8 @@ export function LoginPage() {
                       transition={{ duration: 0.25 }}
                       className="space-y-3 text-left"
                     >
-                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">AI Assistant Chat</div>
-                      <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 text-[10px] leading-relaxed shadow-sm">
+                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">AI Assistant Chat</div>
+                      <div className="p-3 rounded-xl bg-black/60 border border-[#272727] text-[10px] leading-relaxed shadow-sm">
                         <div className="font-extrabold text-[8px] uppercase tracking-wider text-brand-400 mb-0.5">Stuhub AI</div>
                         Predicted DBMS exam question on <strong>SQL Joins</strong> has 85% probability.
                       </div>
@@ -662,8 +662,8 @@ export function LoginPage() {
                       transition={{ duration: 0.25 }}
                       className="flex flex-col items-center justify-center space-y-3"
                     >
-                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Attendance Monitor</div>
-                      <div className="flex items-center gap-3 bg-slate-950/60 border border-white/5 p-3 rounded-xl shadow-lg w-full max-w-[200px] text-left">
+                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Attendance Monitor</div>
+                      <div className="flex items-center gap-3 bg-black/60 border border-[#272727] p-3 rounded-xl shadow-lg w-full max-w-[200px] text-left">
                         <div className="relative flex items-center justify-center h-10 w-10 flex-shrink-0">
                           <svg className="absolute w-full h-full transform -rotate-90">
                             <circle cx="20" cy="20" r="16" className="stroke-white/5 fill-none" strokeWidth="3" />
@@ -688,15 +688,15 @@ export function LoginPage() {
                       transition={{ duration: 0.25 }}
                       className="space-y-3 text-left"
                     >
-                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Assignments Tracker</div>
-                      <div className="p-3.5 rounded-xl bg-slate-950/45 border border-white/5 text-[10px] space-y-1.5 shadow-sm">
-                        <div className="flex justify-between items-center text-[8px] font-bold text-slate-500">
+                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Assignments Tracker</div>
+                      <div className="p-3.5 rounded-xl bg-black/45 border border-[#272727] text-[10px] space-y-1.5 shadow-sm">
+                        <div className="flex justify-between items-center text-[8px] font-bold text-zinc-500">
                           <span>ACTIVE TASKS</span>
                           <span className="text-brand-500">2 pending</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <input type="checkbox" readOnly className="rounded border-white/10 bg-transparent text-brand-500 focus:ring-0 focus:ring-offset-0 h-3 w-3" />
-                          <span className="text-slate-355">Submit OS lab report</span>
+                          <input type="checkbox" readOnly className="rounded border-[#333333] bg-transparent text-brand-500 focus:ring-0 focus:ring-offset-0 h-3 w-3" />
+                          <span className="text-zinc-355">Submit OS lab report</span>
                         </div>
                       </div>
                     </motion.div>
@@ -711,14 +711,14 @@ export function LoginPage() {
                       transition={{ duration: 0.25 }}
                       className="space-y-3 text-left"
                     >
-                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Digital Library Repo</div>
-                      <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/60 border border-white/5 text-[10px]">
+                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Digital Library Repo</div>
+                      <div className="flex items-center gap-2.5 p-2 rounded-lg bg-black/60 border border-[#272727] text-[10px]">
                         <div className="h-7 w-7 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
                           <Library size={13} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="font-bold text-slate-200 truncate">DBMS_Syllabus.pdf</div>
-                          <div className="text-[8px] text-slate-550">1.2 MB</div>
+                          <div className="font-bold text-zinc-200 truncate">DBMS_Syllabus.pdf</div>
+                          <div className="text-[8px] text-zinc-550">1.2 MB</div>
                         </div>
                       </div>
                     </motion.div>
@@ -733,12 +733,12 @@ export function LoginPage() {
                       transition={{ duration: 0.25 }}
                       className="space-y-3 text-left"
                     >
-                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Exam PYQ Analyzer</div>
-                      <div className="border border-emerald-500/20 bg-slate-950/60 p-3.5 rounded-xl shadow-lg space-y-1.5">
+                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Exam PYQ Analyzer</div>
+                      <div className="border border-emerald-500/20 bg-black/60 p-3.5 rounded-xl shadow-lg space-y-1.5">
                         <div className="text-[8px] font-extrabold text-brand-400 uppercase tracking-wider flex items-center gap-1">
                           <Brain size={10} className="text-brand-500" /> Topic Analysis
                         </div>
-                        <p className="text-[10px] text-slate-200 font-bold leading-snug">
+                        <p className="text-[10px] text-zinc-200 font-bold leading-snug">
                           SQL Indexing Repeated 3x in Papers
                         </p>
                         <div className="text-[8px] font-bold text-emerald-450 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded inline-block">
@@ -751,7 +751,7 @@ export function LoginPage() {
               </div>
 
               {/* Bottom decorative stats bar */}
-              <div className="border-t border-white/5 pt-3 flex justify-between items-center text-[10px] font-bold text-slate-500">
+              <div className="border-t border-[#272727] pt-3 flex justify-between items-center text-[10px] font-bold text-zinc-500">
                 <span className="flex items-center gap-1"><Brain size={12} className="text-brand-500" /> Groq Vision Online</span>
                 <span className="text-emerald-500 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> 99.9% Up</span>
               </div>
@@ -765,7 +765,7 @@ export function LoginPage() {
         <div className="text-center space-y-3">
           <span className="text-xs uppercase tracking-[0.25em] text-brand-500 font-extrabold">Workspace Modules</span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Dynamic Workspace Overview</h2>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto">Click on any module to preview its live interactive mock-up and core student workflows.</p>
+          <p className="text-zinc-400 text-sm max-w-xl mx-auto">Click on any module to preview its live interactive mock-up and core student workflows.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
@@ -780,8 +780,8 @@ export function LoginPage() {
                   onClick={() => setActiveFeature(idx)}
                   className={`relative flex items-start gap-4 p-4 rounded-xl border text-left transition-all duration-300 overflow-hidden ${
                     isActive
-                      ? "bg-slate-900/60 border-brand-500/35 shadow-[0_8px_30px_rgba(99,102,241,0.12)]"
-                      : "bg-slate-900/10 border-white/5 hover:border-white/10 hover:bg-slate-900/20"
+                      ? "bg-[#0a0a0a]/60 border-brand-500/35 shadow-[0_8px_30px_rgba(99,102,241,0.12)]"
+                      : "bg-[#0a0a0a]/10 border-[#272727] hover:border-[#333333] hover:bg-[#0a0a0a]/20"
                   }`}
                 >
                   {/* Sliding active tab indicator */}
@@ -794,12 +794,12 @@ export function LoginPage() {
                   )}
 
                   <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 transition ${
-                    isActive ? "bg-brand-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]" : "bg-white/5 text-slate-400"
+                    isActive ? "bg-brand-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]" : "bg-white/5 text-zinc-400"
                   }`}>
                     <Icon size={20} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className={`text-sm font-bold transition ${isActive ? "text-white" : "text-slate-300"}`}>
+                    <h3 className={`text-sm font-bold transition ${isActive ? "text-white" : "text-zinc-300"}`}>
                       {feat.title}
                     </h3>
                     {isActive ? (
@@ -832,8 +832,8 @@ export function LoginPage() {
                           const lastMsg = aiConversation[aiConversation.length - 1];
                           const previewText = lastMsg ? `"${lastMsg.role === 'user' ? 'You' : 'AI'}: ${lastMsg.text.slice(0, 50)}..."` : 'Simulate prompt clicks...';
                           return (
-                            <div className="bg-slate-950/60 p-2 rounded border border-white/5 font-mono text-[9px] text-purple-400 mt-1 animate-pulse space-y-0.5">
-                              <span className="text-[8px] uppercase tracking-wider text-slate-500 block">Live Chat Feed</span>
+                            <div className="bg-black/60 p-2 rounded border border-[#272727] font-mono text-[9px] text-purple-400 mt-1 animate-pulse space-y-0.5">
+                              <span className="text-[8px] uppercase tracking-wider text-zinc-500 block">Live Chat Feed</span>
                               <p className="line-clamp-2 leading-tight">{previewText}</p>
                             </div>
                           );
@@ -845,7 +845,7 @@ export function LoginPage() {
                         )}
                       </div>
                     ) : (
-                      <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                      <p className="text-[11px] text-zinc-500 mt-1 line-clamp-2 leading-relaxed">
                         {feat.description}
                       </p>
                     )}
@@ -856,7 +856,7 @@ export function LoginPage() {
           </div>
 
           {/* Interactive display panel (7 cols) */}
-          <div className="lg:col-span-7 rounded-2xl border border-white/15 bg-slate-900/30 p-6 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative min-h-[400px] overflow-hidden backdrop-blur-md">
+          <div className="lg:col-span-7 rounded-2xl border border-[#444444] bg-[#0a0a0a]/30 p-6 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative min-h-[400px] overflow-hidden backdrop-blur-md">
             {/* Decorative background grid */}
             <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:12px_12px] -z-10" />
 
@@ -879,7 +879,7 @@ export function LoginPage() {
                 className="flex-1 flex flex-col justify-between space-y-6"
               >
                 {/* Upgraded Header with Active Badge */}
-                <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-1 text-left">
+                <div className="flex items-center justify-between border-b border-[#272727] pb-4 mb-1 text-left">
                   <div>
                     <span className="text-[9px] uppercase tracking-[0.2em] text-brand-500 font-extrabold block">Stuhub Module &bull; Live Preview</span>
                     <h3 className="text-xl font-extrabold text-white mt-1">
@@ -893,10 +893,10 @@ export function LoginPage() {
                 </div>
 
                 {/* Feature specific live mockup */}
-                <div className="flex-1 flex flex-col justify-center bg-slate-950/40 rounded-xl border border-white/5 p-4 min-h-[180px] relative overflow-hidden">
+                <div className="flex-1 flex flex-col justify-center bg-black/40 rounded-xl border border-[#272727] p-4 min-h-[180px] relative overflow-hidden">
                   {features[activeFeature].mockup.type === "assignments" && (
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-500">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500">
                         <span>INTERACTIVE WORKLIST</span>
                         <span className="text-[9px] text-brand-500 uppercase font-bold">(Click row to check off)</span>
                       </div>
@@ -911,19 +911,19 @@ export function LoginPage() {
                             variants={listItemVariants}
                             key={item.id}
                             onClick={() => toggleAssignment(item.id)}
-                            className="w-full flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition duration-300"
+                            className="w-full flex items-center justify-between p-2.5 rounded-lg bg-[#0a0a0a]/60 border border-[#272727] text-[11px] text-left hover:border-brand-500/20 hover:bg-[#0a0a0a]/80 transition duration-300"
                           >
                             <div className="flex items-center gap-2">
                               <span className={`h-2 w-2 rounded-full transition-colors duration-300 ${item.status === 'Submitted' ? 'bg-emerald-500' : item.status === 'In Progress' ? 'bg-blue-500' : 'bg-slate-500'}`} />
                               <div>
-                                <span className={`font-bold text-slate-200 transition-all duration-300 ${item.status === 'Submitted' ? 'line-through text-slate-500' : ''}`}>
+                                <span className={`font-bold text-zinc-200 transition-all duration-300 ${item.status === 'Submitted' ? 'line-through text-zinc-500' : ''}`}>
                                   {item.title}
                                 </span>
-                                <div className="text-[9px] text-slate-500 mt-0.5">Weight: {item.weight}</div>
+                                <div className="text-[9px] text-zinc-500 mt-0.5">Weight: {item.weight}</div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2 text-right">
-                              <span className="text-[10px] text-slate-500">{item.due}</span>
+                              <span className="text-[10px] text-zinc-500">{item.due}</span>
                               <span className={`text-[9px] px-2 py-0.5 rounded font-bold transition-all duration-350 ${
                                 item.status === 'Submitted' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'
                               }`}>
@@ -941,11 +941,11 @@ export function LoginPage() {
                     const isSafe = attPct >= 75;
                     return (
                       <div className="flex flex-col items-center justify-center space-y-3">
-                        <div className="flex justify-between items-center w-full text-[10px] font-bold text-slate-500 px-1">
+                        <div className="flex justify-between items-center w-full text-[10px] font-bold text-zinc-500 px-1">
                           <span>LIVE TRACKER CALCULATOR</span>
                           <span className="text-[9px] text-brand-500 uppercase">(Test attendance bunk limits)</span>
                         </div>
-                        <div className="flex items-center gap-6 bg-slate-900/60 border border-white/5 p-3 rounded-xl w-full max-w-[280px]">
+                        <div className="flex items-center gap-6 bg-[#0a0a0a]/60 border border-[#272727] p-3 rounded-xl w-full max-w-[280px]">
                           <div className="relative flex items-center justify-center h-14 w-14 flex-shrink-0">
                             <svg className="absolute w-full h-full transform -rotate-90">
                               <circle cx="28" cy="28" r="22" className="stroke-white/5 fill-none" strokeWidth="4" />
@@ -994,7 +994,7 @@ export function LoginPage() {
                     ) || [];
                     return (
                       <div className="space-y-2 text-left">
-                        <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                        <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
                           <span>INTERACTIVE FILE INDEX</span>
                           <span className="text-[9px] text-brand-500 uppercase">(Filter & Download)</span>
                         </div>
@@ -1003,7 +1003,7 @@ export function LoginPage() {
                           value={librarySearch}
                           onChange={(e) => setLibrarySearch(e.target.value)}
                           placeholder="Search notes (e.g. DBMS, OS)..."
-                          className="w-full bg-slate-900 border border-white/5 px-2.5 py-1.5 rounded-lg text-[10px] text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-500/50 mb-2"
+                          className="w-full bg-[#0a0a0a] border border-[#272727] px-2.5 py-1.5 rounded-lg text-[10px] text-white placeholder:text-zinc-500 focus:outline-none focus:border-brand-500/50 mb-2"
                         />
                         <motion.div
                           variants={listContainerVariants}
@@ -1017,22 +1017,22 @@ export function LoginPage() {
                               key={idx}
                               onClick={() => handleDownloadFile(file.name)}
                               disabled={downloadingFile !== null}
-                              className="w-full flex flex-col gap-1.5 p-2 rounded-lg bg-slate-900/60 border border-white/5 text-[11px] text-left hover:border-brand-500/20 hover:bg-slate-900/80 transition duration-300"
+                              className="w-full flex flex-col gap-1.5 p-2 rounded-lg bg-[#0a0a0a]/60 border border-[#272727] text-[11px] text-left hover:border-brand-500/20 hover:bg-[#0a0a0a]/80 transition duration-300"
                             >
                               <div className="w-full flex items-center gap-2">
                                 <div className="h-6 w-6 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
                                   <Library size={12} />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="font-bold text-slate-200 truncate">{file.name}</div>
-                                  <div className="text-[8px] text-slate-500">{file.size}</div>
+                                  <div className="font-bold text-zinc-200 truncate">{file.name}</div>
+                                  <div className="text-[8px] text-zinc-500">{file.size}</div>
                                 </div>
-                                <span className="text-[8px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-bold">
+                                <span className="text-[8px] bg-[#111111] text-zinc-400 px-2 py-0.5 rounded font-bold">
                                   {downloadingFile === file.name ? 'Downloading...' : 'Click to Download'}
                                 </span>
                               </div>
                               {downloadingFile === file.name && (
-                                <div className="w-full bg-slate-950 rounded-full h-1 border border-white/5 overflow-hidden">
+                                <div className="w-full bg-black rounded-full h-1 border border-[#272727] overflow-hidden">
                                   <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: "100%" }}
@@ -1050,23 +1050,23 @@ export function LoginPage() {
 
                   {features[activeFeature].mockup.type === "ai" && (
                     <div className="space-y-2 flex flex-col justify-between h-full text-left">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
                         <span>STUDY CO-PILOT CHAT</span>
                         <span className="text-[9px] text-brand-500 uppercase">(Select Prompt Below)</span>
                       </div>
                       <div className="space-y-2 max-h-[100px] overflow-y-auto pr-1 flex-1 flex flex-col justify-end">
                         {aiConversation.map((msg, idx) => (
                           <div key={idx} className={`p-2 rounded-lg text-[10px] leading-relaxed max-w-[85%] ${
-                            msg.role === 'user' ? 'bg-brand-500/10 border border-brand-500/20 text-brand-400 self-end' : 'bg-slate-900/80 border border-white/5 text-slate-350 self-start'
+                            msg.role === 'user' ? 'bg-brand-500/10 border border-brand-500/20 text-brand-400 self-end' : 'bg-[#0a0a0a]/80 border border-[#272727] text-zinc-350 self-start'
                           }`}>
-                            <div className="font-extrabold text-[8px] uppercase tracking-wider text-slate-500 mb-0.5">
+                            <div className="font-extrabold text-[8px] uppercase tracking-wider text-zinc-500 mb-0.5">
                               {msg.role === 'user' ? 'You' : 'Stuhub AI'}
                             </div>
                             {msg.text}
                           </div>
                         ))}
                         {isAiTyping && (
-                          <div className="p-2 rounded-lg bg-slate-900/80 border border-white/5 text-slate-300 self-start flex items-center gap-1 shadow-sm">
+                          <div className="p-2 rounded-lg bg-[#0a0a0a]/80 border border-[#272727] text-zinc-300 self-start flex items-center gap-1 shadow-sm">
                             <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '0ms' }} />
                             <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '150ms' }} />
                             <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -1079,7 +1079,7 @@ export function LoginPage() {
                             key={prompt}
                             onClick={() => handleAiPromptClick(prompt)}
                             disabled={isAiTyping}
-                            className="text-[9px] bg-slate-900 border border-white/10 hover:border-brand-500/40 hover:bg-slate-900/80 text-slate-300 px-2.5 py-1 rounded-full transition active:scale-95 disabled:opacity-50"
+                            className="text-[9px] bg-[#0a0a0a] border border-[#333333] hover:border-brand-500/40 hover:bg-[#0a0a0a]/80 text-zinc-300 px-2.5 py-1 rounded-full transition active:scale-95 disabled:opacity-50"
                           >
                             {prompt}
                           </button>
@@ -1090,16 +1090,16 @@ export function LoginPage() {
 
                   {features[activeFeature].mockup.type === "pyq" && (
                     <div className="space-y-3 text-left">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
                         <span>GROQ VISION SCANNER</span>
                         <span className="text-[9px] text-brand-500 uppercase">(Simulate OCR Scan)</span>
                       </div>
                       
                       {pyqScanState === 'idle' && (
-                        <div className="flex flex-col items-center justify-center py-4 border border-dashed border-white/10 rounded-lg hover:border-brand-500/30 transition cursor-pointer" onClick={handlePyqScan}>
+                        <div className="flex flex-col items-center justify-center py-4 border border-dashed border-[#333333] rounded-lg hover:border-brand-500/30 transition cursor-pointer" onClick={handlePyqScan}>
                           <Brain size={24} className="text-brand-500/60 mb-1.5 animate-pulse" />
-                          <span className="text-[10px] font-bold text-slate-300">Click to Scan Sample Paper</span>
-                          <span className="text-[8px] text-slate-500 mt-0.5">Simulates PDF parsing & Groq API analysis</span>
+                          <span className="text-[10px] font-bold text-zinc-300">Click to Scan Sample Paper</span>
+                          <span className="text-[8px] text-zinc-500 mt-0.5">Simulates PDF parsing & Groq API analysis</span>
                         </div>
                       )}
 
@@ -1108,7 +1108,7 @@ export function LoginPage() {
                           {/* Animated radar bar scanner */}
                           <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand-500 shadow-[0_0_10px_#6366f1] animate-bounce" style={{ animationDuration: '1.5s' }} />
                           <Brain size={24} className="text-brand-500 mb-1.5 animate-spin" style={{ animationDuration: '3s' }} />
-                          <span className="text-[10px] font-bold text-slate-300">Parsing PDF / Running Groq LLM...</span>
+                          <span className="text-[10px] font-bold text-zinc-300">Parsing PDF / Running Groq LLM...</span>
                         </div>
                       )}
 
@@ -1116,11 +1116,11 @@ export function LoginPage() {
                         <div className="space-y-2.5">
                           {features[activeFeature].mockup.topics?.map((topic: any, idx: number) => (
                             <div key={idx} className="space-y-1">
-                              <div className="flex justify-between text-[10px] font-bold text-slate-200">
+                              <div className="flex justify-between text-[10px] font-bold text-zinc-200">
                                 <span>{topic.name}</span>
                                 <span className="text-brand-400">{topic.pct}% Weight</span>
                               </div>
-                              <div className="w-full bg-slate-900 rounded-full h-1.5 border border-white/5 overflow-hidden">
+                              <div className="w-full bg-[#0a0a0a] rounded-full h-1.5 border border-[#272727] overflow-hidden">
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: `${topic.pct}%` }}
@@ -1132,7 +1132,7 @@ export function LoginPage() {
                           ))}
                           <button
                             onClick={() => setPyqScanState("idle")}
-                            className="w-full text-center text-[9px] text-slate-500 hover:text-white transition font-bold"
+                            className="w-full text-center text-[9px] text-zinc-500 hover:text-white transition font-bold"
                           >
                             Reset Scanner
                           </button>
@@ -1143,9 +1143,9 @@ export function LoginPage() {
                 </div>
 
                 {/* Key value list */}
-                <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-4">
+                <div className="grid grid-cols-3 gap-2 border-t border-[#272727] pt-4">
                   {features[activeFeature].bullets.map((bullet, idx) => (
-                    <div key={idx} className="flex items-start gap-1.5 text-[10px] text-slate-400 leading-tight">
+                    <div key={idx} className="flex items-start gap-1.5 text-[10px] text-zinc-400 leading-tight">
                       <span className="h-1.5 w-1.5 rounded-full bg-brand-500 mt-1.5 flex-shrink-0" />
                       <span>{bullet}</span>
                     </div>
@@ -1158,27 +1158,27 @@ export function LoginPage() {
       </section>
 
       {/* 4. FAQ Section */}
-      <section id="faq" className="py-24 bg-slate-900/10 border-t border-white/5 px-6">
+      <section id="faq" className="py-24 bg-[#0a0a0a]/10 border-t border-[#272727] px-6">
         <div className="max-w-3xl mx-auto space-y-12">
           <div className="text-center space-y-2">
             <h2 className="text-3xl font-extrabold text-white flex items-center justify-center gap-2">
               <HelpCircle className="text-brand-500" size={28} /> FAQ
             </h2>
-            <p className="text-slate-400 text-sm">Have any questions? Find answers to commonly asked inquiries here.</p>
+            <p className="text-zinc-400 text-sm">Have any questions? Find answers to commonly asked inquiries here.</p>
           </div>
 
           <div className="space-y-4">
             {faqData.map((item, idx) => (
-              <div key={idx} className="rounded-xl border border-white/5 bg-slate-900/20 overflow-hidden transition-all duration-300 hover:border-white/10">
+              <div key={idx} className="rounded-xl border border-[#272727] bg-[#0a0a0a]/20 overflow-hidden transition-all duration-300 hover:border-[#333333]">
                 <button
                   onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                  className="w-full text-left px-6 py-5 font-bold text-slate-200 hover:text-white transition flex justify-between items-center"
+                  className="w-full text-left px-6 py-5 font-bold text-zinc-200 hover:text-white transition flex justify-between items-center"
                 >
                   {item.q}
                   <span className="text-brand-500 text-lg">{activeFaq === idx ? "−" : "+"}</span>
                 </button>
                 {activeFaq === idx && (
-                  <div className="px-6 pb-5 pt-1 text-sm text-slate-400 leading-relaxed border-t border-white/5 bg-slate-950/20">
+                  <div className="px-6 pb-5 pt-1 text-sm text-zinc-400 leading-relaxed border-t border-[#272727] bg-black/20">
                     {item.a}
                   </div>
                 )}
@@ -1189,19 +1189,19 @@ export function LoginPage() {
       </section>
 
       {/* 5. Footer */}
-      <footer className="py-12 border-t border-white/5 text-center text-xs text-slate-500 bg-slate-950">
+      <footer className="py-12 border-t border-[#272727] text-center text-xs text-zinc-500 bg-black">
         <p>&copy; {new Date().getFullYear()} Stuhub. All rights reserved.</p>
       </footer>
 
       {/* 6. Authentic Modal Overlay */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md p-5 sm:p-6 rounded border border-outline bg-[#0F0F12] shadow-lg text-[#e2e2e2]"
+              className="relative w-full max-w-md p-5 sm:p-6 rounded border border-outline bg-surface shadow-lg text-zinc-200"
             >
               {/* Close Button */}
               <button
@@ -1230,7 +1230,7 @@ export function LoginPage() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                      className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                     />
                   </div>
                 )}
@@ -1240,7 +1240,7 @@ export function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                    className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                   />
                 </div>
                 <div>
@@ -1249,7 +1249,7 @@ export function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                    className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                   />
                 </div>
 
@@ -1268,9 +1268,9 @@ export function LoginPage() {
               {/* Social Logins */}
               <div className="mt-4 space-y-2">
                 <div className="relative flex py-2 items-center">
-                  <div className="flex-grow border-t border-[#27272D]"></div>
+                  <div className="flex-grow border-t border-outline"></div>
                   <span className="flex-shrink mx-4 text-on-surface-variant text-[10px] font-bold uppercase tracking-wider font-mono">or continue with</span>
-                  <div className="flex-grow border-t border-[#27272D]"></div>
+                  <div className="flex-grow border-t border-outline"></div>
                 </div>
                 
                 {/* Official Google Sign-In Button Container */}
@@ -1280,7 +1280,7 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => handleSocialLogin("google")}
-                    className="h-11 rounded border border-outline bg-[#16161A] text-[10px] font-semibold flex items-center justify-center gap-1.5 hover:bg-[#1C1C21] transition-colors text-white"
+                    className="h-11 rounded border border-outline bg-surface-container text-[10px] font-semibold flex items-center justify-center gap-1.5 hover:bg-surface-container-high transition-colors text-white"
                   >
                     <svg className="h-4 w-4" viewBox="0 0 24 24">
                       <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.177 4.114-3.478 0-6.3-2.823-6.3-6.3 0-3.478 2.822-6.3 6.3-6.3 1.63 0 3.11.624 4.228 1.636l3.076-3.076C19.14 2.502 15.918 1.5 12.24 1.5 6.42 1.5 1.7 6.22 1.7 12s4.72 10.5 10.54 10.5c5.73 0 10.19-3.9 10.19-9.9 0-.6-.05-1.17-.16-1.715H12.24z"/>
@@ -1290,7 +1290,7 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => handleSocialLogin("github")}
-                    className="h-11 rounded border border-outline bg-[#16161A] text-[10px] font-semibold flex items-center justify-center gap-1.5 hover:bg-[#1C1C21] transition-colors text-white"
+                    className="h-11 rounded border border-outline bg-surface-container text-[10px] font-semibold flex items-center justify-center gap-1.5 hover:bg-surface-container-high transition-colors text-white"
                   >
                     <svg className="h-4 w-4 fill-white" viewBox="0 0 24 24">
                       <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
@@ -1312,7 +1312,7 @@ export function LoginPage() {
                 </div>
               )}
 
-              <p className="text-xs text-center text-slate-400 mt-6">
+              <p className="text-xs text-center text-zinc-400 mt-6">
                 {modalMode === "login" ? (
                   <>
                     New to Stuhub?{" "}

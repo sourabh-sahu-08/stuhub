@@ -9,6 +9,7 @@ import { authRouter } from "./routes/auth.routes.js";
 import { pyqRouter } from "./routes/pyq.routes.js";
 import { pyqAnalyzerRouter } from "./routes/pyq-analyzer.routes.js";
 import { notesRouter } from "./routes/notes.routes.js";
+import { adminRouter } from "./routes/admin.routes.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
 export function createApp() {
@@ -22,6 +23,7 @@ export function createApp() {
 
   app.get("/health", (_req, res) => res.json({ ok: true, service: "stuhub-api" }));
   app.use("/api/auth", authRouter);
+  app.use("/api/admin", adminRouter);
   app.use("/api/pyq", pyqRouter);
   app.use("/api/pyq-analyzer", pyqAnalyzerRouter);
   app.use("/api/notes", notesRouter);

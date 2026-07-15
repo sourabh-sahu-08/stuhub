@@ -280,7 +280,7 @@ export function NotesPage() {
   return (
     <div className="min-h-[calc(100vh-110px)] text-white">
       {/* ================= BREADCRUMBS ================= */}
-      <div className="mb-6 flex flex-wrap items-center gap-1.5 font-mono text-[10px] text-[#71717A] no-print">
+      <div className="mb-6 flex flex-wrap items-center gap-1.5 font-mono text-[10px] text-zinc-500 no-print">
         <button
           onClick={() => {
             setSelectedBranch(null);
@@ -330,7 +330,7 @@ export function NotesPage() {
               <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
                 Notes Library
               </h1>
-              <p className="mt-2 text-sm text-[#A1A1AA]">
+              <p className="mt-2 text-sm text-zinc-400">
                 Select your engineering branch to browse and share lecture notes, books, and study materials.
               </p>
             </div>
@@ -340,17 +340,17 @@ export function NotesPage() {
                 <button
                   key={b.code}
                   onClick={() => setSelectedBranch(b.code)}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-[#27272D] bg-[#0F0F12] p-5 text-left transition-all hover:border-[#F5A524] hover:shadow-[0_0_15px_rgba(245,165,36,0.05)] focus:outline-none focus:ring-2 focus:ring-[#F5A524]"
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-outline bg-surface p-5 text-left transition-all hover:border-[#F5A524] hover:shadow-[0_0_15px_rgba(245,165,36,0.05)] focus:outline-none focus:ring-2 focus:ring-[#F5A524]"
                 >
                   <div className="absolute -right-3 -top-3 h-14 w-14 rounded-full bg-[#F5A524]/5 transition-transform group-hover:scale-125" />
                   <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#F5A524]/10 text-[#F5A524] transition-colors group-hover:bg-[#F5A524] group-hover:text-black">
                     <Folder size={18} fill="currentColor" className="opacity-80" />
                   </div>
                   <div className="mt-6">
-                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#71717A]">
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-500">
                       Branch: {b.code}
                     </span>
-                    <h3 className="mt-0.5 text-sm font-bold text-[#E2E2E2] group-hover:text-white line-clamp-1">
+                    <h3 className="mt-0.5 text-sm font-bold text-zinc-200 group-hover:text-white line-clamp-1">
                       {b.name}
                     </h3>
                   </div>
@@ -371,7 +371,7 @@ export function NotesPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSelectedBranch(null)}
-                className="flex h-9 w-9 items-center justify-center rounded-md border border-[#27272D] bg-[#16161A] text-[#A1A1AA] transition-colors hover:bg-[#27272D] hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-outline bg-surface-container text-zinc-400 transition-colors hover:bg-[#27272D] hover:text-white"
                 aria-label="Back to branches"
               >
                 <ArrowLeft size={16} />
@@ -380,7 +380,7 @@ export function NotesPage() {
                 <h1 className="text-xl font-bold text-white sm:text-2xl">
                   {getBranchName(selectedBranch)}
                 </h1>
-                <p className="text-xs text-[#A1A1AA]">Select your academic semester</p>
+                <p className="text-xs text-zinc-400">Select your academic semester</p>
               </div>
             </div>
 
@@ -389,16 +389,16 @@ export function NotesPage() {
                 <button
                   key={sem}
                   onClick={() => setSelectedSemester(sem)}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-[#27272D] bg-[#0F0F12] p-5 text-left transition-all hover:border-[#F5A524] hover:shadow-[0_0_15px_rgba(245,165,36,0.05)] focus:outline-none"
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-outline bg-surface p-5 text-left transition-all hover:border-[#F5A524] hover:shadow-[0_0_15px_rgba(245,165,36,0.05)] focus:outline-none"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded bg-[#F5A524]/10 text-[#F5A524] transition-colors group-hover:bg-[#F5A524] group-hover:text-black">
                     <Folder size={16} fill="currentColor" />
                   </div>
                   <div className="mt-8">
-                    <h3 className="text-xs font-bold text-[#E2E2E2] group-hover:text-white">
+                    <h3 className="text-xs font-bold text-zinc-200 group-hover:text-white">
                       Semester {sem}
                     </h3>
-                    <p className="text-[10px] text-[#71717A]">Notes repository</p>
+                    <p className="text-[10px] text-zinc-500">Notes repository</p>
                   </div>
                 </button>
               ))}
@@ -422,7 +422,7 @@ export function NotesPage() {
                     setSelectedSemester(null);
                     setSearchQuery("");
                   }}
-                  className="flex h-9 w-9 items-center justify-center rounded-md border border-[#27272D] bg-[#16161A] text-[#A1A1AA] transition-colors hover:bg-[#27272D] hover:text-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-md border border-outline bg-surface-container text-zinc-400 transition-colors hover:bg-[#27272D] hover:text-white"
                   aria-label="Back to semesters"
                 >
                   <ArrowLeft size={16} />
@@ -431,7 +431,7 @@ export function NotesPage() {
                   <h1 className="text-xl font-bold text-white sm:text-2xl">
                     Semester {selectedSemester} Notes
                   </h1>
-                  <p className="text-xs text-[#A1A1AA]">
+                  <p className="text-xs text-zinc-400">
                     {getBranchName(selectedBranch)} ({selectedBranch})
                   </p>
                 </div>
@@ -448,7 +448,7 @@ export function NotesPage() {
             {/* Filter and search bar */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               {/* Syllabus Tabs */}
-              <div className="flex items-center gap-6 border-b border-[#27272D] pb-0">
+              <div className="flex items-center gap-6 border-b border-outline pb-0">
                 {(["new", "old"] as const).map((tab) => (
                   <button
                     key={tab}
@@ -456,7 +456,7 @@ export function NotesPage() {
                     className={`cursor-pointer pb-2 px-0 text-xs font-bold uppercase transition-colors relative border-b-2 -mb-[2px] ${
                       activeSyllabusTab === tab
                         ? "border-[#F5A524] text-[#F5A524]"
-                        : "border-transparent text-[#71717A] hover:text-white"
+                        : "border-transparent text-zinc-500 hover:text-white"
                     }`}
                   >
                     {tab} syllabus
@@ -468,7 +468,7 @@ export function NotesPage() {
 
               {/* Search */}
               <div className="relative w-full max-w-sm">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-[#71717A]">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-zinc-500">
                   search
                 </span>
                 <input
@@ -476,24 +476,24 @@ export function NotesPage() {
                   placeholder="Search notes title or subject..."
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  className="w-full rounded-md border border-[#27272D] bg-[#0F0F12] py-2.5 pl-10 pr-4 text-xs text-[#E2E2E2] outline-none transition-colors placeholder:text-[#71717A] focus:border-[#F5A524]"
+                  className="w-full rounded-md border border-outline bg-surface py-2.5 pl-10 pr-4 text-xs text-zinc-200 outline-none transition-colors placeholder:text-zinc-500 focus:border-[#F5A524]"
                 />
               </div>
             </div>
 
             {/* Notes List */}
             {loading ? (
-              <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-[#27272D] bg-[#0F0F12]">
+              <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-outline bg-surface">
                 <span className="h-6 w-6 animate-spin rounded-full border-2 border-[#F5A524] border-t-transparent" />
-                <span className="mt-2 text-xs font-mono text-[#71717A]">
+                <span className="mt-2 text-xs font-mono text-zinc-500">
                   RETRIEVING FILES...
                 </span>
               </div>
             ) : notes.length === 0 ? (
-              <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-[#27272D] bg-[#0F0F12] p-6 text-center">
-                <AlertCircle size={28} className="text-[#71717A]" />
-                <h3 className="mt-3 text-sm font-bold text-[#E2E2E2]">No notes found</h3>
-                <p className="mt-1 max-w-xs text-xs text-[#71717A]">
+              <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-outline bg-surface p-6 text-center">
+                <AlertCircle size={28} className="text-zinc-500" />
+                <h3 className="mt-3 text-sm font-bold text-zinc-200">No notes found</h3>
+                <p className="mt-1 max-w-xs text-xs text-zinc-500">
                   No study materials uploaded for this selection yet.
                 </p>
                 <button
@@ -508,22 +508,22 @@ export function NotesPage() {
                 {notes.map((note) => (
                   <div
                     key={note._id}
-                    className="flex flex-col justify-between rounded-lg border border-[#27272D] bg-[#0F0F12] p-4 transition-colors hover:border-[#3F3F46]"
+                    className="flex flex-col justify-between rounded-lg border border-outline bg-surface p-4 transition-colors hover:border-[#3F3F46]"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 min-w-0">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#16161A] text-[#71717A]">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-surface-container text-zinc-500">
                           <FileText size={18} />
                         </div>
                         <div className="min-w-0">
-                          <h4 className="truncate text-sm font-bold text-[#E2E2E2]">
+                          <h4 className="truncate text-sm font-bold text-zinc-200">
                             {note.title}
                           </h4>
                           <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
                             <span className="rounded bg-[#F5A524]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#F5A524]">
                               {note.subject}
                             </span>
-                            <span className="rounded bg-[#27272D] px-2 py-0.5 text-[9px] font-mono text-[#A1A1AA] uppercase">
+                            <span className="rounded bg-[#27272D] px-2 py-0.5 text-[9px] font-mono text-zinc-400 uppercase">
                               {note.syllabus} Syllabus
                             </span>
                           </div>
@@ -533,7 +533,7 @@ export function NotesPage() {
                       {user?.id === note.user?._id && (
                         <button
                           onClick={() => handleDelete(note._id)}
-                          className="shrink-0 p-1.5 rounded text-[#71717A] hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                          className="shrink-0 p-1.5 rounded text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-colors"
                           title="Delete Notes"
                         >
                           <Trash2 size={14} />
@@ -541,8 +541,8 @@ export function NotesPage() {
                       )}
                     </div>
 
-                    <div className="mt-6 flex flex-col gap-3 border-t border-[#27272D] pt-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[9px] text-[#71717A]">
+                    <div className="mt-6 flex flex-col gap-3 border-t border-outline pt-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[9px] text-zinc-500">
                         <span className="flex items-center gap-1">
                           <Calendar size={10} />
                           {new Date(note.createdAt).toLocaleDateString()}
@@ -556,7 +556,7 @@ export function NotesPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleView(note._id, note.mimeType)}
-                          className="flex items-center gap-1.5 rounded bg-[#16161A] px-2.5 py-1.5 text-[10px] font-bold text-[#E2E2E2] hover:bg-[#27272D] transition-colors"
+                          className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
                         >
                           <Eye size={12} /> View
                         </button>
@@ -564,7 +564,7 @@ export function NotesPage() {
                           onClick={() =>
                             handleDownload(note._id, note.fileName, note.mimeType)
                           }
-                          className="flex items-center gap-1.5 rounded bg-[#16161A] px-2.5 py-1.5 text-[10px] font-bold text-[#E2E2E2] hover:bg-[#27272D] transition-colors"
+                          className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
                         >
                           <Download size={12} /> Download
                         </button>
@@ -596,27 +596,27 @@ export function NotesPage() {
               initial={{ scale: 0.95, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 15 }}
-              className="relative w-full max-w-lg rounded-xl border border-[#27272D] bg-[#0F0F12] p-6 shadow-2xl"
+              className="relative w-full max-w-lg rounded-xl border border-outline bg-surface p-6 shadow-2xl"
             >
               <button
                 onClick={() => {
                   if (!uploadLoading) setIsUploadOpen(false);
                 }}
                 disabled={uploadLoading}
-                className="absolute right-4 top-4 text-[#71717A] hover:text-white disabled:opacity-50"
+                className="absolute right-4 top-4 text-zinc-500 hover:text-white disabled:opacity-50"
               >
                 <X size={18} />
               </button>
 
               <h2 className="text-lg font-bold text-white">Upload Subject Notes</h2>
-              <p className="text-xs text-[#71717A]">
+              <p className="text-xs text-zinc-500">
                 Uploading notes to {selectedBranch} - Semester {selectedSemester} repository.
               </p>
 
               <form onSubmit={handleUploadSubmit} className="mt-5 space-y-4">
                 {/* Note Title */}
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                     Notes Title
                   </label>
                   <input
@@ -626,13 +626,13 @@ export function NotesPage() {
                     placeholder="e.g. Unit 3: Transaction Processing Systems"
                     value={noteTitle}
                     onChange={(e) => setNoteTitle(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-[#27272D] bg-[#16161A] px-3 py-2 text-xs text-white outline-none focus:border-[#F5A524] disabled:opacity-65"
+                    className="mt-1 w-full rounded-md border border-outline bg-surface-container px-3 py-2 text-xs text-white outline-none focus:border-[#F5A524] disabled:opacity-65"
                   />
                 </div>
 
                 {/* Subject autocomplete */}
                 <div className="relative" ref={dropdownRef}>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                     Subject Name
                   </label>
                   <input
@@ -646,12 +646,12 @@ export function NotesPage() {
                       setSubjectDropdownOpen(true);
                     }}
                     onFocus={() => setSubjectDropdownOpen(true)}
-                    className="mt-1 w-full rounded-md border border-[#27272D] bg-[#16161A] px-3 py-2 text-xs text-white outline-none focus:border-[#F5A524] disabled:opacity-65"
+                    className="mt-1 w-full rounded-md border border-outline bg-surface-container px-3 py-2 text-xs text-white outline-none focus:border-[#F5A524] disabled:opacity-65"
                   />
 
                   {/* Autocomplete list */}
                   {subjectDropdownOpen && filteredSubjects.length > 0 && (
-                    <div className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-[#27272D] bg-[#16161A] p-1 shadow-xl">
+                    <div className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-outline bg-surface-container p-1 shadow-xl">
                       {filteredSubjects.map((opt) => (
                         <button
                           key={opt.code}
@@ -660,7 +660,7 @@ export function NotesPage() {
                             setSubject(opt.name);
                             setSubjectDropdownOpen(false);
                           }}
-                          className="w-full rounded px-2.5 py-1.5 text-left text-xs hover:bg-[#27272D] text-[#E2E2E2]"
+                          className="w-full rounded px-2.5 py-1.5 text-left text-xs hover:bg-[#27272D] text-zinc-200"
                         >
                           <span className="font-bold text-[#F5A524] mr-2">
                             [{opt.code}]
@@ -675,7 +675,7 @@ export function NotesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Syllabus Type */}
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                       Syllabus Version
                     </label>
                     <select
@@ -683,7 +683,7 @@ export function NotesPage() {
                       disabled={uploadLoading}
                       value={syllabusType}
                       onChange={(e) => setSyllabusType(e.target.value as "new" | "old")}
-                      className="mt-1 w-full h-9 rounded-md border border-[#27272D] bg-[#16161A] px-2 text-xs text-white focus:border-[#F5A524] disabled:opacity-65"
+                      className="mt-1 w-full h-9 rounded-md border border-outline bg-surface-container px-2 text-xs text-white focus:border-[#F5A524] disabled:opacity-65"
                     >
                       <option value="new">New Syllabus</option>
                       <option value="old">Old Syllabus</option>
@@ -692,14 +692,14 @@ export function NotesPage() {
 
                   {/* Semester locked */}
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                       Semester
                     </label>
                     <input
                       type="text"
                       disabled
                       value={`Semester ${selectedSemester}`}
-                      className="mt-1 w-full h-9 rounded-md border border-[#27272D] bg-[#16161A]/50 px-3 py-2 text-xs text-[#71717A] outline-none"
+                      className="mt-1 w-full h-9 rounded-md border border-outline bg-surface-container/50 px-3 py-2 text-xs text-zinc-500 outline-none"
                     />
                   </div>
                 </div>
@@ -713,7 +713,7 @@ export function NotesPage() {
                   className={`mt-2 flex flex-col items-center justify-center rounded-lg border border-dashed p-6 text-center transition-all ${
                     dragActive
                       ? "border-[#F5A524] bg-[#F5A524]/5"
-                      : "border-[#27272D] bg-[#16161A] hover:border-[#3F3F46]"
+                      : "border-outline bg-surface-container hover:border-[#3F3F46]"
                   }`}
                 >
                   <input
@@ -728,10 +728,10 @@ export function NotesPage() {
                   {selectedFile ? (
                     <div className="flex flex-col items-center">
                       <FileText size={24} className="text-[#F5A524]" />
-                      <p className="mt-2 text-xs font-bold text-[#E2E2E2] max-w-[250px] truncate">
+                      <p className="mt-2 text-xs font-bold text-zinc-200 max-w-[250px] truncate">
                         {selectedFile.name}
                       </p>
-                      <p className="text-[10px] text-[#71717A]">
+                      <p className="text-[10px] text-zinc-500">
                         {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                       <button
@@ -745,8 +745,8 @@ export function NotesPage() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center">
-                      <UploadCloud size={28} className="text-[#71717A]" />
-                      <p className="mt-2 text-xs font-semibold text-[#E2E2E2]">
+                      <UploadCloud size={28} className="text-zinc-500" />
+                      <p className="mt-2 text-xs font-semibold text-zinc-200">
                         Drag and drop your notes document, or{" "}
                         <button
                           type="button"
@@ -757,7 +757,7 @@ export function NotesPage() {
                           browse
                         </button>
                       </p>
-                      <p className="text-[9px] text-[#71717A] mt-1">
+                      <p className="text-[9px] text-zinc-500 mt-1">
                         Supports PDF, PNG, JPG, or JPEG (Max 5MB)
                       </p>
                     </div>
@@ -765,12 +765,12 @@ export function NotesPage() {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="mt-6 flex justify-end gap-3 border-t border-[#27272D] pt-4">
+                <div className="mt-6 flex justify-end gap-3 border-t border-outline pt-4">
                   <button
                     type="button"
                     disabled={uploadLoading}
                     onClick={() => setIsUploadOpen(false)}
-                    className="rounded-md bg-[#16161A] px-4 py-2 text-xs font-bold text-[#E2E2E2] hover:bg-[#27272D] transition-colors disabled:opacity-50"
+                    className="rounded-md bg-surface-container px-4 py-2 text-xs font-bold text-zinc-200 hover:bg-[#27272D] transition-colors disabled:opacity-50"
                   >
                     Cancel
                   </button>

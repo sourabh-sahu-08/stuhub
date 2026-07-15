@@ -94,7 +94,7 @@ export function PyqAnalyzerPage() {
           <button
             onClick={checkDevHealth}
             disabled={checkingHealth}
-            className="flex items-center gap-1.5 rounded border border-[#27272D] bg-[#16161A] px-3 py-1.5 text-[10px] font-bold text-on-surface-variant hover:text-white transition-all cursor-pointer font-mono"
+            className="flex items-center gap-1.5 rounded border border-outline bg-surface-container px-3 py-1.5 text-[10px] font-bold text-on-surface-variant hover:text-white transition-all cursor-pointer font-mono"
           >
             <Network size={12} className={checkingHealth ? "animate-spin text-primary" : ""} />
             {checkingHealth ? "CHECKING API..." : "TEST API CONNECTIVITY"}
@@ -103,7 +103,7 @@ export function PyqAnalyzerPage() {
       </div>
 
       {/* Main Workspace Card */}
-      <div className="rounded border border-[#27272D] bg-[#0F0F12] p-6 md:p-10 shadow-lg min-h-[60vh] flex flex-col justify-center">
+      <div className="rounded border border-outline bg-surface p-6 md:p-10 shadow-lg min-h-[60vh] flex flex-col justify-center">
         <AnimatePresence mode="wait">
           {!validationResult ? (
             <motion.div
@@ -145,8 +145,8 @@ export function PyqAnalyzerPage() {
               </div>
 
               {/* Verified Metadata Details */}
-              <div className="rounded border border-[#27272D] bg-[#16161A] p-5 space-y-4">
-                <h4 className="text-xs font-bold text-primary uppercase tracking-wider font-mono border-b border-[#27272D] pb-2">
+              <div className="rounded border border-outline bg-surface-container p-5 space-y-4">
+                <h4 className="text-xs font-bold text-primary uppercase tracking-wider font-mono border-b border-outline pb-2">
                   Verified Analysis Parameters
                 </h4>
 
@@ -165,10 +165,10 @@ export function PyqAnalyzerPage() {
                   </div>
                 </div>
 
-                <div className="border-t border-[#27272D] pt-3.5 space-y-3.5">
+                <div className="border-t border-outline pt-3.5 space-y-3.5">
                   <div>
                     <span className="text-on-surface-variant block font-mono uppercase text-[9px] mb-1.5">Syllabus File (1 PDF)</span>
-                    <div className="flex items-center gap-2 p-2 bg-[#0F0F12] border border-[#27272D] rounded text-xs">
+                    <div className="flex items-center gap-2 p-2 bg-surface border border-outline rounded text-xs">
                       <BookOpen size={14} className="text-primary shrink-0" />
                       <span className="font-bold text-white truncate flex-1">{validationResult.syllabus.fileName}</span>
                       <span className="text-[10px] text-on-surface-variant font-mono">
@@ -183,7 +183,7 @@ export function PyqAnalyzerPage() {
                     </span>
                     <div className="space-y-1.5">
                       {validationResult.pyqs.map((paper: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2 p-2 bg-[#0F0F12] border border-[#27272D] rounded text-xs">
+                        <div key={index} className="flex items-center gap-2 p-2 bg-surface border border-outline rounded text-xs">
                           <Cpu size={14} className="text-primary shrink-0" />
                           <span className="font-bold text-white truncate flex-1">{paper.fileName}</span>
                           <span className="text-[10px] text-on-surface-variant font-mono">
@@ -212,7 +212,7 @@ export function PyqAnalyzerPage() {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="flex items-center gap-2 rounded border border-[#27272D] hover:border-primary/50 hover:bg-[#16161A] px-5 h-11 text-xs font-bold text-white shadow transition-all cursor-pointer"
+                  className="flex items-center gap-2 rounded border border-outline hover:border-primary/50 hover:bg-surface-container px-5 h-11 text-xs font-bold text-white shadow transition-all cursor-pointer"
                 >
                   <RefreshCw size={14} /> Validate Another Upload
                 </button>

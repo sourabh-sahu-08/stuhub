@@ -339,11 +339,11 @@ export function AttendancePage() {
       `}</style>
 
       {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 no-print border-b border-[#27272D] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 no-print border-b border-outline pb-6">
         <div className="flex items-center gap-4">
           <Link
             to="/dashboard"
-            className="flex h-9 w-9 items-center justify-center rounded border border-[#27272D] bg-[#16161A] text-[#FAFAFA] transition hover:bg-[#1C1C21]"
+            className="flex h-9 w-9 items-center justify-center rounded border border-outline bg-surface-container text-zinc-50 transition hover:bg-surface-container-high"
             aria-label="Back to Dashboard"
           >
             <ArrowLeft size={16} />
@@ -355,9 +355,9 @@ export function AttendancePage() {
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {/* Simulation Toggle Switch */}
-          <div className="flex items-center gap-2 bg-[#16161A] border border-[#27272D] px-3 py-1.5 rounded">
+          <div className="flex items-center gap-2 bg-surface-container border border-outline px-3 py-1.5 rounded">
             <Sliders size={14} className="text-primary" />
-            <span className="text-[10px] font-bold font-mono text-[#A3A3A3] uppercase">Simulation (+5 classes)</span>
+            <span className="text-[10px] font-bold font-mono text-zinc-400 uppercase">Simulation (+5 classes)</span>
             <input
               type="checkbox"
               id="whatIfToggle"
@@ -369,7 +369,7 @@ export function AttendancePage() {
 
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 h-9 px-4 rounded bg-[#16161A] border border-[#27272D] text-[#FAFAFA] hover:bg-[#1C1C21] text-xs font-semibold font-mono"
+            className="flex items-center gap-2 h-9 px-4 rounded bg-surface-container border border-outline text-zinc-50 hover:bg-surface-container-high text-xs font-semibold font-mono"
           >
             <Printer size={14} /> PDF AUDIT
           </button>
@@ -394,7 +394,7 @@ export function AttendancePage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCalendarDate(new Date(year, month - 1, 1))}
-                className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white"
+                className="h-7 w-7 rounded border border-outline bg-surface-container flex items-center justify-center text-zinc-400 hover:text-white"
               >
                 <ChevronLeft size={14} />
               </button>
@@ -403,14 +403,14 @@ export function AttendancePage() {
               </span>
               <button
                 onClick={() => setCalendarDate(new Date(year, month + 1, 1))}
-                className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white"
+                className="h-7 w-7 rounded border border-outline bg-surface-container flex items-center justify-center text-zinc-400 hover:text-white"
               >
                 <ChevronRight size={14} />
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-[#A1A1AA] py-1 font-mono">
+          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-zinc-400 py-1 font-mono">
             <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
@@ -432,10 +432,10 @@ export function AttendancePage() {
                   onClick={() => cell.dateString && setSelectedDateStr(cell.dateString)}
                   className={`relative min-h-[38px] sm:min-h-[48px] p-1 rounded border flex flex-col items-center justify-between text-[10px] transition-all cursor-pointer ${
                     !cell.isCurrentMonth
-                      ? "border-transparent bg-transparent text-slate-800"
+                      ? "border-transparent bg-transparent text-zinc-800"
                       : isSelected
                       ? "border-primary bg-primary/10 text-primary shadow-sm"
-                      : "border-[#27272D] bg-[#16161A]/40 text-on-surface hover:border-[#808080]"
+                      : "border-outline bg-surface-container/40 text-on-surface hover:border-[#808080]"
                   }`}
                 >
                   <span className="font-bold font-mono self-start">{cell.day}</span>
@@ -477,8 +477,8 @@ export function AttendancePage() {
               const dayLog = logs.find(l => l.date === selectedDateStr && l.subjectId === sub.id);
               
               return (
-                <div key={sub.id} className="border-b border-[#27272D] pb-3 space-y-2 last:border-0 last:pb-0">
-                  <p className="text-xs font-semibold text-[#e2e2e2] truncate">{sub.name}</p>
+                <div key={sub.id} className="border-b border-outline pb-3 space-y-2 last:border-0 last:pb-0">
+                  <p className="text-xs font-semibold text-zinc-200 truncate">{sub.name}</p>
                   
                   <div className="flex gap-1">
                     <button
@@ -486,7 +486,7 @@ export function AttendancePage() {
                       className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
                         dayLog?.status === "attended"
                           ? "bg-emerald-500 text-black"
-                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
+                          : "bg-surface-container border border-outline text-zinc-400 hover:text-white"
                       }`}
                     >
                       Attended
@@ -496,7 +496,7 @@ export function AttendancePage() {
                       className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
                         dayLog?.status === "bunked"
                           ? "bg-red-500 text-white"
-                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
+                          : "bg-surface-container border border-outline text-zinc-400 hover:text-white"
                       }`}
                     >
                       Bunked
@@ -506,7 +506,7 @@ export function AttendancePage() {
                       className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
                         dayLog?.status === "leave"
                           ? "bg-amber-500 text-black"
-                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
+                          : "bg-surface-container border border-outline text-zinc-400 hover:text-white"
                       }`}
                     >
                       Leave
@@ -514,7 +514,7 @@ export function AttendancePage() {
                     {dayLog && (
                       <button
                         onClick={() => clearLog(selectedDateStr, sub.id)}
-                        className="h-7 w-7 rounded bg-[#16161A] border border-[#27272D] flex items-center justify-center text-xs text-[#A3A3A3] hover:text-red-500 transition cursor-pointer"
+                        className="h-7 w-7 rounded bg-surface-container border border-outline flex items-center justify-center text-xs text-zinc-400 hover:text-red-500 transition cursor-pointer"
                         title="Clear log"
                       >
                         ✖
@@ -526,7 +526,7 @@ export function AttendancePage() {
             })}
           </div>
 
-          <div className="rounded bg-[#16161A] border border-[#27272D] p-3 text-[10px] text-on-surface-variant flex items-start gap-2">
+          <div className="rounded bg-surface-container border border-outline p-3 text-[10px] text-on-surface-variant flex items-start gap-2">
             <Info size={14} className="shrink-0 text-primary mt-0.5" />
             <span className="leading-relaxed">Attended increments present & held. Bunked increments held only. Leave has no math impact.</span>
           </div>
@@ -573,18 +573,18 @@ export function AttendancePage() {
           <div className="panel p-5 flex-1 flex flex-col justify-between">
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-primary text-xl">calculate</span>
-              <h4 className="text-xs font-bold text-[#A3A3A3] uppercase tracking-wider font-mono">Bunk Probability Engine</h4>
+              <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">Bunk Probability Engine</h4>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="p-3 bg-[#0d0d0d] rounded border border-outline">
                 <p className="text-[10px] text-on-surface-variant font-mono uppercase">Safe to Skip</p>
                 <p className="text-3xl font-extrabold text-primary mt-1 font-mono">{String(consecutiveSkip).padStart(2, "0")}</p>
-                <p className="text-[9px] text-[#A1A1AA] mt-1 leading-snug">Consecutive classes possible before criteria check</p>
+                <p className="text-[9px] text-zinc-400 mt-1 leading-snug">Consecutive classes possible before criteria check</p>
               </div>
               <div className="p-3 bg-[#0d0d0d] rounded border border-outline">
                 <p className="text-[10px] text-on-surface-variant font-mono uppercase">Buffer Count</p>
                 <p className="text-3xl font-extrabold text-white mt-1 font-mono">{String(totalBuffer).padStart(2, "0")}</p>
-                <p className="text-[9px] text-[#A1A1AA] mt-1 leading-snug">Total leeway buffer remaining across modules</p>
+                <p className="text-[9px] text-zinc-400 mt-1 leading-snug">Total leeway buffer remaining across modules</p>
               </div>
             </div>
           </div>
@@ -595,9 +595,9 @@ export function AttendancePage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-primary text-xl">trending_up</span>
-              <h4 className="text-xs font-bold text-[#A3A3A3] uppercase tracking-wider font-mono">Subject Presence Check</h4>
+              <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">Subject Presence Check</h4>
             </div>
-            <span className="px-2 py-0.5 bg-[#16161A] border border-outline rounded font-mono text-[9px] text-on-surface-variant">CSE</span>
+            <span className="px-2 py-0.5 bg-surface-container border border-outline rounded font-mono text-[9px] text-on-surface-variant">CSE</span>
           </div>
           <div className="flex-1 w-full text-xs">
             <ResponsiveContainer width="100%" height="100%">
@@ -626,7 +626,7 @@ export function AttendancePage() {
       {/* Module breakdown title */}
       <div className="pt-2 flex items-center gap-md">
         <div className="h-[1px] flex-1 bg-[#27272D]"></div>
-        <h4 className="font-label-md text-xs text-[#A3A3A3] uppercase tracking-[0.3em] font-mono">Module-Specific Breakdown</h4>
+        <h4 className="font-label-md text-xs text-zinc-400 uppercase tracking-[0.3em] font-mono">Module-Specific Breakdown</h4>
         <div className="h-[1px] flex-1 bg-[#27272D]"></div>
       </div>
 
@@ -658,7 +658,7 @@ export function AttendancePage() {
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full h-1.5 bg-[#09090B] border border-outline overflow-hidden mb-4">
+                <div className="w-full h-1.5 bg-background border border-outline overflow-hidden mb-4">
                   <div className={`h-full ${barColor}`} style={{ width: `${Math.min(100, sub.percentage)}%` }} />
                 </div>
 
@@ -670,23 +670,23 @@ export function AttendancePage() {
                 )}
               </div>
 
-              <div className="mt-4 flex gap-3 pt-3 border-t border-[#27272D] no-print">
+              <div className="mt-4 flex gap-3 pt-3 border-t border-outline no-print">
                 <button
                   onClick={() => logQuickBunk(sub.id)}
-                  className="flex-1 py-1.5 bg-[#16161A] border border-[#27272D] text-white font-mono text-[10px] font-bold hover:bg-primary hover:text-black transition-all cursor-pointer"
+                  className="flex-1 py-1.5 bg-surface-container border border-outline text-white font-mono text-[10px] font-bold hover:bg-primary hover:text-black transition-all cursor-pointer"
                 >
                   LOG BUNK
                 </button>
                 <button
                   onClick={() => startEdit(sub)}
-                  className="p-1.5 bg-[#16161A] border border-[#27272D] text-[#A3A3A3] hover:text-white rounded cursor-pointer"
+                  className="p-1.5 bg-surface-container border border-outline text-zinc-400 hover:text-white rounded cursor-pointer"
                   title="Configure"
                 >
                   <Edit3 size={13} />
                 </button>
                 <button
                   onClick={() => deleteSubject(sub.id)}
-                  className="p-1.5 bg-[#16161A] border border-[#27272D] text-[#A3A3A3] hover:text-red-500 rounded cursor-pointer"
+                  className="p-1.5 bg-surface-container border border-outline text-zinc-400 hover:text-red-500 rounded cursor-pointer"
                   title="Delete"
                 >
                   <Trash2 size={13} />
@@ -705,7 +705,7 @@ export function AttendancePage() {
             setBaselineTotal("");
             setIsFormOpen(true);
           }}
-          className="panel border-dashed border-2 p-6 flex flex-col items-center justify-center text-on-surface-variant hover:text-primary hover:bg-[#16161A]/50 transition-all cursor-pointer min-h-[180px] no-print"
+          className="panel border-dashed border-2 p-6 flex flex-col items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container/50 transition-all cursor-pointer min-h-[180px] no-print"
         >
           <span className="material-symbols-outlined text-[40px] mb-2 text-primary">add_circle</span>
           <span className="text-xs uppercase font-bold tracking-wider font-mono">Configure New Module</span>
@@ -722,9 +722,9 @@ export function AttendancePage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md p-6 rounded border border-outline bg-[#0F0F12] text-[#e2e2e2] space-y-5 shadow-lg"
+              className="w-full max-w-md p-6 rounded border border-outline bg-surface text-zinc-200 space-y-5 shadow-lg"
             >
-              <div className="flex justify-between items-center pb-2 border-b border-[#27272D]">
+              <div className="flex justify-between items-center pb-2 border-b border-outline">
                 <h3 className="text-base font-bold text-white font-mono uppercase tracking-wider">
                   {editingId ? "Configure Subject Details" : "Add Course Subject"}
                 </h3>
@@ -745,7 +745,7 @@ export function AttendancePage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Database Systems"
-                    className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                    className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                   />
                 </div>
 
@@ -759,7 +759,7 @@ export function AttendancePage() {
                       value={baselineAttended}
                       onChange={(e) => setBaselineAttended(e.target.value === "" ? "" : Number(e.target.value))}
                       placeholder="e.g. 12"
-                      className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                      className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                     />
                   </div>
                   <div>
@@ -771,7 +771,7 @@ export function AttendancePage() {
                       value={baselineTotal}
                       onChange={(e) => setBaselineTotal(e.target.value === "" ? "" : Number(e.target.value))}
                       placeholder="e.g. 16"
-                      className="w-full h-11 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                      className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                     />
                   </div>
                 </div>
@@ -788,7 +788,7 @@ export function AttendancePage() {
                     step={5}
                     value={required}
                     onChange={(e) => setRequired(Number(e.target.value))}
-                    className="w-full h-1 bg-[#16161A] rounded-lg appearance-none cursor-pointer accent-primary"
+                    className="w-full h-1 bg-surface-container rounded-lg appearance-none cursor-pointer accent-primary"
                   />
                 </div>
 
@@ -796,7 +796,7 @@ export function AttendancePage() {
                   <button
                     type="button"
                     onClick={() => setIsFormOpen(false)}
-                    className="flex-1 h-10 rounded border border-[#27272D] text-[#FAFAFA] text-xs font-bold uppercase tracking-wider font-mono hover:bg-[#16161A] cursor-pointer"
+                    className="flex-1 h-10 rounded border border-outline text-zinc-50 text-xs font-bold uppercase tracking-wider font-mono hover:bg-surface-container cursor-pointer"
                   >
                     Cancel
                   </button>

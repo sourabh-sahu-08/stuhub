@@ -184,31 +184,31 @@ export function ModulePage() {
           <div className="space-y-8">
             {/* Stats Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+              <div className="bg-surface-container border border-outline p-5 rounded">
                 <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Folders Count</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-extrabold text-white">{folders.length}</span>
                   <span className="text-[10px] text-on-surface-variant font-mono">Subjects</span>
                 </div>
               </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+              <div className="bg-surface-container border border-outline p-5 rounded">
                 <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Storage Used</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-extrabold text-white">0.0 GB</span>
                   <span className="text-[10px] text-on-surface-variant font-mono">of 10 GB</span>
                 </div>
-                <div className="w-full h-1 bg-[#09090B] border border-outline mt-2 rounded overflow-hidden">
+                <div className="w-full h-1 bg-background border border-outline mt-2 rounded overflow-hidden">
                   <div className="h-full bg-primary" style={{ width: "0%" }}></div>
                 </div>
               </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+              <div className="bg-surface-container border border-outline p-5 rounded">
                 <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Real-time Streak</p>
                 <div className="flex items-center gap-1.5 mt-1">
                   <Flame size={14} className="text-primary animate-pulse" />
                   <span className="text-xs text-white">{streakDays} Days</span>
                 </div>
               </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+              <div className="bg-surface-container border border-outline p-5 rounded">
                 <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">AI Summaries</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-extrabold text-white">0</span>
@@ -224,7 +224,7 @@ export function ModulePage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsNewFolderOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#16161A] border border-[#27272D] text-xs font-bold text-[#e2e2e2] hover:border-primary/50 transition-all cursor-pointer font-mono"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container border border-outline text-xs font-bold text-zinc-200 hover:border-primary/50 transition-all cursor-pointer font-mono"
                   >
                     <FolderPlus size={14} /> NEW FOLDER
                   </button>
@@ -234,7 +234,7 @@ export function ModulePage() {
               {folders.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {folders.map((fold, idx) => (
-                    <div key={idx} className="bg-[#0F0F12] border border-[#27272D] hover:border-[#808080] p-5 rounded transition-all cursor-pointer group flex flex-col justify-between">
+                    <div key={idx} className="bg-surface border border-outline hover:border-[#808080] p-5 rounded transition-all cursor-pointer group flex flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between mb-4">
                           <Folder className="text-[#FFA31A]" size={36} fill="#FFA31A" />
@@ -244,7 +244,7 @@ export function ModulePage() {
                         </div>
                         <h4 className="text-sm font-bold text-white">{fold.name}</h4>
                       </div>
-                      <div className="mt-4 pt-3 border-t border-[#27272D] space-y-1">
+                      <div className="mt-4 pt-3 border-t border-outline space-y-1">
                         <div className="flex items-center justify-between text-[10px] text-on-surface-variant">
                           <span>Logs Count</span>
                           <span className="text-white font-semibold font-mono">{fold.count}</span>
@@ -268,17 +268,17 @@ export function ModulePage() {
             <div className="space-y-4 pt-4">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Recently Modified Files</h3>
               {libraryFiles.length > 0 ? (
-                <div className="border border-[#27272D] bg-[#0F0F12] rounded overflow-x-auto">
+                <div className="border border-outline bg-surface rounded overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-[#16161A] border-b border-[#27272D] font-mono text-[9px] uppercase tracking-wider text-on-surface-variant">
+                      <tr className="bg-surface-container border-b border-outline font-mono text-[9px] uppercase tracking-wider text-on-surface-variant">
                         <th className="px-5 py-3 font-bold">Name</th>
                         <th className="px-5 py-3 font-bold">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#27272D] text-[#e2e2e2]">
+                    <tbody className="divide-y divide-[#27272D] text-zinc-200">
                       {libraryFiles.map((file, idx) => (
-                        <tr key={idx} className="hover:bg-[#16161A]/30">
+                        <tr key={idx} className="hover:bg-surface-container/30">
                           <td className="px-5 py-3 flex items-center gap-2">
                             <FileText className="text-primary" size={14} />
                             <span className="font-semibold">{file.title}</span>
@@ -304,9 +304,9 @@ export function ModulePage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="w-full max-w-sm p-6 rounded border border-outline bg-[#0F0F12] text-[#e2e2e2] space-y-5"
+                    className="w-full max-w-sm p-6 rounded border border-outline bg-surface text-zinc-200 space-y-5"
                   >
-                    <div className="flex justify-between items-center pb-2 border-b border-[#27272D]">
+                    <div className="flex justify-between items-center pb-2 border-b border-outline">
                       <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">Configure New Folder</h3>
                       <button onClick={() => setIsNewFolderOpen(false)} className="text-on-surface-variant hover:text-white cursor-pointer">✖</button>
                     </div>
@@ -319,14 +319,14 @@ export function ModulePage() {
                           value={newFolderName}
                           onChange={(e) => setNewFolderName(e.target.value)}
                           placeholder="e.g. Computer Networks"
-                          className="w-full h-10 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                          className="w-full h-10 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                         />
                       </div>
                       <div className="flex gap-2.5 pt-2">
                         <button
                           type="button"
                           onClick={() => setIsNewFolderOpen(false)}
-                          className="flex-1 h-9 rounded border border-[#27272D] text-[#FAFAFA] text-xs font-semibold uppercase tracking-wider font-mono hover:bg-[#16161A] cursor-pointer"
+                          className="flex-1 h-9 rounded border border-outline text-zinc-50 text-xs font-semibold uppercase tracking-wider font-mono hover:bg-surface-container cursor-pointer"
                         >
                           Cancel
                         </button>
@@ -353,16 +353,16 @@ export function ModulePage() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">September 2024</h3>
                 <div className="flex gap-1.5">
-                  <button className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white">
+                  <button className="h-7 w-7 rounded border border-outline bg-surface-container flex items-center justify-center text-zinc-400 hover:text-white">
                     <ChevronLeft size={14} />
                   </button>
-                  <button className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white">
+                  <button className="h-7 w-7 rounded border border-outline bg-surface-container flex items-center justify-center text-zinc-400 hover:text-white">
                     <ChevronRight size={14} />
                   </button>
                 </div>
               </div>
               
-              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-[#A1A1AA] py-1 font-mono">
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-zinc-400 py-1 font-mono">
                 <span>Mon</span>
                 <span>Tue</span>
                 <span>Wed</span>
@@ -371,7 +371,7 @@ export function ModulePage() {
                 <span className="text-primary">Sat</span>
                 <span className="text-primary">Sun</span>
               </div>
-              <div className="grid grid-cols-7 gap-1 border-t border-l border-[#27272D] mt-2">
+              <div className="grid grid-cols-7 gap-1 border-t border-l border-outline mt-2">
                 {Array.from({ length: 30 }, (_, i) => {
                   const day = i + 1;
                   const isToday = day === 12;
@@ -379,8 +379,8 @@ export function ModulePage() {
                   return (
                     <div
                       key={day}
-                      className={`h-16 sm:h-24 border-r border-b border-[#27272D] p-1.5 text-xs text-on-surface-variant font-mono hover:bg-[#16161A]/40 transition-colors flex flex-col justify-between ${
-                        isToday ? "bg-[#16161A] border-t-2 border-t-primary" : ""
+                      className={`h-16 sm:h-24 border-r border-b border-outline p-1.5 text-xs text-on-surface-variant font-mono hover:bg-surface-container/40 transition-colors flex flex-col justify-between ${
+                        isToday ? "bg-surface-container border-t-2 border-t-primary" : ""
                       }`}
                     >
                       <div className="flex justify-between items-center">
@@ -397,7 +397,7 @@ export function ModulePage() {
             <div className="lg:col-span-4 flex flex-col gap-6">
               <h3 className="text-sm font-bold text-white flex items-center justify-between font-mono uppercase tracking-wider">
                 Upcoming Events
-                <span className="font-mono text-[9px] bg-[#16161A] px-2 py-0.5 rounded border border-[#27272D] text-[#A3A3A3]">0 Active</span>
+                <span className="font-mono text-[9px] bg-surface-container px-2 py-0.5 rounded border border-outline text-zinc-400">0 Active</span>
               </h3>
 
               <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
@@ -412,7 +412,7 @@ export function ModulePage() {
           <div className="space-y-6 max-w-3xl">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Notification Logs</h3>
-              <span className="font-mono text-[9px] bg-[#16161A] border border-[#27272D] text-on-surface-variant px-2 py-0.5 rounded uppercase">
+              <span className="font-mono text-[9px] bg-surface-container border border-outline text-on-surface-variant px-2 py-0.5 rounded uppercase">
                 {notices.length} Alerts
               </span>
             </div>
@@ -426,7 +426,7 @@ export function ModulePage() {
                       <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">Attendance Warning</h4>
                       <span className="text-[8px] font-mono text-red-500 uppercase font-bold px-1 bg-red-500/10 rounded">Urgent</span>
                     </div>
-                    <p className="text-xs text-[#e2e2e2] mt-1.5">
+                    <p className="text-xs text-zinc-200 mt-1.5">
                       Your overall attendance aggregate is currently {overallAttPct.toFixed(1)}%, which is below the mandatory 75% baseline requirement. Review your attendance matrix to log future sessions.
                     </p>
                     <p className="text-[9px] text-on-surface-variant font-mono uppercase mt-2">Source: Client-Side Attendance Engine</p>
@@ -436,13 +436,13 @@ export function ModulePage() {
 
               {notices.length > 0 ? (
                 notices.map((notice: any, idx: number) => (
-                  <div key={idx} className="p-5 bg-[#16161A] rounded border border-outline flex gap-4 items-start">
+                  <div key={idx} className="p-5 bg-surface-container rounded border border-outline flex gap-4 items-start">
                     <span className="material-symbols-outlined text-primary mt-0.5">campaign</span>
                     <div>
                       <div className="flex items-center gap-2">
                         <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">{notice.title}</h4>
                       </div>
-                      <p className="text-xs text-[#e2e2e2] mt-1.5">{notice.content}</p>
+                      <p className="text-xs text-zinc-200 mt-1.5">{notice.content}</p>
                     </div>
                   </div>
                 ))
@@ -485,7 +485,7 @@ export function ModulePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column: Academic Credentials */}
               <div className="panel p-6 space-y-4">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono border-b border-[#27272D] pb-2">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono border-b border-outline pb-2">
                   Academic Profile
                 </h3>
                 
@@ -524,14 +524,14 @@ export function ModulePage() {
               {/* Right Column: Statistics & Highlights */}
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-[#16161A] border border-[#27272D] p-5 rounded flex flex-col justify-between h-28">
+                  <div className="bg-surface-container border border-outline p-5 rounded flex flex-col justify-between h-28">
                     <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider font-mono">Study Streak</p>
                     <div className="flex items-center gap-2 mt-1">
                       <Flame className="text-primary animate-pulse" size={20} fill="#F5A524" />
                       <span className="text-2xl font-extrabold text-white">{streakDays} Days</span>
                     </div>
                   </div>
-                  <div className="bg-[#16161A] border border-[#27272D] p-5 rounded flex flex-col justify-between h-28">
+                  <div className="bg-surface-container border border-outline p-5 rounded flex flex-col justify-between h-28">
                     <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider font-mono">Avg Attendance</p>
                     <div>
                       <span className="text-2xl font-extrabold text-white">{overallAttPct > 0 ? `${overallAttPct.toFixed(1)}%` : "0%"}</span>
@@ -544,7 +544,7 @@ export function ModulePage() {
 
                 {/* Courses section from actual localStorage */}
                 <div className="panel p-5 space-y-4">
-                  <h4 className="text-xs font-bold text-[#A3A3A3] uppercase tracking-wider font-mono border-b border-[#27272D] pb-2">
+                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono border-b border-outline pb-2">
                     Subject Presence Overview
                   </h4>
                   {subjects.length > 0 ? (
@@ -559,7 +559,7 @@ export function ModulePage() {
                         const pct = total > 0 ? (attended / total) * 100 : 0;
 
                         return (
-                          <div key={sub.id} className="flex items-center justify-between text-xs py-1 border-b border-[#27272D]/50 last:border-0 last:pb-0">
+                          <div key={sub.id} className="flex items-center justify-between text-xs py-1 border-b border-outline/50 last:border-0 last:pb-0">
                             <span className="text-white truncate max-w-[180px] font-medium">{sub.name}</span>
                             <span className={`font-mono font-bold ${pct >= 75 ? "text-primary" : "text-red-500"}`}>
                               {pct.toFixed(1)}%
@@ -589,7 +589,7 @@ export function ModulePage() {
                 className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
                   settingsTab === "general"
                     ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-[#27272D] bg-[#16161A] text-on-surface-variant hover:text-white"
+                    : "border-outline bg-surface-container text-on-surface-variant hover:text-white"
                 }`}
               >
                 <span>General</span>
@@ -600,7 +600,7 @@ export function ModulePage() {
                 className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
                   settingsTab === "security"
                     ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-[#27272D] bg-[#16161A] text-on-surface-variant hover:text-white"
+                    : "border-outline bg-surface-container text-on-surface-variant hover:text-white"
                 }`}
               >
                 <span>Security</span>
@@ -611,7 +611,7 @@ export function ModulePage() {
                 className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
                   settingsTab === "notifications"
                     ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-[#27272D] bg-[#16161A] text-on-surface-variant hover:text-white"
+                    : "border-outline bg-surface-container text-on-surface-variant hover:text-white"
                 }`}
               >
                 <span>Signals</span>
@@ -626,7 +626,7 @@ export function ModulePage() {
                   <div>
                     <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mb-3">Visual Architecture</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 bg-[#16161A] border-2 border-primary rounded relative">
+                      <div className="p-4 bg-surface-container border-2 border-primary rounded relative">
                         <div className="flex justify-between items-start mb-2">
                           <h4 className="text-xs font-bold text-primary font-mono uppercase">Kinetic Obsidian</h4>
                           <span className="material-symbols-outlined text-primary text-base">check_circle</span>
@@ -634,8 +634,8 @@ export function ModulePage() {
                         <p className="text-[10px] text-on-surface-variant">High-contrast tactical interface designed for peak cognitive focus.</p>
                         <div className="absolute top-0 right-0 px-2 py-0.5 bg-primary text-black font-bold font-mono text-[8px]">ACTIVE</div>
                       </div>
-                      <div className="p-4 bg-[#16161A] border border-[#27272D] opacity-40 rounded grayscale cursor-not-allowed">
-                        <h4 className="text-xs font-bold text-[#A3A3A3] font-mono uppercase">Nova Static</h4>
+                      <div className="p-4 bg-surface-container border border-outline opacity-40 rounded grayscale cursor-not-allowed">
+                        <h4 className="text-xs font-bold text-zinc-400 font-mono uppercase">Nova Static</h4>
                         <p className="text-[10px] text-on-surface-variant">Monochrome blueprint aesthetic. Unavailable in current build.</p>
                       </div>
                     </div>
@@ -643,7 +643,7 @@ export function ModulePage() {
 
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[#808080] mb-2 font-mono">System Language</label>
-                    <select className="w-full max-w-xs h-10 rounded border border-outline bg-[#16161A] px-3 text-xs text-white focus:outline-none focus:border-primary">
+                    <select className="w-full max-w-xs h-10 rounded border border-outline bg-surface-container px-3 text-xs text-white focus:outline-none focus:border-primary">
                       <option>English (Technical / US)</option>
                       <option>Mandarin (Simplified)</option>
                       <option>German (Precision)</option>
@@ -654,9 +654,9 @@ export function ModulePage() {
                   <div>
                     <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mb-3">Profile Privacy</h3>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3.5 bg-[#16161A] border border-[#27272D] rounded">
+                      <div className="flex items-center justify-between p-3.5 bg-surface-container border border-outline rounded">
                         <div>
-                          <p className="text-xs font-bold text-[#e2e2e2]">Stealth Mode</p>
+                          <p className="text-xs font-bold text-zinc-200">Stealth Mode</p>
                           <p className="text-[10px] text-on-surface-variant">Hide your current activity from peers in study groups.</p>
                         </div>
                         <button onClick={() => setStealthMode(!stealthMode)} className="text-primary hover:opacity-85 cursor-pointer">
@@ -664,9 +664,9 @@ export function ModulePage() {
                         </button>
                       </div>
 
-                      <div className="flex items-center justify-between p-3.5 bg-[#16161A] border border-[#27272D] rounded">
+                      <div className="flex items-center justify-between p-3.5 bg-surface-container border border-outline rounded">
                         <div>
-                          <p className="text-xs font-bold text-[#e2e2e2]">Public Node Discovery</p>
+                          <p className="text-xs font-bold text-zinc-200">Public Node Discovery</p>
                           <p className="text-[10px] text-on-surface-variant">Allow students with similar course IDs to find your profile.</p>
                         </div>
                         <button onClick={() => setPublicDiscovery(!publicDiscovery)} className="text-primary hover:opacity-85 cursor-pointer">
@@ -681,11 +681,11 @@ export function ModulePage() {
               {settingsTab === "security" && (
                 <div className="space-y-6">
                   <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Access Protocols</h3>
-                  <div className="p-5 border border-[#27272D] bg-[#16161A] rounded flex gap-4 items-start">
+                  <div className="p-5 border border-outline bg-surface-container rounded flex gap-4 items-start">
                     <Shield className="text-primary mt-0.5" size={24} />
                     <div className="space-y-3">
                       <div>
-                        <h4 className="text-xs font-bold text-[#e2e2e2]">Biometric Passkeys</h4>
+                        <h4 className="text-xs font-bold text-zinc-200">Biometric Passkeys</h4>
                         <p className="text-[10px] text-on-surface-variant mt-0.5">Secure your Student OS portal with hardware passkey validation.</p>
                       </div>
                       <button className="bg-primary text-black font-mono text-[9px] font-bold px-3 py-1.5 rounded uppercase tracking-wider hover:opacity-90 cursor-pointer">
@@ -701,15 +701,15 @@ export function ModulePage() {
                   <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Signal Distribution</h3>
                   <div className="divide-y divide-[#27272D] text-xs">
                     <div className="flex items-center justify-between py-3">
-                      <span className="text-[#e2e2e2]">Real-time Deadlines Signals</span>
+                      <span className="text-zinc-200">Real-time Deadlines Signals</span>
                       <span className="text-primary"><ToggleRight size={22} /></span>
                     </div>
                     <div className="flex items-center justify-between py-3">
-                      <span className="text-[#e2e2e2]">AI Analyzer Insights Logs</span>
+                      <span className="text-zinc-200">AI Analyzer Insights Logs</span>
                       <span className="text-primary"><ToggleRight size={22} /></span>
                     </div>
                     <div className="flex items-center justify-between py-3">
-                      <span className="text-[#e2e2e2]">Peer Share Notifications</span>
+                      <span className="text-zinc-200">Peer Share Notifications</span>
                       <span className="text-primary"><ToggleRight size={22} /></span>
                     </div>
                   </div>
@@ -745,10 +745,10 @@ export function ModulePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4 border-b border-[#27272D] pb-6 no-print">
+      <div className="flex items-center gap-4 border-b border-outline pb-6 no-print">
         <Link
           to="/dashboard"
-          className="flex h-9 w-9 items-center justify-center rounded border border-[#27272D] bg-[#16161A] text-[#FAFAFA] transition hover:bg-[#1C1C21]"
+          className="flex h-9 w-9 items-center justify-center rounded border border-outline bg-surface-container text-zinc-50 transition hover:bg-surface-container-high"
           aria-label="Back to Dashboard"
         >
           <ArrowLeft size={16} />

@@ -124,7 +124,7 @@ export function AppShell() {
               className="h-8 w-8 object-contain shrink-0"
             />
 
-            <h1 className="truncate text-lg font-bold tracking-tight text-[#FAFAFA]">
+            <h1 className="truncate text-lg font-bold tracking-tight text-zinc-50">
               StuHub
             </h1>
           </Link>
@@ -133,7 +133,7 @@ export function AppShell() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(false)}
-              className="rounded-md p-2 text-[#A1A1AA] transition-colors hover:bg-[#1C1C21] hover:text-[#FAFAFA] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]"
+              className="rounded-md p-2 text-zinc-400 transition-colors hover:bg-surface-container-high hover:text-zinc-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]"
               aria-label="Close navigation"
             >
               <X size={20} />
@@ -143,9 +143,15 @@ export function AppShell() {
 
         {/* Navigation */}
         <nav className="space-y-6" aria-label="Primary navigation">
-          {navGroups.map((group) => (
+          {[
+            ...navGroups,
+            ...(user?.role === 'admin' ? [{
+              groupName: "ADMINISTRATION",
+              items: [{ label: "Admin Panel", path: "/dashboard/admin", materialIcon: "admin_panel_settings", icon: undefined }]
+            }] : [])
+          ].map((group) => (
             <div key={group.groupName}>
-              <p className="mb-2 px-2 text-[10px] uppercase tracking-[0.2em] text-[#71717A]">
+              <p className="mb-2 px-2 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
                 {group.groupName}
               </p>
 
@@ -164,8 +170,8 @@ export function AppShell() {
                         "transition-colors duration-150",
                         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]",
                         isActive
-                          ? "font-semibold text-[#FAFAFA]"
-                          : "text-[#71717A] hover:bg-[#16161A] hover:text-[#FAFAFA]",
+                          ? "font-semibold text-zinc-50"
+                          : "text-zinc-500 hover:bg-surface-container hover:text-zinc-50",
                       ].join(" ")
                     }
                   >
@@ -180,7 +186,7 @@ export function AppShell() {
                             "material-symbols-outlined shrink-0 text-[20px]",
                             isActive
                               ? "text-[#F5A524]"
-                              : "text-[#71717A]",
+                              : "text-zinc-500",
                           ].join(" ")}
                         >
                           {item.materialIcon}
@@ -200,10 +206,10 @@ export function AppShell() {
       </div>
 
       {/* Footer */}
-      <div className="mt-8 flex items-center gap-2 border-t border-[#27272D] pt-4">
+      <div className="mt-8 flex items-center gap-2 border-t border-outline pt-4">
         <span className="h-2 w-2 shrink-0 rounded-full bg-[#22C55E]" />
 
-        <span className="truncate text-[10px] uppercase tracking-wider text-[#A1A1AA]">
+        <span className="truncate text-[10px] uppercase tracking-wider text-zinc-400">
           Connected as {user?.role}
         </span>
       </div>
@@ -211,13 +217,13 @@ export function AppShell() {
   );
 
   return (
-    <div className="min-h-[100dvh] w-full overflow-x-hidden bg-[#09090B] text-[#E2E2E2]">
+    <div className="min-h-[100dvh] w-full overflow-x-hidden bg-background text-zinc-200">
       <div className="flex min-h-[100dvh] w-full">
         {/* =====================================================
             DESKTOP SIDEBAR
             Completely removed below md breakpoint
         ====================================================== */}
-        <aside className="hidden h-[100dvh] w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-[#27272D] bg-[#0F0F12] p-6 md:sticky md:top-0 md:flex">
+        <aside className="hidden h-[100dvh] w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-outline bg-surface p-6 md:sticky md:top-0 md:flex">
           <NavigationContent />
         </aside>
 
@@ -247,7 +253,7 @@ export function AppShell() {
                   duration: 0.25,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                className="fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-[min(82vw,300px)] flex-col justify-between overflow-y-auto border-r border-[#27272D] bg-[#0F0F12] p-6 md:hidden"
+                className="fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-[min(82vw,300px)] flex-col justify-between overflow-y-auto border-r border-outline bg-surface p-6 md:hidden"
               >
                 <NavigationContent mobile />
               </motion.aside>
@@ -260,14 +266,14 @@ export function AppShell() {
         ====================================================== */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[#27272D] bg-black/85 px-4 backdrop-blur-md sm:px-6">
+          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-outline bg-black/85 px-4 backdrop-blur-md sm:px-6">
             {/* Left side */}
             <div className="flex min-w-0 flex-1 items-center gap-3">
               {/* Mobile menu button */}
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="shrink-0 rounded-md p-2 text-[#A1A1AA] transition-colors hover:bg-[#16161A] hover:text-[#F5A524] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524] md:hidden"
+                className="shrink-0 rounded-md p-2 text-zinc-400 transition-colors hover:bg-surface-container hover:text-[#F5A524] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524] md:hidden"
                 aria-label="Open navigation"
               >
                 <Menu size={20} />
@@ -291,14 +297,14 @@ export function AppShell() {
 
               {/* Desktop search */}
               <div className="relative hidden w-full max-w-sm md:block">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-[#71717A]">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-zinc-500">
                   search
                 </span>
 
                 <input
                   type="text"
                   placeholder="Search Workspace..."
-                  className="w-full rounded-md border border-[#27272D] bg-[#16161A] py-2 pl-10 pr-3 text-xs text-[#E2E2E2] outline-none transition-colors placeholder:text-[#71717A] focus:border-[#F5A524]"
+                  className="w-full rounded-md border border-outline bg-surface-container py-2 pl-10 pr-3 text-xs text-zinc-200 outline-none transition-colors placeholder:text-zinc-500 focus:border-[#F5A524]"
                 />
               </div>
             </div>
@@ -314,7 +320,7 @@ export function AppShell() {
                   onClick={() =>
                     setProfileDropdownOpen((current) => !current)
                   }
-                  className="flex items-center gap-2 rounded-md border border-[#27272D] bg-[#16161A] p-1.5 transition-colors hover:border-[#52525B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524] md:px-3"
+                  className="flex items-center gap-2 rounded-md border border-outline bg-surface-container p-1.5 transition-colors hover:border-[#52525B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524] md:px-3"
                   aria-expanded={profileDropdownOpen}
                   aria-label="Open profile menu"
                 >
@@ -331,18 +337,18 @@ export function AppShell() {
                   </div>
 
                   <div className="hidden min-w-0 flex-col text-left md:flex">
-                    <span className="max-w-[110px] truncate text-xs font-semibold text-[#FAFAFA]">
+                    <span className="max-w-[110px] truncate text-xs font-semibold text-zinc-50">
                       {user?.name}
                     </span>
 
-                    <span className="text-[9px] uppercase tracking-wider text-[#A1A1AA]">
+                    <span className="text-[9px] uppercase tracking-wider text-zinc-400">
                       {user?.role}
                     </span>
                   </div>
 
                   <ChevronDown
                     size={13}
-                    className="hidden shrink-0 text-[#71717A] md:block"
+                    className="hidden shrink-0 text-zinc-500 md:block"
                   />
                 </button>
 
@@ -353,14 +359,14 @@ export function AppShell() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.98 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-[min(14rem,calc(100vw-2rem))] rounded-md border border-[#27272D] bg-[#0F0F12] p-2.5 shadow-2xl"
+                      className="absolute right-0 mt-2 w-[min(14rem,calc(100vw-2rem))] rounded-md border border-outline bg-surface p-2.5 shadow-2xl"
                     >
-                      <div className="border-b border-[#27272D] px-2 pb-2 pt-1">
+                      <div className="border-b border-outline px-2 pb-2 pt-1">
                         <p className="truncate text-xs font-bold text-white">
                           {user?.name}
                         </p>
 
-                        <p className="mt-0.5 truncate font-mono text-[10px] text-[#71717A]">
+                        <p className="mt-0.5 truncate font-mono text-[10px] text-zinc-500">
                           {user?.email}
                         </p>
                       </div>
@@ -369,7 +375,7 @@ export function AppShell() {
                         <Link
                           to="/dashboard/profile"
                           onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-2 rounded-md p-2 text-xs text-[#E2E2E2] transition-colors hover:bg-[#16161A]"
+                          className="flex items-center gap-2 rounded-md p-2 text-xs text-zinc-200 transition-colors hover:bg-surface-container"
                         >
                           <UserIcon
                             size={14}
@@ -403,12 +409,12 @@ export function AppShell() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-4 left-4 right-4 z-[60] rounded-md border border-[#27272D] bg-[#16161A] p-4 shadow-lg sm:left-auto sm:right-6 sm:max-w-sm">
+        <div className="fixed bottom-4 left-4 right-4 z-[60] rounded-md border border-outline bg-surface-container p-4 shadow-lg sm:left-auto sm:right-6 sm:max-w-sm">
           <p className="text-sm font-bold text-[#F5A524]">
             {toast.title}
           </p>
 
-          <p className="mt-1 text-xs text-[#A3A3A3]">
+          <p className="mt-1 text-xs text-zinc-400">
             {toast.body}
           </p>
         </div>
