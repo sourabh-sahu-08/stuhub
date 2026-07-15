@@ -112,7 +112,7 @@ export function AppShell() {
         {/* Logo */}
         <div className="mb-8 flex items-center justify-between">
           <Link
-            to="/dashboard"
+            to="/"
             className="flex min-w-0 items-center gap-2 select-none"
             onClick={() => {
               if (mobile) setMobileMenuOpen(false);
@@ -281,7 +281,7 @@ export function AppShell() {
 
               {/* Mobile logo */}
               <Link
-                to="/dashboard"
+                to="/"
                 className="flex min-w-0 items-center gap-2 md:hidden"
               >
                 <img 
