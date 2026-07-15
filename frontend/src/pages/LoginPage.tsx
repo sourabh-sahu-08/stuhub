@@ -267,9 +267,9 @@ export function LoginPage() {
   }, [activeFeature]);
 
   // Auth Form States
-  const [name, setName] = useState("Riya Sharma");
-  const [email, setEmail] = useState("student@stuhub.edu");
-  const [password, setPassword] = useState("password123");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
