@@ -487,7 +487,7 @@ export function LoginPage() {
     <div className="min-h-screen bg-black text-white font-sans selection:bg-brand-500 selection:text-white">
       {/* 1. Header Nav */}
       <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-[#272727] px-6 py-4 flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-3 select-none">
+        <a href="/" className="flex items-center gap-3 select-none cursor-pointer">
           <img 
             src="/fvicon.png" 
             alt="Stuhub Logo" 
@@ -497,7 +497,7 @@ export function LoginPage() {
             <span className="font-extrabold text-2xl tracking-tight text-white leading-none">Stuhub</span>
             <span className="font-bold text-[10px] tracking-widest text-primary leading-none mt-1">STUDENT PORTAL</span>
           </div>
-        </div>
+        </a>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-300">
           <a href="#home" className="hover:text-brand-500 transition-colors duration-200">Home</a>
