@@ -541,36 +541,49 @@ export function LoginPage() {
       </header>
 
       {/* 2. Hero Section */}
-      <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden">
-        {/* Background Image with Blurred Gradient Overlay */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
-          
-          {/* Glowing colorful ambient background blobs */}
-          <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-brand-500/10 blur-[120px] -z-10 animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-purple-500/10 blur-[120px] -z-10 animate-pulse" style={{ animationDuration: '4s' }} />
+      <style>{`
+        @keyframes scanMove { 0% { top: -2px; } 100% { top: 100%; } }
+        .stitch-scanline { position: absolute; left: 0; width: 100%; height: 2px; background: rgba(255,144,0,0.08); animation: scanMove 6s linear infinite; pointer-events: none; }
+        @keyframes gridFadeIn { from { opacity: 0; } to { opacity: 1; } }
+      `}</style>
+      <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden bg-black">
+        {/* Structural background: scanline + grid columns */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {/* Scanline sweep */}
+          <div className="stitch-scanline" />
+          {/* Structural vertical grid lines */}
+          <div className="absolute inset-0 grid grid-cols-6 opacity-[0.04]">
+            {[...Array(5)].map((_, i) => <div key={i} className="border-r border-[#FF9000]" />)}
+          </div>
+          {/* Subtle ambient glow — orange only, no purple */}
+          <div className="absolute top-1/3 left-1/4 h-[500px] w-[500px] rounded-full bg-[#FF9000]/5 blur-[160px] pointer-events-none" />
+          <div className="absolute bottom-1/4 right-1/5 h-[400px] w-[400px] rounded-full bg-[#FF9000]/5 blur-[140px] pointer-events-none" />
         </div>
 
         <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column: Heading & Controls (7 cols) */}
           <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
-            {/* Active Badge */}
+            {/* Active Badge — Stitch Obsidian Pulse mono tag */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 100 }}
-              className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-bold text-brand-500 select-none shadow-[0_0_15px_rgba(99,102,241,0.15)]"
+              className="inline-flex items-center gap-2 border border-[#FF9000]/40 bg-[#FF9000]/8 px-4 py-1.5 select-none"
             >
-              <span className="h-2.5 w-2.5 rounded-full bg-brand-500 animate-pulse" />
-              STUHUB STUDENT ENVIRONMENT IS ACTIVE
+              <span className="h-2 w-2 rounded-full bg-[#FF9000] animate-pulse" />
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.08em', fontWeight: 500, color: '#FF9000', textTransform: 'uppercase' }}>
+                V2.0 // SYSTEM_STABLE
+              </span>
             </motion.div>
 
-            {/* Heading */}
-            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
-              The Command Center for <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-zinc-200 to-brand-400">
-                Academic Success
-              </span>
+            {/* Heading — sharp, tight tracking */}
+            <h1 className="text-5xl sm:text-7xl font-extrabold tracking-[-0.03em] leading-[1.0] text-white">
+              The Command
+              <br />
+              <span className="text-[#FF9000]">Center</span> for
+              <br />
+              Academic{" "}
+              <span style={{ color: '#e2e2e2', fontWeight: 700 }}>Success.</span>
             </h1>
 
             {/* Subtitle */}
@@ -598,12 +611,21 @@ export function LoginPage() {
               </button>
             </form>
 
-            {/* Checkmarks */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-zinc-200 font-semibold select-none pt-2">
-              {["Assignments Tracker", "Attendance Watch", "Digital Library", "Groq PYQ Analyzer"].map((item) => (
-                <div key={item} className="flex items-center gap-2 bg-[#0a0a0a]/40 border border-[#272727] px-3 py-1.5 rounded-full backdrop-blur-sm">
-                  <CheckCircle2 className="text-brand-500" size={14} />
-                  {item}
+            {/* Module Tags — Stitch sharp rectangular style */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
+              {[
+                { label: "ASSIGNMENTS", tag: "COMPUTE_ACTIVE" },
+                { label: "ATTENDANCE", tag: "SYNC_READY" },
+                { label: "DIGITAL LIBRARY", tag: "INDEX_OK" },
+                { label: "PYQ ANALYZER", tag: "AI_ONLINE" },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-0 border border-[#333333] overflow-hidden group hover:border-[#FF9000]/50 transition-colors duration-300">
+                  <div className="bg-[#FF9000] px-2 py-1.5">
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', fontWeight: 700, color: '#000', letterSpacing: '0.08em' }}>{item.label}</span>
+                  </div>
+                  <div className="bg-[#1B1B1B] px-2 py-1.5">
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', fontWeight: 500, color: '#808080', letterSpacing: '0.06em' }}>{item.tag}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -757,10 +779,14 @@ export function LoginPage() {
 
       {/* 3. Platform Overview Section */}
       <section id="features" className="py-24 px-6 max-w-6xl mx-auto space-y-16">
-        <div className="text-center space-y-3">
-          <span className="text-xs uppercase tracking-[0.25em] text-brand-500 font-extrabold">Workspace Modules</span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Dynamic Workspace Overview</h2>
-          <p className="text-zinc-400 text-sm max-w-xl mx-auto">Click on any module to preview its live interactive mock-up and core student workflows.</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 w-16 bg-[#333333]" />
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.12em', fontWeight: 500, color: '#FF9000', textTransform: 'uppercase' }}>Core Modules // 001 — 004</span>
+            <div className="h-px flex-1 w-16 bg-[#333333]" />
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-[-0.02em]">System Architecture</h2>
+          <p className="text-zinc-500 text-sm max-w-xl mx-auto" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', letterSpacing: '0.02em' }}>Select any module to interface with its live interactive preview and core student workflows.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
@@ -773,23 +799,23 @@ export function LoginPage() {
                 <button
                   key={feat.title}
                   onClick={() => setActiveFeature(idx)}
-                  className={`relative flex items-start gap-4 p-4 rounded-xl border text-left transition-all duration-300 overflow-hidden ${
+                  className={`relative flex items-start gap-4 p-4 border text-left transition-all duration-300 overflow-hidden ${
                     isActive
-                      ? "bg-[#0a0a0a]/60 border-brand-500/35 shadow-[0_8px_30px_rgba(99,102,241,0.12)]"
-                      : "bg-[#0a0a0a]/10 border-[#272727] hover:border-[#333333] hover:bg-[#0a0a0a]/20"
+                      ? "bg-[#1B1B1B] border-[#FF9000]/50"
+                      : "bg-[#0D0D0D] border-[#292929] hover:border-[#444444] hover:bg-[#151515]"
                   }`}
                 >
-                  {/* Sliding active tab indicator */}
+                  {/* Sliding active tab indicator — sharp left orange line */}
                   {isActive && (
                     <motion.div
                       layoutId="activeFeatureIndicator"
-                      className="absolute inset-0 bg-gradient-to-r from-brand-500/10 to-transparent border-l-2 border-brand-500 pointer-events-none -z-10"
+                      className="absolute inset-0 bg-gradient-to-r from-[#FF9000]/10 to-transparent border-l-[3px] border-[#FF9000] pointer-events-none -z-10"
                       transition={{ type: "spring", stiffness: 120, damping: 20 }}
                     />
                   )}
 
-                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 transition ${
-                    isActive ? "bg-brand-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]" : "bg-white/5 text-zinc-400"
+                  <div className={`h-10 w-10 flex items-center justify-center flex-shrink-0 transition border ${
+                    isActive ? "bg-[#FF9000] text-black border-[#FF9000]" : "bg-[#1B1B1B] text-zinc-400 border-[#333333]"
                   }`}>
                     <Icon size={20} />
                   </div>
@@ -850,19 +876,12 @@ export function LoginPage() {
             })}
           </div>
 
-          {/* Interactive display panel (7 cols) */}
-          <div className="lg:col-span-7 rounded-2xl border border-[#444444] bg-[#0a0a0a]/30 p-6 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative min-h-[400px] overflow-hidden backdrop-blur-md">
-            {/* Decorative background grid */}
-            <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:12px_12px] -z-10" />
-
-            {/* Ambient background glow mapped to active tab color */}
-            <div className={`absolute top-1/4 right-1/4 h-64 w-64 rounded-full bg-gradient-to-br ${
-              activeFeature === 0 ? 'from-blue-500/10 to-indigo-500/10' :
-              activeFeature === 1 ? 'from-amber-500/10 to-orange-500/10' :
-              activeFeature === 2 ? 'from-emerald-500/10 to-teal-500/10' :
-              activeFeature === 3 ? 'from-purple-500/10 to-fuchsia-500/10' :
-              'from-indigo-500/10 to-purple-500/10'
-            } blur-[100px] pointer-events-none transition-all duration-700 -z-10`} />
+          {/* Interactive display panel (7 cols) — Stitch Obsidian Pulse sharp panel */}
+          <div className="lg:col-span-7 border border-[#333333] bg-[#0D0D0D] p-6 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative min-h-[400px] overflow-hidden">
+            {/* Structural dot-grid background */}
+            <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#FF9000_1px,transparent_1px)] [background-size:16px_16px] -z-10" />
+            {/* Subtle orange ambient glow */}
+            <div className="absolute top-1/4 right-1/4 h-64 w-64 rounded-full bg-[#FF9000]/5 blur-[80px] pointer-events-none -z-10" />
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -873,17 +892,17 @@ export function LoginPage() {
                 transition={{ duration: 0.25 }}
                 className="flex-1 flex flex-col justify-between space-y-6"
               >
-                {/* Upgraded Header with Active Badge */}
-                <div className="flex items-center justify-between border-b border-[#272727] pb-4 mb-1 text-left">
+                {/* Panel Header — Stitch structural style */}
+                <div className="flex items-center justify-between border-b border-[#333333] pb-4 mb-1 text-left">
                   <div>
-                    <span className="text-[9px] uppercase tracking-[0.2em] text-brand-500 font-extrabold block">Stuhub Module &bull; Live Preview</span>
-                    <h3 className="text-xl font-extrabold text-white mt-1">
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.1em', fontWeight: 500, color: '#FF9000', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Stuhub // Live Preview</span>
+                    <h3 className="text-xl font-extrabold text-white tracking-[-0.01em]">
                       {features[activeFeature].title}
                     </h3>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-brand-500/10 border border-brand-500/20 px-3 py-1 rounded-full text-[9px] font-bold text-brand-450">
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" />
-                    LIVE MODULE
+                  <div className="flex items-center gap-1.5 bg-[#1B1B1B] border border-[#333333] px-3 py-1.5" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', fontWeight: 500, color: '#808080', letterSpacing: '0.06em' }}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#00FF41] animate-pulse" />
+                    COMPUTE_ACTIVE
                   </div>
                 </div>
 
@@ -1137,11 +1156,11 @@ export function LoginPage() {
                   )}
                 </div>
 
-                {/* Key value list */}
-                <div className="grid grid-cols-3 gap-2 border-t border-[#272727] pt-4">
+                {/* Key value list — Stitch structural tags */}
+                <div className="grid grid-cols-3 gap-2 border-t border-[#333333] pt-4">
                   {features[activeFeature].bullets.map((bullet, idx) => (
                     <div key={idx} className="flex items-start gap-1.5 text-[10px] text-zinc-400 leading-tight">
-                      <span className="h-1.5 w-1.5 rounded-full bg-brand-500 mt-1.5 flex-shrink-0" />
+                      <span className="h-1.5 w-1.5 bg-[#FF9000] mt-1.5 flex-shrink-0" />
                       <span>{bullet}</span>
                     </div>
                   ))}
@@ -1152,28 +1171,34 @@ export function LoginPage() {
         </div>
       </section>
 
-      {/* 4. FAQ Section */}
-      <section id="faq" className="py-24 bg-[#0a0a0a]/10 border-t border-[#272727] px-6">
+      {/* 4. FAQ Section — Stitch Obsidian Pulse style */}
+      <section id="faq" className="py-24 bg-[#080808] border-t border-[#1F1F1F] px-6">
         <div className="max-w-3xl mx-auto space-y-12">
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-extrabold text-white flex items-center justify-center gap-2">
-              <HelpCircle className="text-brand-500" size={28} /> FAQ
-            </h2>
-            <p className="text-zinc-400 text-sm">Have any questions? Find answers to commonly asked inquiries here.</p>
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-3 w-full max-w-sm">
+              <div className="h-px flex-1 bg-[#333333]" />
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.12em', fontWeight: 500, color: '#FF9000', textTransform: 'uppercase' }}>FAQ // DOCS</span>
+              <div className="h-px flex-1 bg-[#333333]" />
+            </div>
+            <h2 className="text-3xl font-extrabold text-white tracking-[-0.02em]">Frequently Asked</h2>
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#808080', letterSpacing: '0.02em' }}>Common queries about the StuHub platform.</p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {faqData.map((item, idx) => (
-              <div key={idx} className="rounded-xl border border-[#272727] bg-[#0a0a0a]/20 overflow-hidden transition-all duration-300 hover:border-[#333333]">
+              <div key={idx} className={`border overflow-hidden transition-all duration-300 ${ activeFaq === idx ? 'border-[#FF9000]/40 bg-[#1B1B1B]' : 'border-[#292929] bg-[#0D0D0D] hover:border-[#3A3A3A]' }`}>
                 <button
                   onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
                   className="w-full text-left px-6 py-5 font-bold text-zinc-200 hover:text-white transition flex justify-between items-center"
                 >
-                  {item.q}
-                  <span className="text-brand-500 text-lg">{activeFaq === idx ? "−" : "+"}</span>
+                  <span className="flex items-center gap-3">
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#FF9000', fontWeight: 600, letterSpacing: '0.06em' }}>0{idx + 1}</span>
+                    {item.q}
+                  </span>
+                  <span className="text-[#FF9000] text-xl font-light flex-shrink-0 ml-4">{activeFaq === idx ? "−" : "+"}</span>
                 </button>
                 {activeFaq === idx && (
-                  <div className="px-6 pb-5 pt-1 text-sm text-zinc-400 leading-relaxed border-t border-[#272727] bg-black/20">
+                  <div className="px-6 pb-5 pt-1 text-sm text-zinc-400 leading-relaxed border-t border-[#333333] bg-black/30">
                     {item.a}
                   </div>
                 )}
@@ -1183,9 +1208,17 @@ export function LoginPage() {
         </div>
       </section>
 
-      {/* 5. Footer */}
-      <footer className="py-12 border-t border-[#272727] text-center text-xs text-zinc-500 bg-black">
-        <p>&copy; {new Date().getFullYear()} Stuhub. All rights reserved.</p>
+      {/* 5. Footer — Stitch Obsidian Pulse */}
+      <footer className="py-8 border-t border-[#1F1F1F] bg-black">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#FF9000] animate-pulse" />
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#808080', letterSpacing: '0.06em' }}>STUHUB_OS // ALL_SYSTEMS_OPERATIONAL</span>
+          </div>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#555', letterSpacing: '0.04em' }}>
+            &copy; {new Date().getFullYear()} Stuhub. All rights reserved.
+          </p>
+        </div>
       </footer>
 
       {/* 6. Authentic Modal Overlay */}
