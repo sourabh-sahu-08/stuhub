@@ -53,7 +53,17 @@ authRouter.post("/login", async (req, res, next) => {
 authRouter.get("/me", requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const user = await User.findById(req.user?.id).populate("department", "name code");
-    res.json({ user: sanitizeUser(user) });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    const student = await Student.findOne({ user: user._id });
+    res.json({
+      user: {
+        ...sanitizeUser(user),
+        rollNumber: student?.rollNumber,
+        semester: student?.semester,
+        section: student?.section,
+        cgpa: student?.cgpa
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -155,7 +165,16 @@ authRouter.put("/complete-profile", requireAuth, async (req: AuthRequest, res, n
     await student.save();
 
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: true });
-    res.json({ token, user: sanitizeUser(user) });
+    res.json({
+      token,
+      user: {
+        ...sanitizeUser(user),
+        rollNumber: student.rollNumber,
+        semester: student.semester,
+        section: student.section,
+        cgpa: student.cgpa
+      }
+    });
   } catch (error) {
     next(error);
   }

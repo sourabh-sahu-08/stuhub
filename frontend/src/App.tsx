@@ -5,6 +5,8 @@ import { AttendancePage } from "./pages/AttendancePage";
 import { ModulePage } from "./pages/ModulePage";
 import { PyqPage } from "./pages/PyqPage";
 import { PyqAnalyzerPage } from "./pages/PyqAnalyzerPage";
+import { NotesPage } from "./pages/NotesPage";
+import { AdminPage } from "./pages/AdminPage";
 import { AppShell } from "./components/layout/AppShell";
 import { useAuth } from "./context/AuthContext";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
@@ -28,6 +30,8 @@ export function App() {
         <Route path="attendance" element={<AttendancePage />} />
         <Route path="pyq" element={<PyqPage />} />
         <Route path="pyq-analyzer" element={<PyqAnalyzerPage />} />
+        <Route path="library" element={<NotesPage />} />
+        <Route path="admin" element={<AdminPage />} />
         <Route path=":module" element={<ModulePage />} />
       </Route>
 

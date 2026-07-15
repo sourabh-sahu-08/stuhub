@@ -200,7 +200,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
       {/* Course Info Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-[#E2E2E2] uppercase tracking-wider font-mono">
+          <label className="text-xs font-bold text-zinc-200 uppercase tracking-wider font-mono">
             Subject Name
           </label>
           <input
@@ -210,12 +210,12 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
             placeholder="e.g. Operating Systems"
             onChange={(e) => setSubject(e.target.value)}
             disabled={loading}
-            className="w-full h-11 px-4 rounded border border-[#27272D] bg-[#16161A] text-sm text-white focus:outline-none focus:border-primary disabled:opacity-50"
+            className="w-full h-11 px-4 rounded border border-outline bg-surface-container text-sm text-white focus:outline-none focus:border-primary disabled:opacity-50"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-[#E2E2E2] uppercase tracking-wider font-mono">
+          <label className="text-xs font-bold text-zinc-200 uppercase tracking-wider font-mono">
             Branch
           </label>
           <input
@@ -225,12 +225,12 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
             placeholder="e.g. Computer Science"
             onChange={(e) => setBranch(e.target.value)}
             disabled={loading}
-            className="w-full h-11 px-4 rounded border border-[#27272D] bg-[#16161A] text-sm text-white focus:outline-none focus:border-primary disabled:opacity-50"
+            className="w-full h-11 px-4 rounded border border-outline bg-surface-container text-sm text-white focus:outline-none focus:border-primary disabled:opacity-50"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-[#E2E2E2] uppercase tracking-wider font-mono">
+          <label className="text-xs font-bold text-zinc-200 uppercase tracking-wider font-mono">
             Semester
           </label>
           <select
@@ -238,7 +238,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
             value={semester}
             onChange={(e) => setSemester(Number(e.target.value) || "")}
             disabled={loading}
-            className="w-full h-11 px-4 rounded border border-[#27272D] bg-[#16161A] text-sm text-white focus:outline-none focus:border-primary disabled:opacity-50"
+            className="w-full h-11 px-4 rounded border border-outline bg-surface-container text-sm text-white focus:outline-none focus:border-primary disabled:opacity-50"
           >
             <option value="">Select Semester</option>
             {Array.from({ length: 8 }, (_, i) => (
@@ -252,7 +252,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
 
       {/* Syllabus Upload Dropzone */}
       <div className="space-y-2">
-        <label className="text-xs font-bold text-[#E2E2E2] uppercase tracking-wider font-mono">
+        <label className="text-xs font-bold text-zinc-200 uppercase tracking-wider font-mono">
           Syllabus PDF (Exactly 1 file)
         </label>
         
@@ -266,7 +266,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
             className={`border-2 border-dashed p-6 rounded text-center cursor-pointer transition-all ${
               isSyllabusDragActive
                 ? "border-primary bg-primary/5"
-                : "border-[#27272D] bg-[#16161A]/40 hover:border-primary/50 hover:bg-[#16161A]/80"
+                : "border-outline bg-surface-container/40 hover:border-primary/50 hover:bg-surface-container/80"
             }`}
           >
             <input
@@ -286,7 +286,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
             </p>
           </div>
         ) : (
-          <div className="flex items-center justify-between p-3.5 bg-[#16161A] border border-[#27272D] rounded">
+          <div className="flex items-center justify-between p-3.5 bg-surface-container border border-outline rounded">
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-10 w-9 items-center justify-center rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
                 <FileText size={18} />
@@ -314,7 +314,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
       {/* PYQs Multiple Upload Dropzone */}
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <label className="text-xs font-bold text-[#E2E2E2] uppercase tracking-wider font-mono">
+          <label className="text-xs font-bold text-zinc-200 uppercase tracking-wider font-mono">
             Exam Question Papers (3 to 10 PDFs)
           </label>
           <span className="text-[10px] text-on-surface-variant font-mono">
@@ -332,7 +332,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
             className={`border-2 border-dashed p-6 rounded text-center cursor-pointer transition-all ${
               isPyqDragActive
                 ? "border-primary bg-primary/5"
-                : "border-[#27272D] bg-[#16161A]/40 hover:border-primary/50 hover:bg-[#16161A]/80"
+                : "border-outline bg-surface-container/40 hover:border-primary/50 hover:bg-surface-container/80"
             }`}
           >
             <input
@@ -360,7 +360,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
             {pyqs.map((file, idx) => (
               <div
                 key={file.name + idx}
-                className="flex items-center justify-between p-3 bg-[#16161A] border border-[#27272D] rounded hover:border-[#3f3f46] transition-colors"
+                className="flex items-center justify-between p-3 bg-surface-container border border-outline rounded hover:border-[#3f3f46] transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex h-9 w-8 items-center justify-center rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
@@ -396,7 +396,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
           className={`w-full sm:w-auto min-w-[200px] flex items-center justify-center gap-2 rounded px-6 h-12 text-sm font-bold shadow-lg transition-all ${
             isFormValid && !loading
               ? "bg-primary text-black hover:opacity-90 cursor-pointer"
-              : "bg-[#27272D] text-[#71717A] cursor-not-allowed border border-[#3f3f46]/45"
+              : "bg-[#27272D] text-zinc-500 cursor-not-allowed border border-[#3f3f46]/45"
           }`}
         >
           {loading ? (

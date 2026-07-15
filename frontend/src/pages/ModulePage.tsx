@@ -127,7 +127,7 @@ export function ModulePage() {
 
     // Load backend stubs
     Promise.all([
-      api.get("/library").then(res => setLibraryFiles(res.data)).catch(() => {}),
+      api.get("/notes/recent").then(res => setLibraryFiles(res.data)).catch(() => {}),
       api.get("/dashboard/student").then(res => setNotices(res.data?.notices || [])).catch(() => {})
     ]).finally(() => {
       setLoadingApis(false);
@@ -184,31 +184,31 @@ export function ModulePage() {
           <div className="space-y-8">
             {/* Stats Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+              <div className="bg-surface-container border border-outline p-5 rounded">
                 <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Folders Count</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-extrabold text-white">{folders.length}</span>
                   <span className="text-[10px] text-on-surface-variant font-mono">Subjects</span>
                 </div>
               </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+              <div className="bg-surface-container border border-outline p-5 rounded">
                 <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Storage Used</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-extrabold text-white">0.0 GB</span>
                   <span className="text-[10px] text-on-surface-variant font-mono">of 10 GB</span>
                 </div>
-                <div className="w-full h-1 bg-[#09090B] border border-outline mt-2 rounded overflow-hidden">
+                <div className="w-full h-1 bg-background border border-outline mt-2 rounded overflow-hidden">
                   <div className="h-full bg-primary" style={{ width: "0%" }}></div>
                 </div>
               </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+              <div className="bg-surface-container border border-outline p-5 rounded">
                 <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Real-time Streak</p>
                 <div className="flex items-center gap-1.5 mt-1">
                   <Flame size={14} className="text-primary animate-pulse" />
                   <span className="text-xs text-white">{streakDays} Days</span>
                 </div>
               </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
+              <div className="bg-surface-container border border-outline p-5 rounded">
                 <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">AI Summaries</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-extrabold text-white">0</span>
@@ -224,7 +224,7 @@ export function ModulePage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsNewFolderOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#16161A] border border-[#27272D] text-xs font-bold text-[#e2e2e2] hover:border-primary/50 transition-all cursor-pointer font-mono"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container border border-outline text-xs font-bold text-zinc-200 hover:border-primary/50 transition-all cursor-pointer font-mono"
                   >
                     <FolderPlus size={14} /> NEW FOLDER
                   </button>
@@ -234,7 +234,7 @@ export function ModulePage() {
               {folders.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {folders.map((fold, idx) => (
-                    <div key={idx} className="bg-[#0F0F12] border border-[#27272D] hover:border-[#808080] p-5 rounded transition-all cursor-pointer group flex flex-col justify-between">
+                    <div key={idx} className="bg-surface border border-outline hover:border-[#808080] p-5 rounded transition-all cursor-pointer group flex flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between mb-4">
                           <Folder className="text-[#FFA31A]" size={36} fill="#FFA31A" />
@@ -244,7 +244,7 @@ export function ModulePage() {
                         </div>
                         <h4 className="text-sm font-bold text-white">{fold.name}</h4>
                       </div>
-                      <div className="mt-4 pt-3 border-t border-[#27272D] space-y-1">
+                      <div className="mt-4 pt-3 border-t border-outline space-y-1">
                         <div className="flex items-center justify-between text-[10px] text-on-surface-variant">
                           <span>Logs Count</span>
                           <span className="text-white font-semibold font-mono">{fold.count}</span>
@@ -268,20 +268,20 @@ export function ModulePage() {
             <div className="space-y-4 pt-4">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Recently Modified Files</h3>
               {libraryFiles.length > 0 ? (
-                <div className="border border-[#27272D] bg-[#0F0F12] rounded overflow-x-auto">
+                <div className="border border-outline bg-surface rounded overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-[#16161A] border-b border-[#27272D] font-mono text-[9px] uppercase tracking-wider text-on-surface-variant">
+                      <tr className="bg-surface-container border-b border-outline font-mono text-[9px] uppercase tracking-wider text-on-surface-variant">
                         <th className="px-5 py-3 font-bold">Name</th>
                         <th className="px-5 py-3 font-bold">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#27272D] text-[#e2e2e2]">
+                    <tbody className="divide-y divide-[#27272D] text-zinc-200">
                       {libraryFiles.map((file, idx) => (
-                        <tr key={idx} className="hover:bg-[#16161A]/30">
+                        <tr key={idx} className="hover:bg-surface-container/30">
                           <td className="px-5 py-3 flex items-center gap-2">
                             <FileText className="text-primary" size={14} />
-                            <span className="font-semibold">{file.name}</span>
+                            <span className="font-semibold">{file.title}</span>
                           </td>
                           <td className="px-5 py-3 font-mono">No Actions</td>
                         </tr>
@@ -304,9 +304,9 @@ export function ModulePage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="w-full max-w-sm p-6 rounded border border-outline bg-[#0F0F12] text-[#e2e2e2] space-y-5"
+                    className="w-full max-w-sm p-6 rounded border border-outline bg-surface text-zinc-200 space-y-5"
                   >
-                    <div className="flex justify-between items-center pb-2 border-b border-[#27272D]">
+                    <div className="flex justify-between items-center pb-2 border-b border-outline">
                       <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">Configure New Folder</h3>
                       <button onClick={() => setIsNewFolderOpen(false)} className="text-on-surface-variant hover:text-white cursor-pointer">✖</button>
                     </div>
@@ -319,14 +319,14 @@ export function ModulePage() {
                           value={newFolderName}
                           onChange={(e) => setNewFolderName(e.target.value)}
                           placeholder="e.g. Computer Networks"
-                          className="w-full h-10 rounded border border-outline bg-[#16161A] px-3 text-sm focus:outline-none focus:border-primary text-white"
+                          className="w-full h-10 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                         />
                       </div>
                       <div className="flex gap-2.5 pt-2">
                         <button
                           type="button"
                           onClick={() => setIsNewFolderOpen(false)}
-                          className="flex-1 h-9 rounded border border-[#27272D] text-[#FAFAFA] text-xs font-semibold uppercase tracking-wider font-mono hover:bg-[#16161A] cursor-pointer"
+                          className="flex-1 h-9 rounded border border-outline text-zinc-50 text-xs font-semibold uppercase tracking-wider font-mono hover:bg-surface-container cursor-pointer"
                         >
                           Cancel
                         </button>
@@ -353,16 +353,16 @@ export function ModulePage() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">September 2024</h3>
                 <div className="flex gap-1.5">
-                  <button className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white">
+                  <button className="h-7 w-7 rounded border border-outline bg-surface-container flex items-center justify-center text-zinc-400 hover:text-white">
                     <ChevronLeft size={14} />
                   </button>
-                  <button className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white">
+                  <button className="h-7 w-7 rounded border border-outline bg-surface-container flex items-center justify-center text-zinc-400 hover:text-white">
                     <ChevronRight size={14} />
                   </button>
                 </div>
               </div>
               
-              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-[#A1A1AA] py-1 font-mono">
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-zinc-400 py-1 font-mono">
                 <span>Mon</span>
                 <span>Tue</span>
                 <span>Wed</span>
@@ -371,7 +371,7 @@ export function ModulePage() {
                 <span className="text-primary">Sat</span>
                 <span className="text-primary">Sun</span>
               </div>
-              <div className="grid grid-cols-7 gap-1 border-t border-l border-[#27272D] mt-2">
+              <div className="grid grid-cols-7 gap-1 border-t border-l border-outline mt-2">
                 {Array.from({ length: 30 }, (_, i) => {
                   const day = i + 1;
                   const isToday = day === 12;
@@ -379,8 +379,8 @@ export function ModulePage() {
                   return (
                     <div
                       key={day}
-                      className={`h-16 sm:h-24 border-r border-b border-[#27272D] p-1.5 text-xs text-on-surface-variant font-mono hover:bg-[#16161A]/40 transition-colors flex flex-col justify-between ${
-                        isToday ? "bg-[#16161A] border-t-2 border-t-primary" : ""
+                      className={`h-16 sm:h-24 border-r border-b border-outline p-1.5 text-xs text-on-surface-variant font-mono hover:bg-surface-container/40 transition-colors flex flex-col justify-between ${
+                        isToday ? "bg-surface-container border-t-2 border-t-primary" : ""
                       }`}
                     >
                       <div className="flex justify-between items-center">
@@ -397,7 +397,7 @@ export function ModulePage() {
             <div className="lg:col-span-4 flex flex-col gap-6">
               <h3 className="text-sm font-bold text-white flex items-center justify-between font-mono uppercase tracking-wider">
                 Upcoming Events
-                <span className="font-mono text-[9px] bg-[#16161A] px-2 py-0.5 rounded border border-[#27272D] text-[#A3A3A3]">0 Active</span>
+                <span className="font-mono text-[9px] bg-surface-container px-2 py-0.5 rounded border border-outline text-zinc-400">0 Active</span>
               </h3>
 
               <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
@@ -412,7 +412,7 @@ export function ModulePage() {
           <div className="space-y-6 max-w-3xl">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Notification Logs</h3>
-              <span className="font-mono text-[9px] bg-[#16161A] border border-[#27272D] text-on-surface-variant px-2 py-0.5 rounded uppercase">
+              <span className="font-mono text-[9px] bg-surface-container border border-outline text-on-surface-variant px-2 py-0.5 rounded uppercase">
                 {notices.length} Alerts
               </span>
             </div>
@@ -426,7 +426,7 @@ export function ModulePage() {
                       <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">Attendance Warning</h4>
                       <span className="text-[8px] font-mono text-red-500 uppercase font-bold px-1 bg-red-500/10 rounded">Urgent</span>
                     </div>
-                    <p className="text-xs text-[#e2e2e2] mt-1.5">
+                    <p className="text-xs text-zinc-200 mt-1.5">
                       Your overall attendance aggregate is currently {overallAttPct.toFixed(1)}%, which is below the mandatory 75% baseline requirement. Review your attendance matrix to log future sessions.
                     </p>
                     <p className="text-[9px] text-on-surface-variant font-mono uppercase mt-2">Source: Client-Side Attendance Engine</p>
@@ -436,13 +436,13 @@ export function ModulePage() {
 
               {notices.length > 0 ? (
                 notices.map((notice: any, idx: number) => (
-                  <div key={idx} className="p-5 bg-[#16161A] rounded border border-outline flex gap-4 items-start">
+                  <div key={idx} className="p-5 bg-surface-container rounded border border-outline flex gap-4 items-start">
                     <span className="material-symbols-outlined text-primary mt-0.5">campaign</span>
                     <div>
                       <div className="flex items-center gap-2">
                         <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">{notice.title}</h4>
                       </div>
-                      <p className="text-xs text-[#e2e2e2] mt-1.5">{notice.content}</p>
+                      <p className="text-xs text-zinc-200 mt-1.5">{notice.content}</p>
                     </div>
                   </div>
                 ))
@@ -469,245 +469,225 @@ export function ModulePage() {
         return (
           <div className="space-y-8">
             {/* Profile Overview Card */}
-            <div className="panel p-6 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
-              <div className="relative">
-                <img
-                  className="w-28 h-28 rounded border-2 border-primary object-cover"
-                  src={user?.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuCVeeEPJSdKU3MKNu7H10u4Ru4onm9eJjmu_Ss52j_nLxII1w0k8oRnHDU7-dHOwHVSh0ls6e7iETgZjo318g0ajsd5jvN9jFRnZqpfsYtlI710rRAgLGDTbC4OTv0OIRvrL1dy1J1RXyJN8DYRb8jNv4oI70al0TznBUBPGE34-3Yk2TInZ9QzCRs5n_K1s8l1O4B1TLAQcmo13WdBD7xg2Sewc_TOTVfqo3SOtMb07V3yonSTaFHqof2_fC1YI5pyacB7SYWEklg"}
-                  alt="Student Avatar"
-                />
-                <div className="absolute -bottom-1 -right-1 bg-primary text-black p-0.5 rounded-full">
-                  <span className="material-symbols-outlined text-[14px]">verified</span>
-                </div>
+            <div className="panel p-6 flex items-center gap-4 relative overflow-hidden">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
+                <User size={28} />
               </div>
-              <div className="flex-grow text-center md:text-left space-y-1">
+              <div>
                 <h2 className="text-xl font-extrabold text-white">{user?.name}</h2>
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-on-surface-variant text-[11px] font-mono uppercase">
-                  <div className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs">fingerprint</span>
-                    <span>ROLL: CS-2024-{user?.id ? user.id.slice(-4) : "0892"}</span>
-                  </div>
-                  <span className="hidden sm:inline opacity-30">•</span>
-                  <div className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs">school</span>
-                    <span>{user?.role || "Student"} Workspace</span>
-                  </div>
-                </div>
+                <p className="text-xs text-on-surface-variant font-mono uppercase mt-0.5">
+                  {user?.role || "Student"} Workspace
+                </p>
               </div>
             </div>
 
-            {/* Profile bento row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
-                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Cumulative GPA</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-white">—</span>
-                  <span className="text-[10px] text-on-surface-variant font-mono">API Offline</span>
+            {/* Academic & Stats Panel */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column: Academic Credentials */}
+              <div className="panel p-6 space-y-4">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono border-b border-outline pb-2">
+                  Academic Profile
+                </h3>
+                
+                <div className="space-y-3.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Full Name</span>
+                    <span className="font-bold text-white">{user?.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Email Address</span>
+                    <span className="font-bold text-white">{user?.email}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Roll Number</span>
+                    <span className="font-bold text-white">{user?.rollNumber || "Not Set"}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Department / Branch</span>
+                    <span className="font-bold text-white text-right max-w-[200px] truncate" title={user?.department?.name}>
+                      {user?.department?.name || "Not Set"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Academic Semester</span>
+                    <span className="font-bold text-white">
+                      {user?.semester ? `Semester ${user.semester}` : "Not Set"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Class Section</span>
+                    <span className="font-bold text-white">{user?.section || "Not Set"}</span>
+                  </div>
                 </div>
               </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
-                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Total Credits</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-white">—</span>
-                  <span className="text-[10px] text-on-surface-variant font-mono">API Offline</span>
-                </div>
-                <div className="w-full h-1 bg-[#09090B] border border-outline mt-2 rounded overflow-hidden">
-                  <div className="h-full bg-outline-variant w-[0%]"></div>
-                </div>
-              </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
-                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Study Streak</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Flame className="text-primary animate-pulse" size={18} fill="#F5A524" />
-                  <span className="text-xl font-extrabold text-white">{streakDays} Days</span>
-                </div>
-              </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
-                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Avg Attendance</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-white">{overallAttPct > 0 ? `${overallAttPct.toFixed(1)}%` : "0%"}</span>
-                  <span className="text-[10px] text-primary font-mono">{overallAttPct >= 75 ? "Satisfied" : "Warning"}</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Courses section from actual localStorage */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-white uppercase tracking-wider font-mono">Configured Study Subjects</h3>
-              {subjects.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {subjects.map((sub: any) => {
-                    const subLogs = logs.filter((l: any) => l.subjectId === sub.id);
-                    const attendedLogs = subLogs.filter((l: any) => l.status === "attended").length;
-                    const bunkedLogs = subLogs.filter((l: any) => l.status === "bunked").length;
+              {/* Right Column: Statistics & Highlights */}
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-surface-container border border-outline p-5 rounded flex flex-col justify-between h-28">
+                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider font-mono">Study Streak</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Flame className="text-primary animate-pulse" size={20} fill="#F5A524" />
+                      <span className="text-2xl font-extrabold text-white">{streakDays} Days</span>
+                    </div>
+                  </div>
+                  <div className="bg-surface-container border border-outline p-5 rounded flex flex-col justify-between h-28">
+                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider font-mono">Avg Attendance</p>
+                    <div>
+                      <span className="text-2xl font-extrabold text-white">{overallAttPct > 0 ? `${overallAttPct.toFixed(1)}%` : "0%"}</span>
+                      <p className={`text-[9px] font-mono mt-0.5 ${overallAttPct >= 75 ? "text-emerald-500" : "text-red-500"}`}>
+                        {overallAttPct >= 75 ? "SATISFIED" : "WARNING"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                    const attended = (sub.baselineAttended ?? 0) + attendedLogs;
-                    const total = (sub.baselineTotal ?? 0) + attendedLogs + bunkedLogs;
-                    const pct = total > 0 ? (attended / total) * 100 : 0;
+                {/* Courses section from actual localStorage */}
+                <div className="panel p-5 space-y-4">
+                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono border-b border-outline pb-2">
+                    Subject Presence Overview
+                  </h4>
+                  {subjects.length > 0 ? (
+                    <div className="space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
+                      {subjects.map((sub: any) => {
+                        const subLogs = logs.filter((l: any) => l.subjectId === sub.id);
+                        const attendedLogs = subLogs.filter((l: any) => l.status === "attended").length;
+                        const bunkedLogs = subLogs.filter((l: any) => l.status === "bunked").length;
 
-                    return (
-                      <div key={sub.id} className="p-4 bg-[#0F0F12] border border-[#27272D] rounded hover:border-[#808080] transition-all flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Laptop className="text-primary" size={20} />
-                          <div>
-                            <h4 className="text-xs font-bold text-white">{sub.name}</h4>
-                            <p className="text-[10px] text-on-surface-variant mt-0.5 font-mono uppercase">ID: SUB-{sub.id.slice(-4)}</p>
+                        const attended = (sub.baselineAttended ?? 0) + attendedLogs;
+                        const total = (sub.baselineTotal ?? 0) + attendedLogs + bunkedLogs;
+                        const pct = total > 0 ? (attended / total) * 100 : 0;
+
+                        return (
+                          <div key={sub.id} className="flex items-center justify-between text-xs py-1 border-b border-outline/50 last:border-0 last:pb-0">
+                            <span className="text-white truncate max-w-[180px] font-medium">{sub.name}</span>
+                            <span className={`font-mono font-bold ${pct >= 75 ? "text-primary" : "text-red-500"}`}>
+                              {pct.toFixed(1)}%
+                            </span>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <span className={`text-sm font-extrabold ${pct >= 75 ? "text-primary" : "text-red-500"}`}>{pct.toFixed(1)}%</span>
-                          <p className="text-[9px] text-on-surface-variant font-mono">{attended}/{total} classes</p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-on-surface-variant font-mono">
+                      No subject folders configured.
+                    </p>
+                  )}
                 </div>
-              ) : (
-                <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
-                  No course modules configured. Add them under the Attendance tracker.
-                </div>
-              )}
+              </div>
             </div>
           </div>
         );
 
       case "settings":
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left selector */}
-            <div className="lg:col-span-3 flex flex-col gap-1.5 no-print">
-              <button
-                onClick={() => setSettingsTab("general")}
-                className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
-                  settingsTab === "general"
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-[#27272D] bg-[#16161A] text-on-surface-variant hover:text-white"
-                }`}
-              >
-                <span>General</span>
-                <span className="material-symbols-outlined text-sm">settings_suggest</span>
-              </button>
-              <button
-                onClick={() => setSettingsTab("security")}
-                className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
-                  settingsTab === "security"
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-[#27272D] bg-[#16161A] text-on-surface-variant hover:text-white"
-                }`}
-              >
-                <span>Security</span>
-                <span className="material-symbols-outlined text-sm">shield</span>
-              </button>
-              <button
-                onClick={() => setSettingsTab("notifications")}
-                className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
-                  settingsTab === "notifications"
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-[#27272D] bg-[#16161A] text-on-surface-variant hover:text-white"
-                }`}
-              >
-                <span>Signals</span>
-                <span className="material-symbols-outlined text-sm">notifications_active</span>
-              </button>
-            </div>
+          <div className="max-w-2xl space-y-8">
 
-            {/* Right tab content */}
-            <div className="lg:col-span-9 panel p-6 min-h-[400px]">
-              {settingsTab === "general" && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mb-3">Visual Architecture</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 bg-[#16161A] border-2 border-primary rounded relative">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="text-xs font-bold text-primary font-mono uppercase">Kinetic Obsidian</h4>
-                          <span className="material-symbols-outlined text-primary text-base">check_circle</span>
-                        </div>
-                        <p className="text-[10px] text-on-surface-variant">High-contrast tactical interface designed for peak cognitive focus.</p>
-                        <div className="absolute top-0 right-0 px-2 py-0.5 bg-primary text-black font-bold font-mono text-[8px]">ACTIVE</div>
-                      </div>
-                      <div className="p-4 bg-[#16161A] border border-[#27272D] opacity-40 rounded grayscale cursor-not-allowed">
-                        <h4 className="text-xs font-bold text-[#A3A3A3] font-mono uppercase">Nova Static</h4>
-                        <p className="text-[10px] text-on-surface-variant">Monochrome blueprint aesthetic. Unavailable in current build.</p>
-                      </div>
+            {/* Account */}
+            <section>
+              <h2 className="text-base font-semibold text-white mb-4">Account</h2>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[#111] border border-[#2a2a2a]">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[20px] text-[#FF9000]">person</span>
+                    <div>
+                      <p className="text-sm font-medium text-white">{user?.name ?? "Student"}</p>
+                      <p className="text-xs text-zinc-500">{user?.email ?? ""}</p>
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[#808080] mb-2 font-mono">System Language</label>
-                    <select className="w-full max-w-xs h-10 rounded border border-outline bg-[#16161A] px-3 text-xs text-white focus:outline-none focus:border-primary">
-                      <option>English (Technical / US)</option>
-                      <option>Mandarin (Simplified)</option>
-                      <option>German (Precision)</option>
-                      <option>Japanese (Modernist)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mb-3">Profile Privacy</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3.5 bg-[#16161A] border border-[#27272D] rounded">
-                        <div>
-                          <p className="text-xs font-bold text-[#e2e2e2]">Stealth Mode</p>
-                          <p className="text-[10px] text-on-surface-variant">Hide your current activity from peers in study groups.</p>
-                        </div>
-                        <button onClick={() => setStealthMode(!stealthMode)} className="text-primary hover:opacity-85 cursor-pointer">
-                          {stealthMode ? <ToggleRight size={24} /> : <ToggleLeft size={24} className="text-on-surface-variant" />}
-                        </button>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3.5 bg-[#16161A] border border-[#27272D] rounded">
-                        <div>
-                          <p className="text-xs font-bold text-[#e2e2e2]">Public Node Discovery</p>
-                          <p className="text-[10px] text-on-surface-variant">Allow students with similar course IDs to find your profile.</p>
-                        </div>
-                        <button onClick={() => setPublicDiscovery(!publicDiscovery)} className="text-primary hover:opacity-85 cursor-pointer">
-                          {publicDiscovery ? <ToggleRight size={24} /> : <ToggleLeft size={24} className="text-on-surface-variant" />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <span className="text-[10px] uppercase font-bold text-[#FF9000] bg-[#FF9000]/10 px-2 py-0.5 rounded">
+                    {user?.role ?? "student"}
+                  </span>
                 </div>
-              )}
+              </div>
+            </section>
 
-              {settingsTab === "security" && (
-                <div className="space-y-6">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Access Protocols</h3>
-                  <div className="p-5 border border-[#27272D] bg-[#16161A] rounded flex gap-4 items-start">
-                    <Shield className="text-primary mt-0.5" size={24} />
-                    <div className="space-y-3">
-                      <div>
-                        <h4 className="text-xs font-bold text-[#e2e2e2]">Biometric Passkeys</h4>
-                        <p className="text-[10px] text-on-surface-variant mt-0.5">Secure your Student OS portal with hardware passkey validation.</p>
-                      </div>
-                      <button className="bg-primary text-black font-mono text-[9px] font-bold px-3 py-1.5 rounded uppercase tracking-wider hover:opacity-90 cursor-pointer">
-                        Configure Passkeys
-                      </button>
+            {/* Privacy */}
+            <section>
+              <h2 className="text-base font-semibold text-white mb-4">Privacy</h2>
+              <div className="divide-y divide-[#1f1f1f] rounded-xl border border-[#2a2a2a] overflow-hidden">
+                <div className="flex items-center justify-between p-4 bg-[#111]">
+                  <div>
+                    <p className="text-sm font-medium text-white">Stealth Mode</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">Hide your activity from peers in study groups</p>
+                  </div>
+                  <button
+                    onClick={() => setStealthMode(!stealthMode)}
+                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${stealthMode ? "bg-[#FF9000]" : "bg-[#333]"}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${stealthMode ? "translate-x-5" : "translate-x-0"}`} />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-[#111]">
+                  <div>
+                    <p className="text-sm font-medium text-white">Public Profile</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">Let other students with similar courses find you</p>
+                  </div>
+                  <button
+                    onClick={() => setPublicDiscovery(!publicDiscovery)}
+                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${publicDiscovery ? "bg-[#FF9000]" : "bg-[#333]"}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${publicDiscovery ? "translate-x-5" : "translate-x-0"}`} />
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            {/* Notifications */}
+            <section>
+              <h2 className="text-base font-semibold text-white mb-4">Notifications</h2>
+              <div className="divide-y divide-[#1f1f1f] rounded-xl border border-[#2a2a2a] overflow-hidden">
+                {[
+                  { label: "Upcoming deadlines", desc: "Reminders before assignment due dates" },
+                  { label: "AI analysis complete", desc: "When your PYQ paper scan finishes" },
+                  { label: "Peer activity", desc: "When someone shares a note with you" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center justify-between p-4 bg-[#111]">
+                    <div>
+                      <p className="text-sm font-medium text-white">{item.label}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{item.desc}</p>
+                    </div>
+                    <button className="relative w-11 h-6 rounded-full bg-[#FF9000] focus:outline-none">
+                      <span className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white shadow" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Security */}
+            <section>
+              <h2 className="text-base font-semibold text-white mb-4">Security</h2>
+              <div className="rounded-xl border border-[#2a2a2a] overflow-hidden">
+                <div className="flex items-center justify-between p-4 bg-[#111]">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[20px] text-zinc-400">lock</span>
+                    <div>
+                      <p className="text-sm font-medium text-white">Password</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">Last changed: never</p>
                     </div>
                   </div>
+                  <button className="text-xs text-[#FF9000] font-semibold hover:underline">Change</button>
                 </div>
-              )}
+              </div>
+            </section>
 
-              {settingsTab === "notifications" && (
-                <div className="space-y-4">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Signal Distribution</h3>
-                  <div className="divide-y divide-[#27272D] text-xs">
-                    <div className="flex items-center justify-between py-3">
-                      <span className="text-[#e2e2e2]">Real-time Deadlines Signals</span>
-                      <span className="text-primary"><ToggleRight size={22} /></span>
-                    </div>
-                    <div className="flex items-center justify-between py-3">
-                      <span className="text-[#e2e2e2]">AI Analyzer Insights Logs</span>
-                      <span className="text-primary"><ToggleRight size={22} /></span>
-                    </div>
-                    <div className="flex items-center justify-between py-3">
-                      <span className="text-[#e2e2e2]">Peer Share Notifications</span>
-                      <span className="text-primary"><ToggleRight size={22} /></span>
-                    </div>
+            {/* Danger Zone */}
+            <section>
+              <h2 className="text-base font-semibold text-red-400 mb-4">Danger Zone</h2>
+              <div className="rounded-xl border border-red-500/20 overflow-hidden">
+                <div className="flex items-center justify-between p-4 bg-red-500/5">
+                  <div>
+                    <p className="text-sm font-medium text-white">Delete Account</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">Permanently delete your account and all data</p>
                   </div>
+                  <button className="text-xs text-red-400 border border-red-400/30 px-3 py-1.5 rounded-lg hover:bg-red-400/10 transition-colors">
+                    Delete
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            </section>
+
           </div>
         );
 
@@ -737,10 +717,10 @@ export function ModulePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4 border-b border-[#27272D] pb-6 no-print">
+      <div className="flex items-center gap-4 border-b border-outline pb-6 no-print">
         <Link
           to="/dashboard"
-          className="flex h-9 w-9 items-center justify-center rounded border border-[#27272D] bg-[#16161A] text-[#FAFAFA] transition hover:bg-[#1C1C21]"
+          className="flex h-9 w-9 items-center justify-center rounded border border-outline bg-surface-container text-zinc-50 transition hover:bg-surface-container-high"
           aria-label="Back to Dashboard"
         >
           <ArrowLeft size={16} />

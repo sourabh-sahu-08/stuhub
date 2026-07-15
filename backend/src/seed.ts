@@ -5,6 +5,7 @@ import { Course, Department, Student, Subject } from "./models/Academic.js";
 import { Assignment, Attendance, Leave, Timetable } from "./models/Operations.js";
 import { Alumni, Club, Event, Notice, Notification, Placement, Resource } from "./models/Campus.js";
 import { Pyq } from "./models/Pyq.js";
+import { Note } from "./models/Note.js";
 
 await connectDatabase();
 
@@ -25,12 +26,18 @@ await Promise.all([
   Club.deleteMany({}),
   Alumni.deleteMany({}),
   Notification.deleteMany({}),
-  Pyq.deleteMany({})
+  Pyq.deleteMany({}),
+  Note.deleteMany({})
 ]);
 
-const [cse, ece] = await Department.create([
-  { name: "Computer Science and Engineering", code: "CSE", description: "Software, AI, systems, and data." },
-  { name: "Electronics and Communication", code: "ECE", description: "Circuits, embedded systems, and communication." }
+const [it, cse, mech, civil, mining, elec, entc] = await Department.create([
+  { name: "Information Technology", code: "IT", description: "Systems, software, and database engineering." },
+  { name: "Computer Science and Engineering", code: "CSE", description: "Computation, algorithms, and artificial intelligence." },
+  { name: "Mechanical Engineering", code: "MECHNICAL", description: "Thermodynamics, robotics, and machine design." },
+  { name: "Civil Engineering", code: "CIVIL", description: "Structures, environmental engineering, and infrastructures." },
+  { name: "Mining Engineering", code: "MINING", description: "Resource extraction, minerals, and geology." },
+  { name: "Electrical Engineering", code: "ELEC", description: "Power systems, circuits, and machinery." },
+  { name: "Electronics and Telecommunication", code: "ELECTRONICS AND TELECOMMUNICATION", description: "Signals, communication systems, and electronic designs." }
 ]);
 
 const [btechCse] = await Course.create([

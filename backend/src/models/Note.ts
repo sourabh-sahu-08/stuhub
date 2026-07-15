@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface IPyq extends Document {
+export interface INote extends Document {
   user: mongoose.Types.ObjectId;
   fileName: string;
-  paperName: string;
+  title: string;
   subject: string;
   semester: number; // 1 to 8
   syllabus: "new" | "old";
@@ -14,11 +14,11 @@ export interface IPyq extends Document {
   updatedAt: Date;
 }
 
-const pyqSchema = new Schema<IPyq>(
+const noteSchema = new Schema<INote>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     fileName: { type: String, required: true },
-    paperName: { type: String, required: true },
+    title: { type: String, required: true },
     subject: { type: String, required: true },
     semester: { type: Number, required: true, min: 1, max: 8 },
     syllabus: { type: String, enum: ["new", "old"], required: true },
@@ -29,4 +29,4 @@ const pyqSchema = new Schema<IPyq>(
   { timestamps: true }
 );
 
-export const Pyq = mongoose.model<IPyq>("Pyq", pyqSchema);
+export const Note = mongoose.model<INote>("Note", noteSchema);

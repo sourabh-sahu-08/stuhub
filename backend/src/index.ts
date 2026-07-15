@@ -17,10 +17,6 @@ app.set("io", io);
 
 io.on("connection", (socket) => {
   socket.on("join", (userId: string) => socket.join(userId));
-  socket.emit("notification", {
-    title: "Connected to Stuhub",
-    body: "Realtime campus updates are live."
-  });
 });
 
 await connectDatabase();

@@ -9,30 +9,30 @@ export default {
         mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
       },
       colors: {
-        ink: "#0f172a",
+        ink: "#000000",
         mist: "#f7f8fb",
-        background: "#09090B",
-        surface: "#121414",
-        "surface-dim": "#121414",
-        "surface-bright": "#38393a",
-        "surface-container-lowest": "#0c0f0f",
-        "surface-container-low": "#1a1c1c",
-        "surface-container": "#1e2020",
-        "surface-container-high": "#282a2b",
-        "surface-container-highest": "#333535",
+        background: "#000000",
+        surface: "#0a0a0a",
+        "surface-dim": "#0a0a0a",
+        "surface-bright": "#1a1a1a",
+        "surface-container-lowest": "#000000",
+        "surface-container-low": "#0a0a0a",
+        "surface-container": "#111111",
+        "surface-container-high": "#1a1a1a",
+        "surface-container-highest": "#222222",
         "on-surface": "#e2e2e2",
         "on-surface-variant": "#d7c3ae",
         "inverse-surface": "#e2e2e2",
-        "inverse-on-surface": "#2f3131",
-        outline: "#27272D",
+        "inverse-on-surface": "#222222",
+        outline: "#272727",
         "outline-variant": "#524434",
-        "surface-tint": "#ffb957",
+        "surface-tint": "#FF9000",
         primary: {
-          DEFAULT: "#F5A524",
-          container: "#F5A524",
+          DEFAULT: "#FF9000",
+          container: "#FF9000",
           fixed: "#ffddb5",
           "fixed-dim": "#ffb957",
-          "on-container": "#643f00"
+          "on-container": "#4a2a00"
         },
         secondary: {
           DEFAULT: "#c6c6cf",
@@ -50,11 +50,11 @@ export default {
           "on-container": "#ffdad6"
         },
         brand: {
-          50: "#f5f3ff",
-          100: "#ede9fe",
-          500: "#F5A524",
-          600: "#e0931f",
-          700: "#cc8218"
+          50: "#fff8f0",
+          100: "#ffefd6",
+          500: "#FF9000",
+          600: "#e07d00",
+          700: "#b36300"
         }
       },
       borderRadius: {

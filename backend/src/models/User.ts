@@ -7,7 +7,7 @@ const userSchema = new Schema(
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, minlength: 8, select: false },
-    role: { type: String, enum: ["student"], default: "student", required: true },
+    role: { type: String, enum: ["student", "admin"], default: "student", required: true },
     avatar: String,
     department: { type: Schema.Types.ObjectId, ref: "Department" },
     isProfileComplete: { type: Boolean, default: true },

@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
-import { Pyq } from "../models/Pyq.js";
+import { Note } from "../models/Note.js";
 import { Subject, Department } from "../models/Academic.js";
 import type { AuthRequest } from "../types.js";
 
@@ -10,19 +10,31 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-export const pyqRouter = Router();
+export const notesRouter = Router();
 
-// 1. Upload PYQ
-pyqRouter.post("/upload", requireAuth, upload.single("file"), async (req: AuthRequest, res: Response, next) => {
+// 0. Fetch recent notes across all branches (for dashboard)
+notesRouter.get("/recent", requireAuth, async (req: AuthRequest, res: Response, next) => {
+  try {
+    const recentNotes = await Note.find({}, "title fileName subject semester syllabus branch createdAt")
+      .sort({ createdAt: -1 })
+      .limit(6);
+    res.json(recentNotes);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 1. Upload Note
+notesRouter.post("/upload", requireAuth, upload.single("file"), async (req: AuthRequest, res: Response, next) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: "No question paper file was uploaded." });
+      return res.status(400).json({ message: "No notes file was uploaded." });
     }
 
-    const { paperName, subject, semester, syllabus, branch } = req.body;
+    const { title, subject, semester, syllabus, branch } = req.body;
 
-    if (!paperName || typeof paperName !== "string" || paperName.trim().length === 0) {
-      return res.status(400).json({ message: "Paper name is required." });
+    if (!title || typeof title !== "string" || title.trim().length === 0) {
+      return res.status(400).json({ message: "Notes title is required." });
     }
 
     if (!subject || typeof subject !== "string" || subject.trim().length === 0) {
@@ -44,10 +56,10 @@ pyqRouter.post("/upload", requireAuth, upload.single("file"), async (req: AuthRe
 
     const base64Data = req.file.buffer.toString("base64");
 
-    const newPyq = await Pyq.create({
+    const newNote = await Note.create({
       user: req.user?.id,
       fileName: req.file.originalname,
-      paperName: paperName.trim(),
+      title: title.trim(),
       subject: subject.trim(),
       semester: semNum,
       syllabus,
@@ -56,17 +68,17 @@ pyqRouter.post("/upload", requireAuth, upload.single("file"), async (req: AuthRe
       mimeType: req.file.mimetype
     });
 
-    const pyqResult = newPyq.toObject();
-    delete (pyqResult as any).fileData;
+    const noteResult = newNote.toObject();
+    delete (noteResult as any).fileData;
 
-    res.status(201).json(pyqResult);
+    res.status(201).json(noteResult);
   } catch (error) {
     next(error);
   }
 });
 
-// 2. Fetch PYQs for a branch and semester
-pyqRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest, res: Response, next) => {
+// 2. Fetch Notes for a branch and semester
+notesRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
     const semNum = parseInt(req.params.semester);
     if (isNaN(semNum) || semNum < 1 || semNum > 8) {
@@ -86,61 +98,61 @@ pyqRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest, r
     if (q && typeof q === "string" && q.trim().length > 0) {
       const searchRegex = new RegExp(q.trim(), "i");
       query.$or = [
-        { paperName: searchRegex },
+        { title: searchRegex },
         { subject: searchRegex }
       ];
     }
 
-    const papers = await Pyq.find(query)
+    const notes = await Note.find(query)
       .select("-fileData")
       .populate("user", "name role")
       .sort({ createdAt: -1 });
 
-    res.json(papers);
+    res.json(notes);
   } catch (error) {
     next(error);
   }
 });
 
-// 3. Download/Stream PYQ File
-pyqRouter.get("/download/:id", requireAuth, async (req: AuthRequest, res: Response, next) => {
+// 3. Download/Stream Note File
+notesRouter.get("/download/:id", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
-    const pyq = await Pyq.findById(req.params.id);
-    if (!pyq) {
-      return res.status(404).json({ message: "PYQ not found." });
+    const note = await Note.findById(req.params.id);
+    if (!note) {
+      return res.status(404).json({ message: "Note not found." });
     }
 
-    const fileBuffer = Buffer.from(pyq.fileData, "base64");
+    const fileBuffer = Buffer.from(note.fileData, "base64");
 
-    res.setHeader("Content-Type", pyq.mimeType);
-    res.setHeader("Content-Disposition", `inline; filename="${pyq.fileName}"`);
+    res.setHeader("Content-Type", note.mimeType);
+    res.setHeader("Content-Disposition", `inline; filename="${note.fileName}"`);
     res.send(fileBuffer);
   } catch (error) {
     next(error);
   }
 });
 
-// 4. Delete PYQ
-pyqRouter.delete("/:id", requireAuth, async (req: AuthRequest, res: Response, next) => {
+// 4. Delete Note
+notesRouter.delete("/:id", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
-    const pyq = await Pyq.findById(req.params.id);
-    if (!pyq) {
-      return res.status(404).json({ message: "PYQ not found." });
+    const note = await Note.findById(req.params.id);
+    if (!note) {
+      return res.status(404).json({ message: "Note not found." });
     }
 
-    if (pyq.user.toString() !== req.user?.id) {
-      return res.status(403).json({ message: "You are not authorized to delete this PYQ." });
+    if (note.user.toString() !== req.user?.id) {
+      return res.status(403).json({ message: "You are not authorized to delete this note." });
     }
 
-    await Pyq.findByIdAndDelete(req.params.id);
-    res.json({ message: "PYQ deleted successfully." });
+    await Note.findByIdAndDelete(req.params.id);
+    res.json({ message: "Note deleted successfully." });
   } catch (error) {
     next(error);
   }
 });
 
 // 5. Get Subject options filtered by department/branch
-pyqRouter.get("/subjects/:branch/:semester", requireAuth, async (req: AuthRequest, res: Response, next) => {
+notesRouter.get("/subjects/:branch/:semester", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
     const semNum = parseInt(req.params.semester);
     if (isNaN(semNum) || semNum < 1 || semNum > 8) {

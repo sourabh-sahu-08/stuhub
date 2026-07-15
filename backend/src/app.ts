@@ -8,6 +8,8 @@ import { env } from "./config/env.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { pyqRouter } from "./routes/pyq.routes.js";
 import { pyqAnalyzerRouter } from "./routes/pyq-analyzer.routes.js";
+import { notesRouter } from "./routes/notes.routes.js";
+import { adminRouter } from "./routes/admin.routes.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
 export function createApp() {
@@ -21,15 +23,16 @@ export function createApp() {
 
   app.get("/health", (_req, res) => res.json({ ok: true, service: "stuhub-api" }));
   app.use("/api/auth", authRouter);
+  app.use("/api/admin", adminRouter);
   app.use("/api/pyq", pyqRouter);
   app.use("/api/pyq-analyzer", pyqAnalyzerRouter);
+  app.use("/api/notes", notesRouter);
   
   // Stubs for features to be rebuilt from scratch
   app.use("/api/dashboard/:role", (_req, res) => res.json({ metrics: {}, notices: [] }));
   app.use("/api/ai/chat", (_req, res) => res.json({ answer: "AI Studio is currently offline. Ready to be built from scratch." }));
   app.get([
-    "/api/assignments",
-    "/api/library"
+    "/api/assignments"
   ], (_req, res) => res.json([]));
 
   app.use(notFound);
