@@ -175,13 +175,20 @@ export function DashboardPage() {
         </section>
 
         {/* Primary Action Button */}
-        <section className="pt-2">
+        <section className="pt-2 flex flex-wrap gap-4">
           <Link
             to="/dashboard/pyq"
             className="inline-flex bg-primary text-black px-6 py-3 rounded font-bold items-center gap-3 transition-transform hover:scale-[1.01] active:scale-95"
           >
             <span className="material-symbols-outlined">auto_awesome</span>
             Analyze Exam Papers
+          </Link>
+          <Link
+            to="/dashboard/pyq-analyzer"
+            className="inline-flex border border-[#F5A524]/55 text-primary hover:bg-[#F5A524]/10 px-6 py-3 rounded font-bold items-center gap-3 transition-transform hover:scale-[1.01] active:scale-95"
+          >
+            <span className="material-symbols-outlined">psychology_alt</span>
+            AI PYQ Analyzer
           </Link>
         </section>
 
