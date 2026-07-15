@@ -581,141 +581,113 @@ export function ModulePage() {
 
       case "settings":
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left selector */}
-            <div className="lg:col-span-3 flex flex-col gap-1.5 no-print">
-              <button
-                onClick={() => setSettingsTab("general")}
-                className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
-                  settingsTab === "general"
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-outline bg-surface-container text-on-surface-variant hover:text-white"
-                }`}
-              >
-                <span>General</span>
-                <span className="material-symbols-outlined text-sm">settings_suggest</span>
-              </button>
-              <button
-                onClick={() => setSettingsTab("security")}
-                className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
-                  settingsTab === "security"
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-outline bg-surface-container text-on-surface-variant hover:text-white"
-                }`}
-              >
-                <span>Security</span>
-                <span className="material-symbols-outlined text-sm">shield</span>
-              </button>
-              <button
-                onClick={() => setSettingsTab("notifications")}
-                className={`flex items-center justify-between px-4 py-3 rounded border font-mono text-xs uppercase cursor-pointer transition ${
-                  settingsTab === "notifications"
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-outline bg-surface-container text-on-surface-variant hover:text-white"
-                }`}
-              >
-                <span>Signals</span>
-                <span className="material-symbols-outlined text-sm">notifications_active</span>
-              </button>
-            </div>
+          <div className="max-w-2xl space-y-8">
 
-            {/* Right tab content */}
-            <div className="lg:col-span-9 panel p-6 min-h-[400px]">
-              {settingsTab === "general" && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mb-3">Visual Architecture</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 bg-surface-container border-2 border-primary rounded relative">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="text-xs font-bold text-primary font-mono uppercase">Kinetic Obsidian</h4>
-                          <span className="material-symbols-outlined text-primary text-base">check_circle</span>
-                        </div>
-                        <p className="text-[10px] text-on-surface-variant">High-contrast tactical interface designed for peak cognitive focus.</p>
-                        <div className="absolute top-0 right-0 px-2 py-0.5 bg-primary text-black font-bold font-mono text-[8px]">ACTIVE</div>
-                      </div>
-                      <div className="p-4 bg-surface-container border border-outline opacity-40 rounded grayscale cursor-not-allowed">
-                        <h4 className="text-xs font-bold text-zinc-400 font-mono uppercase">Nova Static</h4>
-                        <p className="text-[10px] text-on-surface-variant">Monochrome blueprint aesthetic. Unavailable in current build.</p>
-                      </div>
+            {/* Account */}
+            <section>
+              <h2 className="text-base font-semibold text-white mb-4">Account</h2>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[#111] border border-[#2a2a2a]">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[20px] text-[#FF9000]">person</span>
+                    <div>
+                      <p className="text-sm font-medium text-white">{user?.name ?? "Student"}</p>
+                      <p className="text-xs text-zinc-500">{user?.email ?? ""}</p>
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[#808080] mb-2 font-mono">System Language</label>
-                    <select className="w-full max-w-xs h-10 rounded border border-outline bg-surface-container px-3 text-xs text-white focus:outline-none focus:border-primary">
-                      <option>English (Technical / US)</option>
-                      <option>Mandarin (Simplified)</option>
-                      <option>German (Precision)</option>
-                      <option>Japanese (Modernist)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mb-3">Profile Privacy</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3.5 bg-surface-container border border-outline rounded">
-                        <div>
-                          <p className="text-xs font-bold text-zinc-200">Stealth Mode</p>
-                          <p className="text-[10px] text-on-surface-variant">Hide your current activity from peers in study groups.</p>
-                        </div>
-                        <button onClick={() => setStealthMode(!stealthMode)} className="text-primary hover:opacity-85 cursor-pointer">
-                          {stealthMode ? <ToggleRight size={24} /> : <ToggleLeft size={24} className="text-on-surface-variant" />}
-                        </button>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3.5 bg-surface-container border border-outline rounded">
-                        <div>
-                          <p className="text-xs font-bold text-zinc-200">Public Node Discovery</p>
-                          <p className="text-[10px] text-on-surface-variant">Allow students with similar course IDs to find your profile.</p>
-                        </div>
-                        <button onClick={() => setPublicDiscovery(!publicDiscovery)} className="text-primary hover:opacity-85 cursor-pointer">
-                          {publicDiscovery ? <ToggleRight size={24} /> : <ToggleLeft size={24} className="text-on-surface-variant" />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <span className="text-[10px] uppercase font-bold text-[#FF9000] bg-[#FF9000]/10 px-2 py-0.5 rounded">
+                    {user?.role ?? "student"}
+                  </span>
                 </div>
-              )}
+              </div>
+            </section>
 
-              {settingsTab === "security" && (
-                <div className="space-y-6">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Access Protocols</h3>
-                  <div className="p-5 border border-outline bg-surface-container rounded flex gap-4 items-start">
-                    <Shield className="text-primary mt-0.5" size={24} />
-                    <div className="space-y-3">
-                      <div>
-                        <h4 className="text-xs font-bold text-zinc-200">Biometric Passkeys</h4>
-                        <p className="text-[10px] text-on-surface-variant mt-0.5">Secure your Student OS portal with hardware passkey validation.</p>
-                      </div>
-                      <button className="bg-primary text-black font-mono text-[9px] font-bold px-3 py-1.5 rounded uppercase tracking-wider hover:opacity-90 cursor-pointer">
-                        Configure Passkeys
-                      </button>
+            {/* Privacy */}
+            <section>
+              <h2 className="text-base font-semibold text-white mb-4">Privacy</h2>
+              <div className="divide-y divide-[#1f1f1f] rounded-xl border border-[#2a2a2a] overflow-hidden">
+                <div className="flex items-center justify-between p-4 bg-[#111]">
+                  <div>
+                    <p className="text-sm font-medium text-white">Stealth Mode</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">Hide your activity from peers in study groups</p>
+                  </div>
+                  <button
+                    onClick={() => setStealthMode(!stealthMode)}
+                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${stealthMode ? "bg-[#FF9000]" : "bg-[#333]"}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${stealthMode ? "translate-x-5" : "translate-x-0"}`} />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-[#111]">
+                  <div>
+                    <p className="text-sm font-medium text-white">Public Profile</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">Let other students with similar courses find you</p>
+                  </div>
+                  <button
+                    onClick={() => setPublicDiscovery(!publicDiscovery)}
+                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${publicDiscovery ? "bg-[#FF9000]" : "bg-[#333]"}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${publicDiscovery ? "translate-x-5" : "translate-x-0"}`} />
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            {/* Notifications */}
+            <section>
+              <h2 className="text-base font-semibold text-white mb-4">Notifications</h2>
+              <div className="divide-y divide-[#1f1f1f] rounded-xl border border-[#2a2a2a] overflow-hidden">
+                {[
+                  { label: "Upcoming deadlines", desc: "Reminders before assignment due dates" },
+                  { label: "AI analysis complete", desc: "When your PYQ paper scan finishes" },
+                  { label: "Peer activity", desc: "When someone shares a note with you" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center justify-between p-4 bg-[#111]">
+                    <div>
+                      <p className="text-sm font-medium text-white">{item.label}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{item.desc}</p>
+                    </div>
+                    <button className="relative w-11 h-6 rounded-full bg-[#FF9000] focus:outline-none">
+                      <span className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white shadow" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Security */}
+            <section>
+              <h2 className="text-base font-semibold text-white mb-4">Security</h2>
+              <div className="rounded-xl border border-[#2a2a2a] overflow-hidden">
+                <div className="flex items-center justify-between p-4 bg-[#111]">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[20px] text-zinc-400">lock</span>
+                    <div>
+                      <p className="text-sm font-medium text-white">Password</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">Last changed: never</p>
                     </div>
                   </div>
+                  <button className="text-xs text-[#FF9000] font-semibold hover:underline">Change</button>
                 </div>
-              )}
+              </div>
+            </section>
 
-              {settingsTab === "notifications" && (
-                <div className="space-y-4">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Signal Distribution</h3>
-                  <div className="divide-y divide-[#27272D] text-xs">
-                    <div className="flex items-center justify-between py-3">
-                      <span className="text-zinc-200">Real-time Deadlines Signals</span>
-                      <span className="text-primary"><ToggleRight size={22} /></span>
-                    </div>
-                    <div className="flex items-center justify-between py-3">
-                      <span className="text-zinc-200">AI Analyzer Insights Logs</span>
-                      <span className="text-primary"><ToggleRight size={22} /></span>
-                    </div>
-                    <div className="flex items-center justify-between py-3">
-                      <span className="text-zinc-200">Peer Share Notifications</span>
-                      <span className="text-primary"><ToggleRight size={22} /></span>
-                    </div>
+            {/* Danger Zone */}
+            <section>
+              <h2 className="text-base font-semibold text-red-400 mb-4">Danger Zone</h2>
+              <div className="rounded-xl border border-red-500/20 overflow-hidden">
+                <div className="flex items-center justify-between p-4 bg-red-500/5">
+                  <div>
+                    <p className="text-sm font-medium text-white">Delete Account</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">Permanently delete your account and all data</p>
                   </div>
+                  <button className="text-xs text-red-400 border border-red-400/30 px-3 py-1.5 rounded-lg hover:bg-red-400/10 transition-colors">
+                    Delete
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            </section>
+
           </div>
         );
 
