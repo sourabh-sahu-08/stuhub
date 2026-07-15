@@ -119,14 +119,14 @@ export function AppShell() {
             }}
           >
             <img 
-              src="/favicon.png" 
+              src="/fvicon.png" 
               alt="Stuhub Logo" 
-              className="h-8 w-8 object-contain shrink-0"
+              className="h-10 w-10 object-contain shrink-0"
             />
-
-            <h1 className="truncate text-lg font-bold tracking-tight text-zinc-50">
-              StuHub
-            </h1>
+            <div className="flex flex-col">
+              <span className="font-extrabold text-2xl tracking-tight text-white leading-none">Stuhub</span>
+              <span className="font-bold text-[10px] tracking-widest text-primary leading-none mt-1">STUDENT PORTAL</span>
+            </div>
           </Link>
 
           {mobile && (
@@ -285,14 +285,14 @@ export function AppShell() {
                 className="flex min-w-0 items-center gap-2 md:hidden"
               >
                 <img 
-                  src="/favicon.png" 
+                  src="/fvicon.png" 
                   alt="Stuhub Logo" 
-                  className="h-6 w-6 object-contain shrink-0"
+                  className="h-8 w-8 object-contain shrink-0"
                 />
-
-                <span className="truncate font-mono text-sm font-bold text-white">
-                  StuHub
-                </span>
+                <div className="flex flex-col">
+                  <span className="font-extrabold text-xl tracking-tight text-white leading-none">Stuhub</span>
+                  <span className="font-bold text-[8px] tracking-widest text-primary leading-none mt-0.5">STUDENT PORTAL</span>
+                </div>
               </Link>
 
               {/* Desktop search */}

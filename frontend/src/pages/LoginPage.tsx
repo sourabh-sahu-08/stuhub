@@ -487,15 +487,15 @@ export function LoginPage() {
     <div className="min-h-screen bg-black text-white font-sans selection:bg-brand-500 selection:text-white">
       {/* 1. Header Nav */}
       <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-[#272727] px-6 py-4 flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-2 select-none">
+        <div className="flex items-center gap-3 select-none">
           <img 
-            src="/favicon.png" 
+            src="/fvicon.png" 
             alt="Stuhub Logo" 
-            className="h-10 w-10 object-contain drop-shadow-[0_0_15px_rgba(245,165,36,0.4)]"
+            className="h-10 w-10 object-contain drop-shadow-[0_0_15px_rgba(255,144,0,0.4)]"
           />
-          <div>
-            <span className="font-extrabold text-lg tracking-tight text-white block">Stuhub</span>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-brand-500 font-bold block -mt-1">Student Portal</span>
+          <div className="flex flex-col">
+            <span className="font-extrabold text-2xl tracking-tight text-white leading-none">Stuhub</span>
+            <span className="font-bold text-[10px] tracking-widest text-primary leading-none mt-1">STUDENT PORTAL</span>
           </div>
         </div>
 
