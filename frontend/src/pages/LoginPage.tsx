@@ -544,11 +544,6 @@ export function LoginPage() {
       <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden">
         {/* Background Image with Blurred Gradient Overlay */}
         <div className="absolute inset-0 z-0">
-          <img
-            src="/workspace_background.jpg"
-            alt="Collaborative Workspace"
-            className="w-full h-full object-cover filter brightness-[0.2] contrast-[1.05]"
-          />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
           
           {/* Glowing colorful ambient background blobs */}
