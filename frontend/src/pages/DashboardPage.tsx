@@ -93,7 +93,7 @@ export function DashboardPage() {
     // Load backend stubs
     Promise.all([
       api.get("/assignments").then(res => setDeadlines(res.data)).catch(() => {}),
-      api.get("/library").then(res => setResources(res.data)).catch(() => {}),
+      api.get("/notes/recent").then(res => setResources(res.data)).catch(() => {}),
       api.get("/dashboard/student").then(res => setNotices(res.data?.notices || [])).catch(() => {})
     ]).finally(() => {
       setLoadingApis(false);
@@ -206,7 +206,8 @@ export function DashboardPage() {
                     <span className="material-symbols-outlined text-secondary group-hover:text-primary">folder_open</span>
                     <span className="text-[9px] font-bold text-[#A3A3A3] font-mono">FILE</span>
                   </div>
-                  <p className="font-label-lg font-semibold text-white">{item.name}</p>
+                  <p className="font-label-lg font-semibold text-white">{item.title}</p>
+                  <p className="text-[10px] text-on-surface-variant font-mono uppercase mt-0.5">{item.subject} • Sem {item.semester} ({item.branch})</p>
                 </div>
               ))}
             </div>

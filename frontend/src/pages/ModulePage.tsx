@@ -127,7 +127,7 @@ export function ModulePage() {
 
     // Load backend stubs
     Promise.all([
-      api.get("/library").then(res => setLibraryFiles(res.data)).catch(() => {}),
+      api.get("/notes/recent").then(res => setLibraryFiles(res.data)).catch(() => {}),
       api.get("/dashboard/student").then(res => setNotices(res.data?.notices || [])).catch(() => {})
     ]).finally(() => {
       setLoadingApis(false);
@@ -281,7 +281,7 @@ export function ModulePage() {
                         <tr key={idx} className="hover:bg-[#16161A]/30">
                           <td className="px-5 py-3 flex items-center gap-2">
                             <FileText className="text-primary" size={14} />
-                            <span className="font-semibold">{file.name}</span>
+                            <span className="font-semibold">{file.title}</span>
                           </td>
                           <td className="px-5 py-3 font-mono">No Actions</td>
                         </tr>
@@ -469,104 +469,112 @@ export function ModulePage() {
         return (
           <div className="space-y-8">
             {/* Profile Overview Card */}
-            <div className="panel p-6 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
-              <div className="relative">
-                <img
-                  className="w-28 h-28 rounded border-2 border-primary object-cover"
-                  src={user?.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuCVeeEPJSdKU3MKNu7H10u4Ru4onm9eJjmu_Ss52j_nLxII1w0k8oRnHDU7-dHOwHVSh0ls6e7iETgZjo318g0ajsd5jvN9jFRnZqpfsYtlI710rRAgLGDTbC4OTv0OIRvrL1dy1J1RXyJN8DYRb8jNv4oI70al0TznBUBPGE34-3Yk2TInZ9QzCRs5n_K1s8l1O4B1TLAQcmo13WdBD7xg2Sewc_TOTVfqo3SOtMb07V3yonSTaFHqof2_fC1YI5pyacB7SYWEklg"}
-                  alt="Student Avatar"
-                />
-                <div className="absolute -bottom-1 -right-1 bg-primary text-black p-0.5 rounded-full">
-                  <span className="material-symbols-outlined text-[14px]">verified</span>
-                </div>
+            <div className="panel p-6 flex items-center gap-4 relative overflow-hidden">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
+                <User size={28} />
               </div>
-              <div className="flex-grow text-center md:text-left space-y-1">
+              <div>
                 <h2 className="text-xl font-extrabold text-white">{user?.name}</h2>
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-on-surface-variant text-[11px] font-mono uppercase">
-                  <div className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs">fingerprint</span>
-                    <span>ROLL: CS-2024-{user?.id ? user.id.slice(-4) : "0892"}</span>
-                  </div>
-                  <span className="hidden sm:inline opacity-30">•</span>
-                  <div className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs">school</span>
-                    <span>{user?.role || "Student"} Workspace</span>
-                  </div>
-                </div>
+                <p className="text-xs text-on-surface-variant font-mono uppercase mt-0.5">
+                  {user?.role || "Student"} Workspace
+                </p>
               </div>
             </div>
 
-            {/* Profile bento row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
-                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Cumulative GPA</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-white">—</span>
-                  <span className="text-[10px] text-on-surface-variant font-mono">API Offline</span>
+            {/* Academic & Stats Panel */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column: Academic Credentials */}
+              <div className="panel p-6 space-y-4">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono border-b border-[#27272D] pb-2">
+                  Academic Profile
+                </h3>
+                
+                <div className="space-y-3.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Full Name</span>
+                    <span className="font-bold text-white">{user?.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Email Address</span>
+                    <span className="font-bold text-white">{user?.email}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Roll Number</span>
+                    <span className="font-bold text-white">{user?.rollNumber || "Not Set"}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Department / Branch</span>
+                    <span className="font-bold text-white text-right max-w-[200px] truncate" title={user?.department?.name}>
+                      {user?.department?.name || "Not Set"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Academic Semester</span>
+                    <span className="font-bold text-white">
+                      {user?.semester ? `Semester ${user.semester}` : "Not Set"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-on-surface-variant">Class Section</span>
+                    <span className="font-bold text-white">{user?.section || "Not Set"}</span>
+                  </div>
                 </div>
               </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
-                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Total Credits</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-white">—</span>
-                  <span className="text-[10px] text-on-surface-variant font-mono">API Offline</span>
-                </div>
-                <div className="w-full h-1 bg-[#09090B] border border-outline mt-2 rounded overflow-hidden">
-                  <div className="h-full bg-outline-variant w-[0%]"></div>
-                </div>
-              </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
-                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Study Streak</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Flame className="text-primary animate-pulse" size={18} fill="#F5A524" />
-                  <span className="text-xl font-extrabold text-white">{streakDays} Days</span>
-                </div>
-              </div>
-              <div className="bg-[#16161A] border border-[#27272D] p-5 rounded">
-                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Avg Attendance</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-white">{overallAttPct > 0 ? `${overallAttPct.toFixed(1)}%` : "0%"}</span>
-                  <span className="text-[10px] text-primary font-mono">{overallAttPct >= 75 ? "Satisfied" : "Warning"}</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Courses section from actual localStorage */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-white uppercase tracking-wider font-mono">Configured Study Subjects</h3>
-              {subjects.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {subjects.map((sub: any) => {
-                    const subLogs = logs.filter((l: any) => l.subjectId === sub.id);
-                    const attendedLogs = subLogs.filter((l: any) => l.status === "attended").length;
-                    const bunkedLogs = subLogs.filter((l: any) => l.status === "bunked").length;
+              {/* Right Column: Statistics & Highlights */}
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-[#16161A] border border-[#27272D] p-5 rounded flex flex-col justify-between h-28">
+                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider font-mono">Study Streak</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Flame className="text-primary animate-pulse" size={20} fill="#F5A524" />
+                      <span className="text-2xl font-extrabold text-white">{streakDays} Days</span>
+                    </div>
+                  </div>
+                  <div className="bg-[#16161A] border border-[#27272D] p-5 rounded flex flex-col justify-between h-28">
+                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider font-mono">Avg Attendance</p>
+                    <div>
+                      <span className="text-2xl font-extrabold text-white">{overallAttPct > 0 ? `${overallAttPct.toFixed(1)}%` : "0%"}</span>
+                      <p className={`text-[9px] font-mono mt-0.5 ${overallAttPct >= 75 ? "text-emerald-500" : "text-red-500"}`}>
+                        {overallAttPct >= 75 ? "SATISFIED" : "WARNING"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                    const attended = (sub.baselineAttended ?? 0) + attendedLogs;
-                    const total = (sub.baselineTotal ?? 0) + attendedLogs + bunkedLogs;
-                    const pct = total > 0 ? (attended / total) * 100 : 0;
+                {/* Courses section from actual localStorage */}
+                <div className="panel p-5 space-y-4">
+                  <h4 className="text-xs font-bold text-[#A3A3A3] uppercase tracking-wider font-mono border-b border-[#27272D] pb-2">
+                    Subject Presence Overview
+                  </h4>
+                  {subjects.length > 0 ? (
+                    <div className="space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
+                      {subjects.map((sub: any) => {
+                        const subLogs = logs.filter((l: any) => l.subjectId === sub.id);
+                        const attendedLogs = subLogs.filter((l: any) => l.status === "attended").length;
+                        const bunkedLogs = subLogs.filter((l: any) => l.status === "bunked").length;
 
-                    return (
-                      <div key={sub.id} className="p-4 bg-[#0F0F12] border border-[#27272D] rounded hover:border-[#808080] transition-all flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Laptop className="text-primary" size={20} />
-                          <div>
-                            <h4 className="text-xs font-bold text-white">{sub.name}</h4>
-                            <p className="text-[10px] text-on-surface-variant mt-0.5 font-mono uppercase">ID: SUB-{sub.id.slice(-4)}</p>
+                        const attended = (sub.baselineAttended ?? 0) + attendedLogs;
+                        const total = (sub.baselineTotal ?? 0) + attendedLogs + bunkedLogs;
+                        const pct = total > 0 ? (attended / total) * 100 : 0;
+
+                        return (
+                          <div key={sub.id} className="flex items-center justify-between text-xs py-1 border-b border-[#27272D]/50 last:border-0 last:pb-0">
+                            <span className="text-white truncate max-w-[180px] font-medium">{sub.name}</span>
+                            <span className={`font-mono font-bold ${pct >= 75 ? "text-primary" : "text-red-500"}`}>
+                              {pct.toFixed(1)}%
+                            </span>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <span className={`text-sm font-extrabold ${pct >= 75 ? "text-primary" : "text-red-500"}`}>{pct.toFixed(1)}%</span>
-                          <p className="text-[9px] text-on-surface-variant font-mono">{attended}/{total} classes</p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-on-surface-variant font-mono">
+                      No subject folders configured.
+                    </p>
+                  )}
                 </div>
-              ) : (
-                <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
-                  No course modules configured. Add them under the Attendance tracker.
-                </div>
-              )}
+              </div>
             </div>
           </div>
         );

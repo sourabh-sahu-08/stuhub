@@ -23,10 +23,10 @@ interface SubjectOption {
   code: string;
 }
 
-interface PyqPaper {
+interface NoteFile {
   _id: string;
   fileName: string;
-  paperName: string;
+  title: string;
   subject: string;
   semester: number;
   syllabus: "new" | "old";
@@ -50,7 +50,7 @@ const BRANCHES = [
   { code: "ELECTRONICS AND TELECOMMUNICATION", name: "Electronics and Telecommunication" }
 ];
 
-export function PyqPage() {
+export function NotesPage() {
   const { user } = useAuth();
 
   // Navigation State
@@ -58,7 +58,7 @@ export function PyqPage() {
   const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
 
   // Files & Filtering State
-  const [papers, setPapers] = useState<PyqPaper[]>([]);
+  const [notes, setNotes] = useState<NoteFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSyllabusTab, setActiveSyllabusTab] = useState<"new" | "old">("new");
@@ -66,7 +66,7 @@ export function PyqPage() {
   // Upload Modal State
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
-  const [paperName, setPaperName] = useState("");
+  const [noteTitle, setNoteTitle] = useState("");
   const [subject, setSubject] = useState("");
   const [syllabusType, setSyllabusType] = useState<"new" | "old">("new");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -79,18 +79,18 @@ export function PyqPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch papers for the selected path
-  const fetchPapers = async (branch: string, sem: number, search = "", syllabus = "all") => {
+  // Fetch notes for the selected path
+  const fetchNotes = async (branch: string, sem: number, search = "", syllabus = "all") => {
     setLoading(true);
     try {
-      let url = `/pyq/list/${branch}/${sem}?q=${encodeURIComponent(search)}`;
+      let url = `/notes/list/${branch}/${sem}?q=${encodeURIComponent(search)}`;
       if (syllabus !== "all") {
         url += `&syllabus=${syllabus}`;
       }
       const response = await api.get(url);
-      setPapers(response.data);
+      setNotes(response.data);
     } catch (err) {
-      console.error("Failed to fetch papers:", err);
+      console.error("Failed to fetch notes:", err);
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ export function PyqPage() {
   // Fetch subject suggestions based on branch and semester
   const fetchSubjectOptions = async (branch: string, sem: number) => {
     try {
-      const response = await api.get(`/pyq/subjects/${branch}/${sem}`);
+      const response = await api.get(`/notes/subjects/${branch}/${sem}`);
       setSubjectOptions(response.data);
     } catch (err) {
       console.error("Failed to fetch subject options:", err);
@@ -108,7 +108,7 @@ export function PyqPage() {
 
   useEffect(() => {
     if (selectedBranch !== null && selectedSemester !== null) {
-      fetchPapers(selectedBranch, selectedSemester, searchQuery, activeSyllabusTab);
+      fetchNotes(selectedBranch, selectedSemester, searchQuery, activeSyllabusTab);
       fetchSubjectOptions(selectedBranch, selectedSemester);
     }
   }, [selectedBranch, selectedSemester]);
@@ -118,14 +118,14 @@ export function PyqPage() {
     const value = e.target.value;
     setSearchQuery(value);
     if (selectedBranch && selectedSemester) {
-      fetchPapers(selectedBranch, selectedSemester, value, activeSyllabusTab);
+      fetchNotes(selectedBranch, selectedSemester, value, activeSyllabusTab);
     }
   };
 
   const handleSyllabusTabChange = (tab: "new" | "old") => {
     setActiveSyllabusTab(tab);
     if (selectedBranch && selectedSemester) {
-      fetchPapers(selectedBranch, selectedSemester, searchQuery, tab);
+      fetchNotes(selectedBranch, selectedSemester, searchQuery, tab);
     }
   };
 
@@ -179,15 +179,15 @@ export function PyqPage() {
       return;
     }
     setSelectedFile(file);
-    if (!paperName) {
+    if (!noteTitle) {
       const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf("."));
-      setPaperName(nameWithoutExt);
+      setNoteTitle(nameWithoutExt);
     }
   };
 
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile || !paperName.trim() || !subject.trim() || !selectedBranch || selectedSemester === null) {
+    if (!selectedFile || !noteTitle.trim() || !subject.trim() || !selectedBranch || selectedSemester === null) {
       alert("Please fill in all fields and select a file.");
       return;
     }
@@ -196,34 +196,34 @@ export function PyqPage() {
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
-      formData.append("paperName", paperName.trim());
+      formData.append("title", noteTitle.trim());
       formData.append("subject", subject.trim());
       formData.append("semester", selectedSemester.toString());
       formData.append("syllabus", syllabusType);
       formData.append("branch", selectedBranch);
 
-      await api.post("/pyq/upload", formData, {
+      await api.post("/notes/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
 
-      setPaperName("");
+      setNoteTitle("");
       setSubject("");
       setSelectedFile(null);
       setIsUploadOpen(false);
 
-      fetchPapers(selectedBranch, selectedSemester, searchQuery, activeSyllabusTab);
+      fetchNotes(selectedBranch, selectedSemester, searchQuery, activeSyllabusTab);
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to upload paper. Please try again.");
+      alert(err.response?.data?.message || "Failed to upload note. Please try again.");
     } finally {
       setUploadLoading(false);
     }
   };
 
-  // View file inline
+  // View note inline
   const handleView = async (id: string, mimeType: string) => {
     try {
-      const response = await api.get(`/pyq/download/${id}`, {
+      const response = await api.get(`/notes/download/${id}`, {
         responseType: "blob"
       });
       const blob = new Blob([response.data], { type: mimeType });
@@ -235,10 +235,10 @@ export function PyqPage() {
     }
   };
 
-  // Download file
+  // Download note file
   const handleDownload = async (id: string, fileName: string, mimeType: string) => {
     try {
-      const response = await api.get(`/pyq/download/${id}`, {
+      const response = await api.get(`/notes/download/${id}`, {
         responseType: "blob"
       });
       const blob = new Blob([response.data], { type: mimeType });
@@ -256,15 +256,15 @@ export function PyqPage() {
     }
   };
 
-  // Delete paper
+  // Delete note
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to permanently delete this question paper?")) return;
+    if (!confirm("Are you sure you want to permanently delete these notes?")) return;
     try {
-      await api.delete(`/pyq/${id}`);
-      setPapers((prev) => prev.filter((p) => p._id !== id));
+      await api.delete(`/notes/${id}`);
+      setNotes((prev) => prev.filter((n) => n._id !== id));
     } catch (err) {
-      console.error("Failed to delete paper:", err);
-      alert("Failed to delete paper.");
+      console.error("Failed to delete notes:", err);
+      alert("Failed to delete notes.");
     }
   };
 
@@ -290,7 +290,7 @@ export function PyqPage() {
             selectedBranch === null ? "text-[#F5A524] font-bold" : ""
           }`}
         >
-          PYQS
+          NOTES
         </button>
         {selectedBranch !== null && (
           <>
@@ -328,10 +328,10 @@ export function PyqPage() {
           >
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                Previous Year Question Papers
+                Notes Library
               </h1>
               <p className="mt-2 text-sm text-[#A1A1AA]">
-                Select your engineering branch to browse and upload past exam question papers.
+                Select your engineering branch to browse and share lecture notes, books, and study materials.
               </p>
             </div>
 
@@ -398,14 +398,14 @@ export function PyqPage() {
                     <h3 className="text-xs font-bold text-[#E2E2E2] group-hover:text-white">
                       Semester {sem}
                     </h3>
-                    <p className="text-[10px] text-[#71717A]">PYQs repository</p>
+                    <p className="text-[10px] text-[#71717A]">Notes repository</p>
                   </div>
                 </button>
               ))}
             </div>
           </motion.div>
         ) : (
-          /* ================= LEVEL 3: PYQ PAPERS LIST ================= */
+          /* ================= LEVEL 3: NOTES FILES LIST ================= */
           <motion.div
             key="files"
             initial={{ opacity: 0, y: 15 }}
@@ -429,7 +429,7 @@ export function PyqPage() {
                 </button>
                 <div>
                   <h1 className="text-xl font-bold text-white sm:text-2xl">
-                    Semester {selectedSemester} PYQs
+                    Semester {selectedSemester} Notes
                   </h1>
                   <p className="text-xs text-[#A1A1AA]">
                     {getBranchName(selectedBranch)} ({selectedBranch})
@@ -441,7 +441,7 @@ export function PyqPage() {
                 onClick={() => setIsUploadOpen(true)}
                 className="flex items-center justify-center gap-2 rounded-md bg-[#F5A524] px-4 py-2 text-xs font-bold text-black transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
-                <Plus size={15} /> Upload PYQ Paper
+                <Plus size={15} /> Upload Note File
               </button>
             </div>
 
@@ -465,6 +465,7 @@ export function PyqPage() {
               </div>
 
 
+
               {/* Search */}
               <div className="relative w-full max-w-sm">
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-[#71717A]">
@@ -472,7 +473,7 @@ export function PyqPage() {
                 </span>
                 <input
                   type="text"
-                  placeholder="Search subject or paper title..."
+                  placeholder="Search notes title or subject..."
                   value={searchQuery}
                   onChange={handleSearchChange}
                   className="w-full rounded-md border border-[#27272D] bg-[#0F0F12] py-2.5 pl-10 pr-4 text-xs text-[#E2E2E2] outline-none transition-colors placeholder:text-[#71717A] focus:border-[#F5A524]"
@@ -480,33 +481,33 @@ export function PyqPage() {
               </div>
             </div>
 
-            {/* PYQs List */}
+            {/* Notes List */}
             {loading ? (
               <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-[#27272D] bg-[#0F0F12]">
                 <span className="h-6 w-6 animate-spin rounded-full border-2 border-[#F5A524] border-t-transparent" />
                 <span className="mt-2 text-xs font-mono text-[#71717A]">
-                  RETRIEVING PYQS...
+                  RETRIEVING FILES...
                 </span>
               </div>
-            ) : papers.length === 0 ? (
+            ) : notes.length === 0 ? (
               <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-[#27272D] bg-[#0F0F12] p-6 text-center">
                 <AlertCircle size={28} className="text-[#71717A]" />
-                <h3 className="mt-3 text-sm font-bold text-[#E2E2E2]">No papers found</h3>
+                <h3 className="mt-3 text-sm font-bold text-[#E2E2E2]">No notes found</h3>
                 <p className="mt-1 max-w-xs text-xs text-[#71717A]">
-                  No past papers uploaded for this selection yet.
+                  No study materials uploaded for this selection yet.
                 </p>
                 <button
                   onClick={() => setIsUploadOpen(true)}
                   className="mt-4 text-xs font-bold text-[#F5A524] hover:underline"
                 >
-                  Upload a paper
+                  Upload a file
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {papers.map((paper) => (
+                {notes.map((note) => (
                   <div
-                    key={paper._id}
+                    key={note._id}
                     className="flex flex-col justify-between rounded-lg border border-[#27272D] bg-[#0F0F12] p-4 transition-colors hover:border-[#3F3F46]"
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -516,24 +517,24 @@ export function PyqPage() {
                         </div>
                         <div className="min-w-0">
                           <h4 className="truncate text-sm font-bold text-[#E2E2E2]">
-                            {paper.paperName}
+                            {note.title}
                           </h4>
                           <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
                             <span className="rounded bg-[#F5A524]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#F5A524]">
-                              {paper.subject}
+                              {note.subject}
                             </span>
                             <span className="rounded bg-[#27272D] px-2 py-0.5 text-[9px] font-mono text-[#A1A1AA] uppercase">
-                              {paper.syllabus} Syllabus
+                              {note.syllabus} Syllabus
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      {user?.id === paper.user?._id && (
+                      {user?.id === note.user?._id && (
                         <button
-                          onClick={() => handleDelete(paper._id)}
+                          onClick={() => handleDelete(note._id)}
                           className="shrink-0 p-1.5 rounded text-[#71717A] hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                          title="Delete Paper"
+                          title="Delete Notes"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -544,24 +545,24 @@ export function PyqPage() {
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[9px] text-[#71717A]">
                         <span className="flex items-center gap-1">
                           <Calendar size={10} />
-                          {new Date(paper.createdAt).toLocaleDateString()}
+                          {new Date(note.createdAt).toLocaleDateString()}
                         </span>
                         <span className="flex items-center gap-1">
                           <User size={10} />
-                          {paper.user?.name ?? "Anonymous"}
+                          {note.user?.name ?? "Anonymous"}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleView(paper._id, paper.mimeType)}
+                          onClick={() => handleView(note._id, note.mimeType)}
                           className="flex items-center gap-1.5 rounded bg-[#16161A] px-2.5 py-1.5 text-[10px] font-bold text-[#E2E2E2] hover:bg-[#27272D] transition-colors"
                         >
                           <Eye size={12} /> View
                         </button>
                         <button
                           onClick={() =>
-                            handleDownload(paper._id, paper.fileName, paper.mimeType)
+                            handleDownload(note._id, note.fileName, note.mimeType)
                           }
                           className="flex items-center gap-1.5 rounded bg-[#16161A] px-2.5 py-1.5 text-[10px] font-bold text-[#E2E2E2] hover:bg-[#27272D] transition-colors"
                         >
@@ -607,24 +608,24 @@ export function PyqPage() {
                 <X size={18} />
               </button>
 
-              <h2 className="text-lg font-bold text-white">Upload Question Paper</h2>
+              <h2 className="text-lg font-bold text-white">Upload Subject Notes</h2>
               <p className="text-xs text-[#71717A]">
-                Uploading paper to {selectedBranch} - Semester {selectedSemester} repository.
+                Uploading notes to {selectedBranch} - Semester {selectedSemester} repository.
               </p>
 
               <form onSubmit={handleUploadSubmit} className="mt-5 space-y-4">
-                {/* Paper Name */}
+                {/* Note Title */}
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
-                    Paper Title / Description
+                    Notes Title
                   </label>
                   <input
                     type="text"
                     required
                     disabled={uploadLoading}
-                    placeholder="e.g. End Semester Exam 2024"
-                    value={paperName}
-                    onChange={(e) => setPaperName(e.target.value)}
+                    placeholder="e.g. Unit 3: Transaction Processing Systems"
+                    value={noteTitle}
+                    onChange={(e) => setNoteTitle(e.target.value)}
                     className="mt-1 w-full rounded-md border border-[#27272D] bg-[#16161A] px-3 py-2 text-xs text-white outline-none focus:border-[#F5A524] disabled:opacity-65"
                   />
                 </div>
@@ -746,7 +747,7 @@ export function PyqPage() {
                     <div className="flex flex-col items-center">
                       <UploadCloud size={28} className="text-[#71717A]" />
                       <p className="mt-2 text-xs font-semibold text-[#E2E2E2]">
-                        Drag and drop your paper, or{" "}
+                        Drag and drop your notes document, or{" "}
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
@@ -797,4 +798,4 @@ export function PyqPage() {
   );
 }
 
-export default PyqPage;
+export default NotesPage;

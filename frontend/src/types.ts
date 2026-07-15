@@ -7,6 +7,15 @@ export interface User {
   role: Role;
   avatar?: string;
   isProfileComplete: boolean;
+  department?: {
+    _id: string;
+    name: string;
+    code: string;
+  };
+  rollNumber?: string;
+  semester?: number;
+  section?: string;
+  cgpa?: number;
 }
 
 export interface DashboardMetric {

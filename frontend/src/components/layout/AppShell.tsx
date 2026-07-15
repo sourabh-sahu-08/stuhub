@@ -1,5 +1,4 @@
 import {
-  Bell,
   ChevronDown,
   LogOut,
   Menu,
@@ -119,15 +118,14 @@ export function AppShell() {
               if (mobile) setMobileMenuOpen(false);
             }}
           >
-            <span className="material-symbols-outlined shrink-0 text-[28px] text-[#F5A524]">
-              terminal
-            </span>
+            <img 
+              src="/favicon.png" 
+              alt="Stuhub Logo" 
+              className="h-8 w-8 object-contain shrink-0"
+            />
 
             <h1 className="truncate text-lg font-bold tracking-tight text-[#FAFAFA]">
-              StuHub{" "}
-              <span className="font-mono text-xs text-[#F5A524]">
-                OS_V1
-              </span>
+              StuHub
             </h1>
           </Link>
 
@@ -280,9 +278,11 @@ export function AppShell() {
                 to="/dashboard"
                 className="flex min-w-0 items-center gap-2 md:hidden"
               >
-                <span className="material-symbols-outlined shrink-0 text-[20px] text-[#F5A524]">
-                  terminal
-                </span>
+                <img 
+                  src="/favicon.png" 
+                  alt="Stuhub Logo" 
+                  className="h-6 w-6 object-contain shrink-0"
+                />
 
                 <span className="truncate font-mono text-sm font-bold text-white">
                   StuHub
@@ -305,18 +305,7 @@ export function AppShell() {
 
             {/* Right side */}
             <div className="ml-3 flex shrink-0 items-center gap-2 sm:gap-3">
-              {/* Notifications */}
-              <button
-                type="button"
-                className="relative rounded-md p-2 text-[#A1A1AA] transition-colors hover:bg-[#16161A] hover:text-[#F5A524] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A524]"
-                aria-label="Notifications"
-              >
-                <Bell size={19} />
 
-                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-bold text-white">
-                  9
-                </span>
-              </button>
 
               {/* Profile */}
               <div className="relative" ref={dropdownRef}>

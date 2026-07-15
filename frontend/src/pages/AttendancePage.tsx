@@ -349,7 +349,6 @@ export function AttendancePage() {
             <ArrowLeft size={16} />
           </Link>
           <div>
-            <h2 className="font-label-sm text-[10px] text-primary uppercase tracking-[0.2em] mb-1 font-mono">Module: AJEX-V1</h2>
             <h1 className="font-display-lg text-2xl sm:text-3xl font-extrabold text-white">Smart Attendance Matrix</h1>
           </div>
         </div>
@@ -380,6 +379,157 @@ export function AttendancePage() {
           >
             <RotateCcw size={14} /> RESET
           </button>
+        </div>
+      </div>
+
+      {/* Attendance logger calendars section */}
+      <div className="grid gap-6 md:grid-cols-3 no-print">
+        {/* Calendar picker matrix */}
+        <div className="panel p-5 md:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
+              <CalendarIcon className="text-primary" size={16} /> Attendance logger calendar
+            </h3>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCalendarDate(new Date(year, month - 1, 1))}
+                className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              <span className="text-xs font-bold text-white min-w-[100px] text-center font-mono">
+                {monthNames[month]} {year}
+              </span>
+              <button
+                onClick={() => setCalendarDate(new Date(year, month + 1, 1))}
+                className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-[#A1A1AA] py-1 font-mono">
+            <span>Sun</span>
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+            {calendarGrid.map((cell, idx) => {
+              const hasLogs = cell.dateString ? getLogsForDate(cell.dateString) : [];
+              const isSelected = cell.dateString === selectedDateStr;
+              
+              return (
+                <button
+                  key={idx}
+                  disabled={!cell.isCurrentMonth}
+                  onClick={() => cell.dateString && setSelectedDateStr(cell.dateString)}
+                  className={`relative min-h-[38px] sm:min-h-[48px] p-1 rounded border flex flex-col items-center justify-between text-[10px] transition-all cursor-pointer ${
+                    !cell.isCurrentMonth
+                      ? "border-transparent bg-transparent text-slate-800"
+                      : isSelected
+                      ? "border-primary bg-primary/10 text-primary shadow-sm"
+                      : "border-[#27272D] bg-[#16161A]/40 text-on-surface hover:border-[#808080]"
+                  }`}
+                >
+                  <span className="font-bold font-mono self-start">{cell.day}</span>
+                  
+                  {/* Status dots */}
+                  {hasLogs.length > 0 && (
+                    <div className="flex flex-wrap justify-center gap-0.5 w-full max-w-[28px] overflow-hidden">
+                      {hasLogs.slice(0, 3).map((log, index) => (
+                        <span
+                          key={index}
+                          className={`h-1 w-1 rounded-full ${
+                            log.status === "attended"
+                              ? "bg-emerald-500"
+                              : log.status === "bunked"
+                              ? "bg-red-500"
+                              : "bg-amber-500"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected Date Log Selector */}
+        <div className="panel p-5 space-y-4">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary font-mono">Day Logger Panel</span>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider mt-1">
+              {selectedDateStr ? new Date(selectedDateStr).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "Select date"}
+            </h3>
+          </div>
+
+          <div className="space-y-4 max-h-[260px] overflow-y-auto pr-1">
+            {computedSubjects.map(sub => {
+              const dayLog = logs.find(l => l.date === selectedDateStr && l.subjectId === sub.id);
+              
+              return (
+                <div key={sub.id} className="border-b border-[#27272D] pb-3 space-y-2 last:border-0 last:pb-0">
+                  <p className="text-xs font-semibold text-[#e2e2e2] truncate">{sub.name}</p>
+                  
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => toggleLogStatus(selectedDateStr, sub.id, "attended")}
+                      className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
+                        dayLog?.status === "attended"
+                          ? "bg-emerald-500 text-black"
+                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
+                      }`}
+                    >
+                      Attended
+                    </button>
+                    <button
+                      onClick={() => toggleLogStatus(selectedDateStr, sub.id, "bunked")}
+                      className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
+                        dayLog?.status === "bunked"
+                          ? "bg-red-500 text-white"
+                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
+                      }`}
+                    >
+                      Bunked
+                    </button>
+                    <button
+                      onClick={() => toggleLogStatus(selectedDateStr, sub.id, "leave")}
+                      className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
+                        dayLog?.status === "leave"
+                          ? "bg-amber-500 text-black"
+                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
+                      }`}
+                    >
+                      Leave
+                    </button>
+                    {dayLog && (
+                      <button
+                        onClick={() => clearLog(selectedDateStr, sub.id)}
+                        className="h-7 w-7 rounded bg-[#16161A] border border-[#27272D] flex items-center justify-center text-xs text-[#A3A3A3] hover:text-red-500 transition cursor-pointer"
+                        title="Clear log"
+                      >
+                        ✖
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="rounded bg-[#16161A] border border-[#27272D] p-3 text-[10px] text-on-surface-variant flex items-start gap-2">
+            <Info size={14} className="shrink-0 text-primary mt-0.5" />
+            <span className="leading-relaxed">Attended increments present & held. Bunked increments held only. Leave has no math impact.</span>
+          </div>
         </div>
       </div>
 
@@ -562,156 +712,7 @@ export function AttendancePage() {
         </button>
       </div>
 
-      {/* Attendance logger calendars section */}
-      <div className="grid gap-6 md:grid-cols-3 no-print pt-4">
-        {/* Calendar picker matrix */}
-        <div className="panel p-5 md:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
-              <CalendarIcon className="text-primary" size={16} /> Attendance logger calendar
-            </h3>
-            
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCalendarDate(new Date(year, month - 1, 1))}
-                className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white"
-              >
-                <ChevronLeft size={14} />
-              </button>
-              <span className="text-xs font-bold text-white min-w-[100px] text-center font-mono">
-                {monthNames[month]} {year}
-              </span>
-              <button
-                onClick={() => setCalendarDate(new Date(year, month + 1, 1))}
-                className="h-7 w-7 rounded border border-[#27272D] bg-[#16161A] flex items-center justify-center text-[#A3A3A3] hover:text-white"
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-[#A1A1AA] py-1 font-mono">
-            <span>Sun</span>
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
-          </div>
-
-          <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
-            {calendarGrid.map((cell, idx) => {
-              const hasLogs = cell.dateString ? getLogsForDate(cell.dateString) : [];
-              const isSelected = cell.dateString === selectedDateStr;
-              
-              return (
-                <button
-                  key={idx}
-                  disabled={!cell.isCurrentMonth}
-                  onClick={() => cell.dateString && setSelectedDateStr(cell.dateString)}
-                  className={`relative min-h-[38px] sm:min-h-[48px] p-1 rounded border flex flex-col items-center justify-between text-[10px] transition-all cursor-pointer ${
-                    !cell.isCurrentMonth
-                      ? "border-transparent bg-transparent text-slate-800"
-                      : isSelected
-                      ? "border-primary bg-primary/10 text-primary shadow-sm"
-                      : "border-[#27272D] bg-[#16161A]/40 text-on-surface hover:border-[#808080]"
-                  }`}
-                >
-                  <span className="font-bold font-mono self-start">{cell.day}</span>
-                  
-                  {/* Status dots */}
-                  {hasLogs.length > 0 && (
-                    <div className="flex flex-wrap justify-center gap-0.5 w-full max-w-[28px] overflow-hidden">
-                      {hasLogs.slice(0, 3).map((log, index) => (
-                        <span
-                          key={index}
-                          className={`h-1 w-1 rounded-full ${
-                            log.status === "attended"
-                              ? "bg-emerald-500"
-                              : log.status === "bunked"
-                              ? "bg-red-500"
-                              : "bg-amber-500"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Selected Date Log Selector */}
-        <div className="panel p-5 space-y-4">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-primary font-mono">Day Logger Panel</span>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mt-1">
-              {selectedDateStr ? new Date(selectedDateStr).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "Select date"}
-            </h3>
-          </div>
-
-          <div className="space-y-4 max-h-[260px] overflow-y-auto pr-1">
-            {computedSubjects.map(sub => {
-              const dayLog = logs.find(l => l.date === selectedDateStr && l.subjectId === sub.id);
-              
-              return (
-                <div key={sub.id} className="border-b border-[#27272D] pb-3 space-y-2 last:border-0 last:pb-0">
-                  <p className="text-xs font-semibold text-[#e2e2e2] truncate">{sub.name}</p>
-                  
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => toggleLogStatus(selectedDateStr, sub.id, "attended")}
-                      className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
-                        dayLog?.status === "attended"
-                          ? "bg-emerald-500 text-black"
-                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
-                      }`}
-                    >
-                      Attended
-                    </button>
-                    <button
-                      onClick={() => toggleLogStatus(selectedDateStr, sub.id, "bunked")}
-                      className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
-                        dayLog?.status === "bunked"
-                          ? "bg-red-500 text-white"
-                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
-                      }`}
-                    >
-                      Bunked
-                    </button>
-                    <button
-                      onClick={() => toggleLogStatus(selectedDateStr, sub.id, "leave")}
-                      className={`flex-1 h-7 rounded text-[9px] font-bold uppercase transition cursor-pointer ${
-                        dayLog?.status === "leave"
-                          ? "bg-amber-500 text-black"
-                          : "bg-[#16161A] border border-[#27272D] text-[#A1A1AA] hover:text-white"
-                      }`}
-                    >
-                      Leave
-                    </button>
-                    {dayLog && (
-                      <button
-                        onClick={() => clearLog(selectedDateStr, sub.id)}
-                        className="h-7 w-7 rounded bg-[#16161A] border border-[#27272D] flex items-center justify-center text-xs text-[#A3A3A3] hover:text-red-500 transition cursor-pointer"
-                        title="Clear log"
-                      >
-                        ✖
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="rounded bg-[#16161A] border border-[#27272D] p-3 text-[10px] text-on-surface-variant flex items-start gap-2">
-            <Info size={14} className="shrink-0 text-primary mt-0.5" />
-            <span className="leading-relaxed">Attended increments present & held. Bunked increments held only. Leave has no math impact.</span>
-          </div>
-        </div>
-      </div>
 
       {/* Dynamic subject creation / editing form modal overlay */}
       <AnimatePresence>
