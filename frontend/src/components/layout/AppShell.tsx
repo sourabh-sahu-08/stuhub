@@ -287,18 +287,6 @@ export function AppShell() {
                 />
               </Link>
 
-              {/* Desktop search */}
-              <div className="relative hidden w-full max-w-sm md:block">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-zinc-500">
-                  search
-                </span>
-
-                <input
-                  type="text"
-                  placeholder="Search Workspace..."
-                  className="w-full rounded-md border border-outline bg-surface-container py-2 pl-10 pr-3 text-xs text-zinc-200 outline-none transition-colors placeholder:text-zinc-500 focus:border-[#F5A524]"
-                />
-              </div>
             </div>
 
             {/* Right side */}
