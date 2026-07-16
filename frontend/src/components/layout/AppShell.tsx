@@ -121,7 +121,7 @@ export function AppShell() {
             <img 
               src="/fvicon.png" 
               alt="Stuhub Logo" 
-              className="h-32 w-32 object-contain shrink-0"
+              className="h-10 w-auto object-contain shrink-0"
             />
           </Link>
 
@@ -283,7 +283,7 @@ export function AppShell() {
                 <img 
                   src="/fvicon.png" 
                   alt="Stuhub Logo" 
-                  className="h-24 w-24 object-contain shrink-0"
+                  className="h-8 w-auto object-contain shrink-0"
                 />
               </Link>
 
