@@ -98,11 +98,11 @@ const features = [
   {
     title: "AI PYQ Analyzer",
     shortTitle: "PYQ Analyzer",
-    description: "Scan previous papers, predict exam patterns, and get custom AI study plans using Groq vision API.",
+    description: "Scan previous papers, predict exam patterns, and get custom AI study plans.",
     icon: Brain,
     color: "from-indigo-500 to-purple-500",
     bullets: [
-      "PDF & Image vision analysis (via Groq Vision)",
+      "PDF & Image vision analysis",
       "Automated difficulty score calculations",
       "Predicted question bank generation"
     ],
@@ -550,18 +550,7 @@ export function LoginPage() {
         <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column: Heading & Controls (7 cols) */}
           <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
-            {/* Active Badge — Stitch Obsidian Pulse mono tag */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 100 }}
-              className="inline-flex items-center gap-2 border border-[#FF9000]/40 bg-[#FF9000]/8 px-4 py-1.5 select-none"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#FF9000] animate-pulse" />
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.08em', fontWeight: 500, color: '#FF9000', textTransform: 'uppercase' }}>
-                V2.0 // SYSTEM_STABLE
-              </span>
-            </motion.div>
+
 
             {/* Heading — sharp, tight tracking */}
             <h1 className="text-5xl sm:text-7xl font-extrabold tracking-[-0.03em] leading-[1.0] text-white">
@@ -575,7 +564,7 @@ export function LoginPage() {
 
             {/* Subtitle */}
             <p className="max-w-2xl mx-auto lg:mx-0 text-base sm:text-lg leading-relaxed text-zinc-350">
-              Unify your course assignments, track attendance safeties, build digital notes libraries, and analyze previous exam papers with Groq-powered AI.
+              Unify your course assignments, track attendance safeties, build digital notes libraries, and analyze previous exam papers with AI.
             </p>
 
             {/* Search Box */}
@@ -756,7 +745,7 @@ export function LoginPage() {
 
               {/* Bottom decorative stats bar */}
               <div className="border-t border-[#272727] pt-3 flex justify-between items-center text-[10px] font-bold text-zinc-500">
-                <span className="flex items-center gap-1"><Brain size={12} className="text-brand-500" /> Groq Vision Online</span>
+                <span className="flex items-center gap-1"><Brain size={12} className="text-brand-500" /> AI Vision Online</span>
                 <span className="text-emerald-500 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> 99.9% Up</span>
               </div>
             </motion.div>
@@ -1092,7 +1081,7 @@ export function LoginPage() {
                   {features[activeFeature].mockup.type === "pyq" && (
                     <div className="space-y-3 text-left">
                       <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
-                        <span>GROQ VISION SCANNER</span>
+                        <span>AI VISION SCANNER</span>
                         <span className="text-[9px] text-brand-500 uppercase">(Simulate OCR Scan)</span>
                       </div>
                       
@@ -1100,7 +1089,7 @@ export function LoginPage() {
                         <div className="flex flex-col items-center justify-center py-4 border border-dashed border-[#333333] rounded-lg hover:border-brand-500/30 transition cursor-pointer" onClick={handlePyqScan}>
                           <Brain size={24} className="text-brand-500/60 mb-1.5 animate-pulse" />
                           <span className="text-[10px] font-bold text-zinc-300">Click to Scan Sample Paper</span>
-                          <span className="text-[8px] text-zinc-500 mt-0.5">Simulates PDF parsing & Groq API analysis</span>
+                          <span className="text-[8px] text-zinc-500 mt-0.5">Simulates PDF parsing & AI analysis</span>
                         </div>
                       )}
 
@@ -1109,7 +1098,7 @@ export function LoginPage() {
                           {/* Animated radar bar scanner */}
                           <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand-500 shadow-[0_0_10px_#6366f1] animate-bounce" style={{ animationDuration: '1.5s' }} />
                           <Brain size={24} className="text-brand-500 mb-1.5 animate-spin" style={{ animationDuration: '3s' }} />
-                          <span className="text-[10px] font-bold text-zinc-300">Parsing PDF / Running Groq LLM...</span>
+                          <span className="text-[10px] font-bold text-zinc-300">Parsing PDF / Running AI...</span>
                         </div>
                       )}
 
