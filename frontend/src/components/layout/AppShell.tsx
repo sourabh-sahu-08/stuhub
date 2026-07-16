@@ -121,9 +121,8 @@ export function AppShell() {
             <img 
               src="/fvicon.png" 
               alt="Stuhub Logo" 
-              className="h-10 w-10 object-contain shrink-0"
+              className="h-12 w-12 object-contain shrink-0 bg-black rounded-lg p-1"
             />
-            <span className="font-extrabold text-2xl tracking-tight text-white leading-none">Stuhub</span>
           </Link>
 
           {mobile && (
@@ -284,9 +283,8 @@ export function AppShell() {
                 <img 
                   src="/fvicon.png" 
                   alt="Stuhub Logo" 
-                  className="h-8 w-8 object-contain shrink-0"
+                  className="h-10 w-10 object-contain shrink-0 bg-black rounded-lg p-1"
                 />
-                <span className="font-extrabold text-xl tracking-tight text-white leading-none">Stuhub</span>
               </Link>
 
               {/* Desktop search */}

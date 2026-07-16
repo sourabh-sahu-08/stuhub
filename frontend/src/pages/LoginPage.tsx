@@ -499,9 +499,8 @@ export function LoginPage() {
           <img 
             src="/fvicon.png" 
             alt="Stuhub Logo" 
-            className="h-10 w-10 object-contain drop-shadow-[0_0_15px_rgba(255,144,0,0.4)]"
+            className="h-12 w-12 object-contain bg-black rounded-lg p-1 drop-shadow-[0_0_15px_rgba(255,144,0,0.4)]"
           />
-            <span className="font-extrabold text-2xl tracking-tight text-white leading-none">Stuhub</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-300">
