@@ -545,24 +545,7 @@ export function LoginPage() {
       </header>
 
       {/* 2. Hero Section */}
-      <style>{`
-        @keyframes scanMove { 0% { top: -2px; } 100% { top: 100%; } }
-        .stitch-scanline { position: absolute; left: 0; width: 100%; height: 2px; background: rgba(255,144,0,0.08); animation: scanMove 6s linear infinite; pointer-events: none; }
-        @keyframes gridFadeIn { from { opacity: 0; } to { opacity: 1; } }
-      `}</style>
       <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden bg-black">
-        {/* Structural background: scanline + grid columns */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          {/* Scanline sweep */}
-          <div className="stitch-scanline" />
-          {/* Structural vertical grid lines */}
-          <div className="absolute inset-0 grid grid-cols-6 opacity-[0.04]">
-            {[...Array(5)].map((_, i) => <div key={i} className="border-r border-[#FF9000]" />)}
-          </div>
-          {/* Subtle ambient glow — orange only, no purple */}
-          <div className="absolute top-1/3 left-1/4 h-[500px] w-[500px] rounded-full bg-[#FF9000]/5 blur-[160px] pointer-events-none" />
-          <div className="absolute bottom-1/4 right-1/5 h-[400px] w-[400px] rounded-full bg-[#FF9000]/5 blur-[140px] pointer-events-none" />
-        </div>
 
         <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column: Heading & Controls (7 cols) */}
