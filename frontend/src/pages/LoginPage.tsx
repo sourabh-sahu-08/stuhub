@@ -499,7 +499,7 @@ export function LoginPage() {
           <img 
             src="/fvicon.png" 
             alt="Stuhub Logo" 
-            className="h-16 w-16 object-contain bg-black rounded-xl p-1 drop-shadow-[0_0_15px_rgba(255,144,0,0.4)]"
+            className="h-16 w-16 object-contain drop-shadow-[0_0_15px_rgba(255,144,0,0.4)]"
           />
         </a>
 
