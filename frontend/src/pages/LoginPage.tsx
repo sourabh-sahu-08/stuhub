@@ -501,10 +501,7 @@ export function LoginPage() {
             alt="Stuhub Logo" 
             className="h-10 w-10 object-contain drop-shadow-[0_0_15px_rgba(255,144,0,0.4)]"
           />
-          <div className="flex flex-col">
             <span className="font-extrabold text-2xl tracking-tight text-white leading-none">Stuhub</span>
-            <span className="font-bold text-[10px] tracking-widest text-primary leading-none mt-1">STUDENT PORTAL</span>
-          </div>
         </a>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-300">

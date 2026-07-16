@@ -123,10 +123,7 @@ export function AppShell() {
               alt="Stuhub Logo" 
               className="h-10 w-10 object-contain shrink-0"
             />
-            <div className="flex flex-col">
-              <span className="font-extrabold text-2xl tracking-tight text-white leading-none">Stuhub</span>
-              <span className="font-bold text-[10px] tracking-widest text-primary leading-none mt-1">STUDENT PORTAL</span>
-            </div>
+            <span className="font-extrabold text-2xl tracking-tight text-white leading-none">Stuhub</span>
           </Link>
 
           {mobile && (
@@ -289,10 +286,7 @@ export function AppShell() {
                   alt="Stuhub Logo" 
                   className="h-8 w-8 object-contain shrink-0"
                 />
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-xl tracking-tight text-white leading-none">Stuhub</span>
-                  <span className="font-bold text-[8px] tracking-widest text-primary leading-none mt-0.5">STUDENT PORTAL</span>
-                </div>
+                <span className="font-extrabold text-xl tracking-tight text-white leading-none">Stuhub</span>
               </Link>
 
               {/* Desktop search */}
