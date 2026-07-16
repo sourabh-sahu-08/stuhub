@@ -14,7 +14,7 @@ const QUICK_LINKS = [
   { label: "Attendance", icon: "calendar_month", to: "/dashboard/attendance", desc: "Track your class attendance" },
   { label: "Notes", icon: "folder_open", to: "/dashboard/library", desc: "Access your study notes" },
   { label: "PYQs", icon: "description", to: "/dashboard/pyq", desc: "Browse past exam papers" },
-  { label: "AI Analyzer", icon: "psychology_alt", to: "/dashboard/pyq-analyzer", desc: "Analyze papers with Groq AI" },
+  { label: "AI Analyzer", icon: "psychology_alt", to: "/dashboard/pyq-analyzer", desc: "Analyze papers with AI" },
 ];
 
 export function DashboardPage() {

@@ -121,12 +121,8 @@ export function AppShell() {
             <img 
               src="/fvicon.png" 
               alt="Stuhub Logo" 
-              className="h-10 w-10 object-contain shrink-0"
+              className="h-24 w-auto object-contain shrink-0"
             />
-            <div className="flex flex-col">
-              <span className="font-extrabold text-2xl tracking-tight text-white leading-none">Stuhub</span>
-              <span className="font-bold text-[10px] tracking-widest text-primary leading-none mt-1">STUDENT PORTAL</span>
-            </div>
           </Link>
 
           {mobile && (
@@ -287,26 +283,10 @@ export function AppShell() {
                 <img 
                   src="/fvicon.png" 
                   alt="Stuhub Logo" 
-                  className="h-8 w-8 object-contain shrink-0"
+                  className="h-16 w-auto object-contain shrink-0"
                 />
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-xl tracking-tight text-white leading-none">Stuhub</span>
-                  <span className="font-bold text-[8px] tracking-widest text-primary leading-none mt-0.5">STUDENT PORTAL</span>
-                </div>
               </Link>
 
-              {/* Desktop search */}
-              <div className="relative hidden w-full max-w-sm md:block">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-zinc-500">
-                  search
-                </span>
-
-                <input
-                  type="text"
-                  placeholder="Search Workspace..."
-                  className="w-full rounded-md border border-outline bg-surface-container py-2 pl-10 pr-3 text-xs text-zinc-200 outline-none transition-colors placeholder:text-zinc-500 focus:border-[#F5A524]"
-                />
-              </div>
             </div>
 
             {/* Right side */}
