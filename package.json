@@ -5,7 +5,7 @@
   "description": "A modern full-stack Stuhub for students, teachers, and administrators.",
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace backend\" \"npm run dev --workspace frontend\"",
-    "build": "npm run build --workspace backend && npm run build --workspace frontend",
+    "build": "rm -rf node_modules frontend/node_modules && npm install && npm run build --workspace backend && npm run build --workspace frontend",
     "start": "npm run start --workspace backend",
     "seed": "npm run seed --workspace backend",
     "lint": "npm run lint --workspace frontend && npm run lint --workspace backend"
