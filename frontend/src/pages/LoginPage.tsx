@@ -2,19 +2,34 @@ import { useState, useEffect, useRef, FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  CheckCircle2,
+  Calendar,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  CheckCircle,
+  Clock,
+  BookOpen,
   Search,
   ArrowRight,
-  ClipboardCheck,
-  Calendar,
-  Library,
+  Activity,
+  Zap,
+  Play,
+  PenTool,
+  LayoutTemplate,
+  Layers,
+  MousePointer2,
+  ArrowUpRight,
+  BarChart2,
+  ShieldCheck,
+  Download,
   Sparkles,
   X,
-  HelpCircle,
-  ChevronDown,
-  Brain
+  Brain,
+  ClipboardCheck,
+  Library
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useWorkspace } from "../context/WorkspaceContext";
 import { CompleteProfileModal } from "../components/auth/CompleteProfileModal";
 
 const features = [
@@ -119,6 +134,7 @@ const features = [
 
 export function LoginPage() {
   const { user, login, register, socialLogin } = useAuth();
+  const { metrics, assignments, recentNotes } = useWorkspace();
   
   // Navigation & UI States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -136,135 +152,21 @@ export function LoginPage() {
   }, []);
 
   // Interactive Mockup States
-  const [mockAssignments, setMockAssignments] = useState([
+  const [mockAssignments] = useState([
     { id: 1, title: "DBMS Assignment 3", due: "Tomorrow", status: "In Progress", weight: "10%" },
     { id: 2, title: "OS Kernel Lab", due: "July 8", status: "Not Started", weight: "15%" },
     { id: 3, title: "Applied AI Midterm Project", due: "Completed", status: "Submitted", weight: "20%" }
   ]);
-  const [attendedClasses, setAttendedClasses] = useState(11);
-  const [totalClasses, setTotalClasses] = useState(14);
   const [librarySearch, setLibrarySearch] = useState("");
-  const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+  const [downloadingFile] = useState<string | null>(null);
   
   const initialMessages = [
     { role: "user", text: "Explain binary search trees." },
     { role: "ai", text: "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent." }
   ];
-  const [aiConversation, setAiConversation] = useState(initialMessages);
-  const [isAiTyping, setIsAiTyping] = useState(false);
-  const [pyqScanState, setPyqScanState] = useState<"idle" | "scanning" | "done">("idle");
-
-  // Automated Showcase Tour Hook
-  useEffect(() => {
-    let t1: any;
-    let t2: any;
-    let t3: any;
-    let t4: any;
-    let t5: any;
-    let interval: any;
-
-    if (activeFeature === 0) { // Assignments
-      setMockAssignments([
-        { id: 1, title: "DBMS Assignment 3", due: "Tomorrow", status: "In Progress", weight: "10%" },
-        { id: 2, title: "OS Kernel Lab", due: "July 8", status: "Not Started", weight: "15%" },
-        { id: 3, title: "Applied AI Midterm Project", due: "Tomorrow", status: "In Progress", weight: "20%" }
-      ]);
-      t1 = setTimeout(() => {
-        setMockAssignments(prev =>
-          prev.map(item =>
-            item.id === 3 ? { ...item, status: "Submitted", due: "Completed" } : item
-          )
-        );
-      }, 1200);
-    }
-    
-    if (activeFeature === 1) { // Attendance
-      setAttendedClasses(0);
-      setTotalClasses(14);
-      let currentAttended = 0;
-      interval = setInterval(() => {
-        if (currentAttended < 11) {
-          currentAttended++;
-          setAttendedClasses(currentAttended);
-        } else {
-          clearInterval(interval);
-        }
-      }, 80);
-    }
-    
-    if (activeFeature === 2) { // Library
-      setLibrarySearch("");
-      setDownloadingFile(null);
-      const searchStr = "DBMS";
-      let currentStr = "";
-      let charIdx = 0;
-      interval = setInterval(() => {
-        if (charIdx < searchStr.length) {
-          currentStr += searchStr[charIdx];
-          setLibrarySearch(currentStr);
-          charIdx++;
-        } else {
-          clearInterval(interval);
-          t2 = setTimeout(() => {
-            setDownloadingFile("DBMS_Syllabus.pdf");
-            t3 = setTimeout(() => {
-              setDownloadingFile(null);
-            }, 1500);
-          }, 600);
-        }
-      }, 150);
-    }
-    
-    if (activeFeature === 3) { // AI Studio
-      setAiConversation([]);
-      setIsAiTyping(false);
-      
-      t4 = setTimeout(() => {
-        setAiConversation([{ role: "user", text: "Explain binary search trees." }]);
-        setIsAiTyping(true);
-        
-        t5 = setTimeout(() => {
-          setIsAiTyping(false);
-          const responseText = "A BST is a node-based binary tree structure where the left subtree contains keys less than the parent.";
-          const words = responseText.split(" ");
-          let wordIdx = 0;
-          let typedText = "";
-          
-          interval = setInterval(() => {
-            if (wordIdx < words.length) {
-              typedText += (wordIdx === 0 ? "" : " ") + words[wordIdx];
-              setAiConversation([
-                { role: "user", text: "Explain binary search trees." },
-                { role: "ai", text: typedText }
-              ]);
-              wordIdx++;
-            } else {
-              clearInterval(interval);
-            }
-          }, 80);
-        }, 1000);
-      }, 400);
-    }
-    
-    if (activeFeature === 4) { // PYQ
-      setPyqScanState("idle");
-      t1 = setTimeout(() => {
-        setPyqScanState("scanning");
-        t2 = setTimeout(() => {
-          setPyqScanState("done");
-        }, 1800);
-      }, 500);
-    }
-
-    return () => {
-      if (t1) clearTimeout(t1);
-      if (t2) clearTimeout(t2);
-      if (t3) clearTimeout(t3);
-      if (t4) clearTimeout(t4);
-      if (t5) clearTimeout(t5);
-      if (interval) clearInterval(interval);
-    };
-  }, [activeFeature]);
+  const [aiConversation] = useState(initialMessages);
+  const [isAiTyping] = useState(false);
+  const [pyqScanState] = useState<"idle" | "scanning" | "done">("idle");
 
   // Auth Form States
   const [name, setName] = useState("");
@@ -393,69 +295,6 @@ export function LoginPage() {
   };
 
   // Interactive Mockup Simulation Actions
-  const toggleAssignment = (id: number) => {
-    setMockAssignments(prev =>
-      prev.map(item =>
-        item.id === id
-          ? {
-              ...item,
-              status: item.status === "Submitted" ? "In Progress" : "Submitted",
-              due: item.status === "Submitted" ? "Tomorrow" : "Completed"
-            }
-          : item
-      )
-    );
-  };
-
-  const handleLogAttendance = (attended: boolean) => {
-    setTotalClasses(t => t + 1);
-    if (attended) {
-      setAttendedClasses(a => a + 1);
-    }
-  };
-
-  const handleDownloadFile = (fileName: string) => {
-    if (downloadingFile) return;
-    setDownloadingFile(fileName);
-    setTimeout(() => {
-      setDownloadingFile(null);
-    }, 1500);
-  };
-
-  const handleAiPromptClick = (promptText: string) => {
-    if (isAiTyping) return;
-    setAiConversation([
-      { role: "user", text: promptText },
-      { role: "ai", text: "Thinking..." }
-    ]);
-    setIsAiTyping(true);
-    
-    let fullResponse = "";
-    if (promptText.includes("BST")) {
-      fullResponse = "A Binary Search Tree (BST) is a tree where each node has at most two children. The left subtree has keys smaller than the node, and the right subtree has keys larger.";
-    } else if (promptText.includes("semaphore")) {
-      fullResponse = "A semaphore is a variable or abstract data type used to control access to a common resource by multiple processes in a concurrent system.";
-    } else {
-      fullResponse = "Here is a quick summary: Normalization in databases removes redundancy and improves data integrity by structuring tables logically.";
-    }
-
-    setTimeout(() => {
-      setAiConversation([
-        { role: "user", text: promptText },
-        { role: "ai", text: fullResponse }
-      ]);
-      setIsAiTyping(false);
-    }, 1200);
-  };
-
-  const handlePyqScan = () => {
-    if (pyqScanState !== "idle") return;
-    setPyqScanState("scanning");
-    setTimeout(() => {
-      setPyqScanState("done");
-    }, 2000);
-  };
-
   const triggerSearch = (e: FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -629,16 +468,22 @@ export function LoginPage() {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 max-w-2xl"
             >
-              {[
+              {(user ? [
+                { label: "Pending Tasks", value: metrics.pendingAssignments.toString(), icon: Clock },
+                { label: "Attendance", value: metrics.attendancePercentage > 0 ? `${metrics.attendancePercentage.toFixed(1)}%` : "—", icon: Calendar },
+                { label: "Resources", value: metrics.notesUploaded.toString(), icon: FileText },
+                { label: "AI Usage", value: "Active", icon: Brain }
+              ] : [
                 { label: "System Uptime", value: "99.9%", icon: Sparkles },
-                { label: "Attendance", value: "92%", icon: Calendar },
-                { label: "Resources", value: "143", icon: Library },
+                { label: "Attendance", value: "92%", icon: Calendar, isDemo: true },
+                { label: "Resources", value: "143", icon: FileText, isDemo: true },
                 { label: "AI Assistant", value: "24/7", icon: Brain }
-              ].map((metric, idx) => (
+              ]).map((metric, idx) => (
                 <div 
                   key={idx} 
-                  className="bg-[#050505] border border-[#1A1A1A] rounded-xl p-4 flex flex-col items-start gap-2 hover:-translate-y-[2px] hover:shadow-lg hover:border-[#333] transition-all duration-200 ease-out cursor-default"
+                  className="bg-[#050505] border border-[#1A1A1A] rounded-xl p-4 flex flex-col items-start gap-2 hover:-translate-y-[2px] hover:shadow-lg hover:border-[#333] transition-all duration-200 ease-out cursor-default relative overflow-hidden"
                 >
+                  {(!user && (metric as any).isDemo) && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[8px] font-bold px-1.5 py-0.5 rounded-bl uppercase">Demo</div>}
                   <metric.icon size={14} className="text-zinc-500" />
                   <div>
                     <p className="text-xl font-semibold text-white tracking-tight">{metric.value}</p>
@@ -658,8 +503,9 @@ export function LoginPage() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="col-span-1 row-span-1 bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-5 flex flex-col justify-between hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group"
+                className="col-span-1 row-span-1 bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-5 flex flex-col justify-between hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group relative overflow-hidden"
               >
+                {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase">Preview</div>}
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors">Attendance</span>
                   <span className="relative flex h-2 w-2">
@@ -669,16 +515,15 @@ export function LoginPage() {
                 </div>
                 <div>
                   <div className="flex items-baseline gap-1">
-                    {/* Simple counter animation effect using framer motion */}
                     <motion.p 
                       initial={{ opacity: 0 }} 
                       animate={{ opacity: 1 }} 
                       className="text-4xl font-semibold text-white tracking-tight"
                     >
-                      92%
+                      {user ? (metrics.attendancePercentage > 0 ? `${metrics.attendancePercentage.toFixed(1)}%` : "—") : "92%"}
                     </motion.p>
                   </div>
-                  <p className="text-[11px] text-zinc-500 mt-1">Safe threshold</p>
+                  <p className="text-[11px] text-zinc-500 mt-1">{user && metrics.attendancePercentage < 75 ? "Needs attention" : "Safe threshold"}</p>
                 </div>
               </motion.div>
 
@@ -687,8 +532,9 @@ export function LoginPage() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="col-span-1 row-span-2 bg-[#111111] border border-[#1A1A1A] rounded-xl p-6 flex flex-col hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group"
+                className="col-span-1 row-span-2 bg-[#111111] border border-[#1A1A1A] rounded-xl p-6 flex flex-col hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group relative overflow-hidden"
               >
+                {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase z-10">Preview</div>}
                 <div className="flex items-center justify-between mb-6">
                   <span className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors">PYQ Analyzer</span>
                   <Brain size={14} className="text-[#FF9000] group-hover:animate-pulse" />
@@ -715,9 +561,9 @@ export function LoginPage() {
                         transition={{ duration: 0.4, delay: 1 }}
                         className="text-xl font-semibold text-white tracking-tight"
                       >
-                        85%
+                        {user ? (metrics.pyqsUploaded > 0 ? "Ready" : "0") : "85%"}
                       </motion.p>
-                      <p className="text-[9px] text-zinc-500 uppercase tracking-widest mt-1">Match</p>
+                      <p className="text-[9px] text-zinc-500 uppercase tracking-widest mt-1">{user ? "Scans" : "Match"}</p>
                     </div>
                   </div>
                 </div>
@@ -731,40 +577,62 @@ export function LoginPage() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
-                className="col-span-1 row-span-2 bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-6 flex flex-col justify-between hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group"
+                className="col-span-1 row-span-2 bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-6 flex flex-col justify-between hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group relative overflow-hidden"
               >
+                {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase">Preview</div>}
                 <div>
                   <div className="flex items-center justify-between mb-5">
                     <span className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors">Assignments</span>
-                    <span className="text-[10px] font-medium text-white px-2 py-0.5 bg-[#222222] rounded-md border border-[#333]">3 Due</span>
+                    <span className="text-[10px] font-medium text-white px-2 py-0.5 bg-[#222222] rounded-md border border-[#333]">
+                      {user ? `${metrics.pendingAssignments} Due` : "3 Due"}
+                    </span>
                   </div>
                   <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#FF9000] mt-1.5 shrink-0" />
-                      <div>
-                        <p className="text-sm font-medium text-white">OS Kernel Lab</p>
-                        <p className="text-[11px] text-zinc-500">Tomorrow, 11:59 PM</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-zinc-700 mt-1.5 shrink-0" />
-                      <div>
-                        <p className="text-sm font-medium text-zinc-400">DBMS Schema</p>
-                        <p className="text-[11px] text-zinc-600">Jul 24</p>
-                      </div>
-                    </div>
+                    {user ? (
+                      assignments.slice(0, 2).map((a: any, i: number) => (
+                        <div key={a._id} className="flex items-start gap-3">
+                          <div className={`w-1.5 h-1.5 rounded-full ${a.status === 'Submitted' ? 'bg-emerald-500' : 'bg-[#FF9000]'} mt-1.5 shrink-0`} />
+                          <div>
+                            <p className="text-sm font-medium text-white line-clamp-1">{a.title}</p>
+                            <p className="text-[11px] text-zinc-500">{new Date(a.dueDate).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex items-start gap-3">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#FF9000] mt-1.5 shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium text-white">OS Kernel Lab</p>
+                            <p className="text-[11px] text-zinc-500">Tomorrow, 11:59 PM</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-700 mt-1.5 shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium text-zinc-400">DBMS Schema</p>
+                            <p className="text-[11px] text-zinc-600">Jul 24</p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {user && assignments.length === 0 && (
+                      <p className="text-xs text-zinc-500 text-center py-4">No assignments yet</p>
+                    )}
                   </div>
                 </div>
                 <div className="pt-5 mt-4">
                   <div className="w-full h-1 bg-[#222222] rounded-full overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: "65%" }}
+                      animate={{ width: user ? (assignments.length > 0 ? "35%" : "0%") : "65%" }}
                       transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
                       className="h-full bg-gradient-to-r from-[#FF9000]/80 to-[#FF9000]" 
                     />
                   </div>
-                  <p className="text-[10px] text-zinc-500 mt-2 text-right">65% Completed</p>
+                  <p className="text-[10px] text-zinc-500 mt-2 text-right">
+                    {user ? (assignments.length > 0 ? "In Progress" : "All Clear") : "65% Completed"}
+                  </p>
                 </div>
               </motion.div>
 
@@ -773,10 +641,11 @@ export function LoginPage() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="col-span-1 row-span-1 bg-[#151515] border border-[#222222] rounded-xl p-5 flex items-center gap-5 hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group"
+                className="col-span-1 row-span-1 bg-[#151515] border border-[#222222] rounded-xl p-5 flex items-center gap-5 hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group relative overflow-hidden"
               >
+                {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase">Preview</div>}
                 <div className="w-10 h-10 rounded-lg bg-[#0A0A0A] border border-[#2A2A2A] flex items-center justify-center text-zinc-400 shrink-0 group-hover:text-white transition-colors">
-                  <Library size={16} />
+                  <FileText size={16} />
                 </div>
                 <div>
                   <motion.p 
@@ -784,9 +653,9 @@ export function LoginPage() {
                     animate={{ opacity: 1 }}
                     className="text-2xl font-semibold text-white tracking-tight"
                   >
-                    143
+                    {user ? metrics.notesUploaded : "143"}
                   </motion.p>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Indexed Resources</p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">{user ? "Your Notes" : "Indexed Resources"}</p>
                 </div>
               </motion.div>
 
@@ -838,7 +707,7 @@ export function LoginPage() {
                     <ul className="mt-4 pl-14 space-y-2">
                       {feat.bullets.map((bullet, bIdx) => (
                         <li key={bIdx} className="flex items-center gap-2 text-xs text-zinc-500">
-                          <CheckCircle2 size={12} className="text-[#FF9000]" />
+                          <CheckCircle size={12} className="text-[#FF9000]" />
                           {bullet}
                         </li>
                       ))}
@@ -863,44 +732,69 @@ export function LoginPage() {
                 
                 {/* Assignments Mockup */}
                 {features[activeFeature].mockup.type === "assignments" && (
-                  <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl overflow-hidden">
+                  <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl overflow-hidden relative">
+                    {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase z-10">Preview</div>}
                     <div className="border-b border-[#222222] bg-[#111111] px-5 py-4 flex items-center justify-between">
                       <span className="text-sm font-semibold text-white">Tasks</span>
-                      <span className="text-xs font-medium px-2 py-1 bg-white text-black rounded">3 Active</span>
+                      <span className="text-xs font-medium px-2 py-1 bg-white text-black rounded">{user ? `${metrics.pendingAssignments} Active` : '3 Active'}</span>
                     </div>
-                    <div className="p-2 space-y-1">
-                      {mockAssignments.map((item) => (
-                        <button
-                          key={item.id}
-                          onClick={() => toggleAssignment(item.id)}
-                          className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-[#111111] transition-colors text-left group"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                              item.status === 'Submitted' ? 'bg-[#FF9000] border-[#FF9000]' : 'border-[#444444] group-hover:border-[#666666]'
-                            }`}>
-                              {item.status === 'Submitted' && <CheckCircle2 size={10} className="text-white" />}
+                    <div className="p-2 space-y-1 h-[300px] overflow-y-auto">
+                      {user ? (
+                        assignments.map((item: any) => (
+                          <div
+                            key={item._id}
+                            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-[#111111] transition-colors text-left group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                                item.status === 'Submitted' ? 'bg-[#FF9000] border-[#FF9000]' : 'border-[#444444] group-hover:border-[#666666]'
+                              }`}>
+                                {item.status === 'Submitted' && <CheckCircle size={10} className="text-white" />}
+                              </div>
+                              <div>
+                                <p className={`text-sm font-medium transition-colors ${item.status === 'Submitted' ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
+                                  {item.title}
+                                </p>
+                                <p className="text-xs text-zinc-500 mt-0.5">{item.module?.name || item.module}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className={`text-sm font-medium transition-colors ${item.status === 'Submitted' ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
-                                {item.title}
-                              </p>
-                              <p className="text-xs text-zinc-500 mt-0.5">{item.weight} of final grade</p>
-                            </div>
+                            <span className="text-xs text-zinc-500">{new Date(item.dueDate).toLocaleDateString()}</span>
                           </div>
-                          <span className="text-xs text-zinc-500">{item.due}</span>
-                        </button>
-                      ))}
+                        ))
+                      ) : (
+                        mockAssignments.map((item) => (
+                          <div
+                            key={item.id}
+                            className="w-full flex items-center justify-between p-3 rounded-lg bg-[#111111] transition-colors text-left group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                                item.status === 'Submitted' ? 'bg-[#FF9000] border-[#FF9000]' : 'border-[#444444]'
+                              }`}>
+                                {item.status === 'Submitted' && <CheckCircle size={10} className="text-white" />}
+                              </div>
+                              <div>
+                                <p className={`text-sm font-medium transition-colors ${item.status === 'Submitted' ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
+                                  {item.title}
+                                </p>
+                                <p className="text-xs text-zinc-500 mt-0.5">{item.weight} of final grade</p>
+                              </div>
+                            </div>
+                            <span className="text-xs text-zinc-500">{item.due}</span>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
 
                 {/* Attendance Mockup */}
                 {features[activeFeature].mockup.type === "attendance" && (() => {
-                  const attPct = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 1000) / 10 : 0;
+                  const attPct = user ? metrics.attendancePercentage : 92;
                   const isSafe = attPct >= 75;
                   return (
-                    <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl p-6">
+                    <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl p-6 relative overflow-hidden">
+                      {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase">Preview</div>}
                       <div className="flex items-center justify-between mb-8">
                         <h4 className="text-sm font-semibold text-white">Attendance Overview</h4>
                         <span className={`text-xs px-2 py-1 rounded font-medium ${isSafe ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
@@ -922,7 +816,7 @@ export function LoginPage() {
                             />
                           </svg>
                           <div className="text-center">
-                            <span className="text-3xl font-semibold text-white block">{attPct}%</span>
+                            <span className="text-3xl font-semibold text-white block">{attPct > 0 ? `${attPct.toFixed(1)}%` : "0%"}</span>
                             <span className="text-[10px] text-zinc-500">Present</span>
                           </div>
                         </div>
@@ -930,14 +824,14 @@ export function LoginPage() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <button
-                          onClick={() => handleLogAttendance(true)}
-                          className="py-2.5 bg-[#111111] border border-[#222222] hover:border-[#444444] rounded-lg text-xs font-medium text-white transition-colors"
+                          disabled
+                          className="py-2.5 bg-[#111111] border border-[#222222] rounded-lg text-xs font-medium text-zinc-500 opacity-50 cursor-not-allowed"
                         >
                           Mark Present
                         </button>
                         <button
-                          onClick={() => handleLogAttendance(false)}
-                          className="py-2.5 bg-[#111111] border border-[#222222] hover:border-[#444444] rounded-lg text-xs font-medium text-white transition-colors"
+                          disabled
+                          className="py-2.5 bg-[#111111] border border-[#222222] rounded-lg text-xs font-medium text-zinc-500 opacity-50 cursor-not-allowed"
                         >
                           Mark Absent
                         </button>
@@ -948,11 +842,13 @@ export function LoginPage() {
 
                 {/* Library Mockup */}
                 {features[activeFeature].mockup.type === "library" && (() => {
-                  const filteredFiles = features[activeFeature].mockup.files?.filter((file: any) =>
-                    file.name.toLowerCase().includes(librarySearch.toLowerCase())
+                  const dataList = user ? recentNotes : features[activeFeature].mockup.files;
+                  const filteredFiles = dataList?.filter((file: any) =>
+                    (file.name || file.title || "").toLowerCase().includes(librarySearch.toLowerCase())
                   ) || [];
                   return (
-                    <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl overflow-hidden">
+                    <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl overflow-hidden relative">
+                      {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase z-10">Preview</div>}
                       <div className="p-4 border-b border-[#222222] bg-[#111111]">
                         <div className="relative">
                           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -967,25 +863,24 @@ export function LoginPage() {
                       </div>
                       <div className="p-2 h-[260px] overflow-y-auto">
                         {filteredFiles.map((file: any, idx: number) => (
-                          <button
+                          <div
                             key={idx}
-                            onClick={() => handleDownloadFile(file.name)}
                             className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-[#111111] transition-colors text-left group"
                           >
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded bg-[#111111] flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
-                                <Library size={14} />
+                                <FileText size={14} />
                               </div>
                               <div>
-                                <p className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors">{file.name}</p>
-                                <p className="text-xs text-zinc-500 mt-0.5">{file.tag} • {file.size}</p>
+                                <p className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors line-clamp-1">{file.name || file.title}</p>
+                                <p className="text-xs text-zinc-500 mt-0.5">{file.tag || file.module?.name} • {file.size || "PDF"}</p>
                               </div>
                             </div>
-                            {downloadingFile === file.name && (
-                              <span className="text-xs text-[#FF9000] animate-pulse">Downloading...</span>
-                            )}
-                          </button>
+                          </div>
                         ))}
+                        {filteredFiles.length === 0 && (
+                          <p className="text-xs text-zinc-500 text-center py-4">No notes found</p>
+                        )}
                       </div>
                     </div>
                   );
@@ -993,7 +888,8 @@ export function LoginPage() {
 
                 {/* AI Studio Mockup */}
                 {features[activeFeature].mockup.type === "ai" && (
-                  <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl flex flex-col h-[360px]">
+                  <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl flex flex-col h-[360px] relative overflow-hidden">
+                    {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase z-10">Preview</div>}
                     <div className="p-4 border-b border-[#222222] bg-[#111111] flex items-center gap-2">
                       <Sparkles size={16} className="text-[#FF9000]" />
                       <span className="text-sm font-semibold text-white">AI Studio</span>
@@ -1011,24 +907,14 @@ export function LoginPage() {
                           </div>
                         </div>
                       ))}
-                      {isAiTyping && (
-                        <div className="flex justify-start">
-                          <div className="bg-[#111111] border border-[#222222] rounded-lg rounded-bl-none p-4 flex gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-                          </div>
-                        </div>
-                      )}
                     </div>
                     
                     <div className="p-3 border-t border-[#222222] flex gap-2">
                       {["Explain BST", "What is semaphore?"].map((prompt) => (
                         <button
                           key={prompt}
-                          onClick={() => handleAiPromptClick(prompt)}
-                          disabled={isAiTyping}
-                          className="text-xs bg-[#111111] border border-[#333333] hover:border-[#666666] text-zinc-300 px-3 py-2 rounded-lg transition-colors disabled:opacity-50 flex-1"
+                          disabled
+                          className="text-xs bg-[#111111] border border-[#333333] hover:border-[#666666] text-zinc-300 px-3 py-2 rounded-lg transition-colors flex-1 cursor-default opacity-80"
                         >
                           {prompt}
                         </button>
@@ -1039,63 +925,37 @@ export function LoginPage() {
 
                 {/* PYQ Analyzer Mockup */}
                 {features[activeFeature].mockup.type === "pyq" && (
-                  <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl p-6">
+                  <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl p-6 relative overflow-hidden">
+                    {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase z-10">Preview</div>}
                     <div className="flex items-center gap-3 mb-8">
                       <Brain size={20} className="text-[#FF9000]" />
                       <h4 className="text-sm font-semibold text-white">Pattern Recognition</h4>
                     </div>
                     
-                    {pyqScanState === 'idle' && (
-                      <button 
-                        onClick={handlePyqScan}
-                        className="w-full h-40 border border-dashed border-[#444444] rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-[#111111] hover:border-[#666666] transition-colors group"
-                      >
-                        <Brain size={24} className="text-zinc-500 group-hover:text-[#FF9000] transition-colors" />
-                        <span className="text-sm font-medium text-zinc-300">Run Deep Analysis</span>
-                      </button>
-                    )}
-
-                    {pyqScanState === 'scanning' && (
-                      <div className="h-40 flex flex-col items-center justify-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-[#111111] border border-[#333333] flex items-center justify-center relative overflow-hidden">
-                          <div className="absolute inset-0 bg-[#FF9000]/10 animate-pulse" />
-                          <Brain size={20} className="text-[#FF9000]" />
+                    <div className="flex items-center justify-between p-4 bg-[#111111] border border-[#222222] rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileText size={24} className="text-zinc-500" />
+                        <div>
+                          <p className="text-sm font-medium text-white">{user ? "PYQ_2023_Final.pdf" : "DBMS_2023_Final.pdf"}</p>
+                          <p className="text-[10px] text-zinc-500">{user ? "Processing Ready" : "Scan Complete"}</p>
                         </div>
-                        <span className="text-sm font-medium text-zinc-400">Processing past papers...</span>
                       </div>
-                    )}
+                      <span className="text-[#FF9000]">
+                        <CheckCircle size={18} />
+                      </span>
+                    </div>
 
-                    {pyqScanState === 'done' && (
-                      <div className="space-y-6">
-                        <div className="space-y-4">
-                          {features[activeFeature].mockup.topics?.map((topic: any, idx: number) => (
-                            <div key={idx} className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="font-medium text-zinc-200">{topic.name}</span>
-                                <span className="text-zinc-500">{topic.pct}% weight</span>
-                              </div>
-                              <div className="w-full bg-[#111111] rounded-full h-1 overflow-hidden">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${topic.pct}%` }}
-                                  transition={{ duration: 1, ease: "easeOut" }}
-                                  className="bg-[#FF9000] h-1 rounded-full"
-                                />
-                              </div>
-                            </div>
-                          ))}
+                    <div className="mt-6 space-y-4">
+                      <h5 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Top Topics</h5>
+                      {features[activeFeature].mockup.topics?.map((topic: any, i: number) => (
+                        <div key={i} className="flex items-center justify-between text-sm">
+                          <span className="text-zinc-300">{topic.name}</span>
+                          <span className="text-white font-medium">{topic.pct}%</span>
                         </div>
-                        <button
-                          onClick={() => setPyqScanState("idle")}
-                          className="w-full py-2 bg-[#111111] border border-[#222222] hover:border-[#444444] rounded-lg text-xs font-medium text-white transition-colors"
-                        >
-                          Analyze Another Paper
-                        </button>
-                      </div>
-                    )}
+                      ))}
+                    </div>
                   </div>
                 )}
-
               </motion.div>
             </AnimatePresence>
           </div>
@@ -1272,3 +1132,4 @@ export function LoginPage() {
     </div>
   );
 }
+

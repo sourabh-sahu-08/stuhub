@@ -8,7 +8,8 @@ import {
   Bookmark,
   User,
   Settings,
-  Sparkles
+  Sparkles,
+  ClipboardCheck
 } from "lucide-react";
 
 export interface NavItem {
@@ -29,6 +30,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { label: "Home", path: "/dashboard", icon: Home, materialIcon: "home" },
       { label: "Attendance", path: "/dashboard/attendance", icon: CalendarDays, materialIcon: "calendar_today" },
+      { label: "Assignments", path: "/dashboard/assignments", icon: ClipboardCheck, materialIcon: "assignment" },
       { label: "Notes", path: "/dashboard/library", icon: BookOpen, materialIcon: "folder" },
       { label: "PYQs", path: "/dashboard/pyq", icon: Brain, materialIcon: "psychology" },
       { label: "AI PYQ Analyzer", path: "/dashboard/pyq-analyzer", icon: Sparkles, materialIcon: "psychology_alt" }
