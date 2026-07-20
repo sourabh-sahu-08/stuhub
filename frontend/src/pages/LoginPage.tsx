@@ -538,31 +538,30 @@ export function LoginPage() {
                 </div>
               </motion.div>
 
-              {/* Widget 2: AI Analyzer */}
               <motion.div 
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="col-span-1 row-span-2 bg-[#111111] border border-[#1A1A1A] rounded-xl p-6 flex flex-col hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group relative overflow-hidden"
+                className="col-span-1 row-span-2 bg-[#111111] border border-[#1A1A1A] rounded-xl p-5 flex flex-col hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group relative overflow-hidden"
               >
                 {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase z-10">Preview</div>}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors">PYQ Analyzer</span>
                   <Brain size={14} className="text-[#FF9000] group-hover:animate-pulse" />
                 </div>
                 <div className="flex-1 flex items-center justify-center relative">
-                  <div className="relative w-32 h-32 flex items-center justify-center">
+                  <div className="relative w-28 h-28 flex items-center justify-center">
                     <svg className="absolute inset-0 w-full h-full transform -rotate-90">
-                      <circle cx="64" cy="64" r="60" className="stroke-[#222222] fill-none" strokeWidth="1" />
-                      <circle cx="64" cy="64" r="48" className="stroke-[#222222] fill-none" strokeWidth="1" />
+                      <circle cx="56" cy="56" r="52" className="stroke-[#222222] fill-none" strokeWidth="1" />
+                      <circle cx="56" cy="56" r="42" className="stroke-[#222222] fill-none" strokeWidth="1" />
                       <motion.circle 
-                        initial={{ strokeDashoffset: 2 * Math.PI * 60 }}
-                        animate={{ strokeDashoffset: 2 * Math.PI * 60 * (1 - 0.85) }}
+                        initial={{ strokeDashoffset: 2 * Math.PI * 52 }}
+                        animate={{ strokeDashoffset: 2 * Math.PI * 52 * (1 - 0.85) }}
                         transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }}
-                        cx="64" cy="64" r="60" 
+                        cx="56" cy="56" r="52" 
                         className="stroke-[#FF9000]/30 fill-none" 
                         strokeWidth="1" 
-                        strokeDasharray={`${2 * Math.PI * 60}`}
+                        strokeDasharray={`${2 * Math.PI * 52}`}
                       />
                     </svg>
                     <div className="text-center">
@@ -574,11 +573,11 @@ export function LoginPage() {
                       >
                         {user ? (metrics.pyqsUploaded > 0 ? "Ready" : "0") : "85%"}
                       </motion.p>
-                      <p className="text-[9px] text-zinc-500 uppercase tracking-widest mt-1">{user ? "Scans" : "Match"}</p>
+                      <p className="text-[9px] text-zinc-500 uppercase tracking-widest mt-0.5">{user ? "Scans" : "Match"}</p>
                     </div>
                   </div>
                 </div>
-                <div className="mt-6 bg-[#050505] rounded-md border border-[#222222] p-2.5 text-center transition-colors group-hover:border-[#333]">
+                <div className="mt-auto bg-[#050505] rounded-md border border-[#222222] p-2 text-center transition-colors group-hover:border-[#333]">
                   <span className="text-[10px] font-medium text-zinc-300">Predictive Model Active</span>
                 </div>
               </motion.div>
