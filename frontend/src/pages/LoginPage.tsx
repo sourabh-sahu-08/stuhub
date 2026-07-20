@@ -544,224 +544,269 @@ export function LoginPage() {
         </div>
       </header>
 
-      {/* 2. Hero Section */}
-      <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden bg-black">
+      {/* 2. Premium Hero Section */}
+      <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-24 bg-black overflow-hidden">
+        {/* Subtle grid background for depth */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,#000_70%,transparent_100%)]" />
 
-        <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: Heading & Controls (7 cols) */}
-          <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
-
-
-            {/* Heading — sharp, tight tracking */}
-            <h1 className="text-5xl sm:text-7xl font-extrabold tracking-[-0.03em] leading-[1.0] text-white">
-              The Command
-              <br />
-              <span className="text-[#FF9000]">Center</span> for
-              <br />
-              Academic{" "}
-              <span style={{ color: '#e2e2e2', fontWeight: 700 }}>Success.</span>
-            </h1>
-
-            {/* Subtitle */}
-            <p className="max-w-2xl mx-auto lg:mx-0 text-base sm:text-lg leading-relaxed text-zinc-350">
-              Unify your course assignments, track attendance safeties, build digital notes libraries, and analyze previous exam papers with AI.
-            </p>
-
-            {/* Search Box */}
-            <form onSubmit={triggerSearch} className="max-w-lg mx-auto lg:mx-0 bg-white/5 backdrop-blur-md rounded-xl p-1.5 border border-[#333333] flex items-center gap-2 shadow-2xl focus-within:border-brand-500/50 transition-all duration-300">
-              <div className="flex items-center gap-2 flex-1 px-3 text-zinc-400">
-                <Search size={18} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search modules or features..."
-                  className="bg-transparent border-none outline-none text-white text-sm w-full placeholder:text-zinc-455 focus:ring-0 focus:outline-none"
-                />
-              </div>
-              <button
-                type="submit"
-                className="h-10 px-5 rounded-lg bg-brand-500 text-sm font-bold text-white flex items-center gap-1.5 transition hover:bg-brand-600 hover:shadow-[0_0_10px_rgba(99,102,241,0.3)] active:scale-95"
+        <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
+          
+          {/* Left Column: Typography & Command Palette (6 cols) */}
+          <div className="lg:col-span-6 space-y-12 text-left">
+            <div className="space-y-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#111111] border border-[#222222]"
               >
-                Search <ArrowRight size={16} />
-              </button>
-            </form>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF9000] animate-pulse" />
+                <span className="text-[10px] font-medium tracking-widest text-zinc-400 uppercase">Academic Operating System</span>
+              </motion.div>
+              
+              <motion.h1 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-4xl sm:text-5xl lg:text-[52px] font-semibold tracking-tight leading-[1.15] text-white"
+              >
+                The Command Center <br className="hidden sm:block"/>
+                for <span className="text-[#FF9000]">Academic Success</span>.
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="max-w-lg text-base sm:text-lg text-zinc-400 leading-relaxed font-normal"
+              >
+                Unify your coursework, monitor attendance safely, build digital libraries, and analyze previous exam papers in one refined workspace.
+              </motion.p>
+            </div>
 
-            {/* Module Tags — Stitch sharp rectangular style */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
-              {[
-                { label: "ASSIGNMENTS", tag: "COMPUTE_ACTIVE" },
-                { label: "ATTENDANCE", tag: "SYNC_READY" },
-                { label: "DIGITAL LIBRARY", tag: "INDEX_OK" },
-                { label: "PYQ ANALYZER", tag: "AI_ONLINE" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-0 border border-[#333333] overflow-hidden group hover:border-[#FF9000]/50 transition-colors duration-300">
-                  <div className="bg-[#FF9000] px-2 py-1.5">
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', fontWeight: 700, color: '#000', letterSpacing: '0.08em' }}>{item.label}</span>
+            {/* Command Palette Search */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <form 
+                onSubmit={triggerSearch} 
+                className="max-w-xl w-full bg-[#0A0A0A] rounded-xl border border-[#222222] p-2.5 flex items-center shadow-lg hover:border-[#333333] focus-within:border-[#FF9000]/50 focus-within:ring-4 focus-within:ring-[#FF9000]/10 transition-all duration-200 group cursor-text"
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input');
+                  if (input) input.focus();
+                }}
+              >
+                <div className="flex items-center gap-3 flex-1 px-2">
+                  <Search size={18} className="text-zinc-500 group-focus-within:text-[#FF9000] transition-colors" />
+                  <div className="relative flex-1 flex items-center">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search notes, assignments, PYQs, faculty, resources..."
+                      className="bg-transparent border-none outline-none text-zinc-200 text-sm w-full placeholder:text-zinc-600 focus:ring-0 peer"
+                    />
+                    {/* Simulated cursor blink when empty (optional visual flair) */}
+                    {searchQuery === "" && (
+                      <span className="absolute left-0 w-[1px] h-4 bg-zinc-600 animate-pulse peer-focus:hidden pointer-events-none" />
+                    )}
                   </div>
-                  <div className="bg-[#1B1B1B] px-2 py-1.5">
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', fontWeight: 500, color: '#808080', letterSpacing: '0.06em' }}>{item.tag}</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2">
+                  <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded bg-[#1A1A1A] border border-[#2A2A2A] px-2 text-[10px] font-medium text-zinc-500">
+                    <span className="text-xs">⌘</span> K
+                  </kbd>
+                </div>
+              </form>
+            </motion.div>
+            
+            {/* Premium Metric Cards */}
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 max-w-2xl"
+            >
+              {[
+                { label: "System Uptime", value: "99.9%", icon: Sparkles },
+                { label: "Attendance", value: "92%", icon: Calendar },
+                { label: "Resources", value: "143", icon: Library },
+                { label: "AI Assistant", value: "24/7", icon: Brain }
+              ].map((metric, idx) => (
+                <div 
+                  key={idx} 
+                  className="bg-[#050505] border border-[#1A1A1A] rounded-xl p-4 flex flex-col items-start gap-2 hover:-translate-y-[2px] hover:shadow-lg hover:border-[#333] transition-all duration-200 ease-out cursor-default"
+                >
+                  <metric.icon size={14} className="text-zinc-500" />
+                  <div>
+                    <p className="text-xl font-semibold text-white tracking-tight">{metric.value}</p>
+                    <p className="text-[10px] text-zinc-500 font-medium mt-0.5">{metric.label}</p>
                   </div>
                 </div>
               ))}
-            </div>
+            </motion.div>
           </div>
 
-          {/* Right Column: Floating Mockup Dashboard with Rotating Modules (5 cols) */}
-          <div className="lg:col-span-5 relative flex justify-center lg:justify-end no-print">
-            <motion.div
-              animate={{ y: [0, -12, 0] }}
-              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-              className="relative w-[340px] h-[360px] bg-[#0a0a0a]/30 rounded-2xl border border-[#333333] p-5 shadow-[0_30px_60px_rgba(0,0,0,0.6)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
-            >
-              {/* Top mock title bar */}
-              <div className="flex items-center justify-between border-b border-[#272727] pb-3">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+          {/* Right Column: Realistic Widget Previews (6 cols) */}
+          <div className="lg:col-span-6 relative h-[500px] w-full no-print">
+            <div className="absolute inset-0 grid grid-cols-2 gap-5 auto-rows-[110px]">
+              
+              {/* Widget 1: Attendance */}
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="col-span-1 row-span-1 bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-5 flex flex-col justify-between hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors">Attendance</span>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
                 </div>
-
-              </div>
-
-              {/* Central region with auto-rotating mockup feature */}
-              <div className="flex-1 py-5 relative flex flex-col justify-center">
-                <AnimatePresence mode="wait">
-                  {currentHeroFeature === 0 && (
-                    <motion.div
-                      key="ai-assistant"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.25 }}
-                      className="space-y-3 text-left"
+                <div>
+                  <div className="flex items-baseline gap-1">
+                    {/* Simple counter animation effect using framer motion */}
+                    <motion.p 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }} 
+                      className="text-4xl font-semibold text-white tracking-tight"
                     >
-                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">AI Assistant Chat</div>
-                      <div className="p-3 rounded-xl bg-black/60 border border-[#272727] text-[10px] leading-relaxed shadow-sm">
-                        <div className="font-extrabold text-[8px] uppercase tracking-wider text-brand-400 mb-0.5">Stuhub AI</div>
-                        Predicted DBMS exam question on <strong>SQL Joins</strong> has 85% probability.
-                      </div>
-                    </motion.div>
-                  )}
+                      92%
+                    </motion.p>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 mt-1">Safe threshold</p>
+                </div>
+              </motion.div>
 
-                  {currentHeroFeature === 1 && (
-                    <motion.div
-                      key="attendance"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.25 }}
-                      className="flex flex-col items-center justify-center space-y-3"
-                    >
-                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Attendance Monitor</div>
-                      <div className="flex items-center gap-3 bg-black/60 border border-[#272727] p-3 rounded-xl shadow-lg w-full max-w-[200px] text-left">
-                        <div className="relative flex items-center justify-center h-10 w-10 flex-shrink-0">
-                          <svg className="absolute w-full h-full transform -rotate-90">
-                            <circle cx="20" cy="20" r="16" className="stroke-white/5 fill-none" strokeWidth="3" />
-                            <circle cx="20" cy="20" r="16" className="stroke-emerald-500 fill-none" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 16}`} strokeDashoffset={`${2 * Math.PI * 16 * (1 - 0.78)}`} strokeLinecap="round" />
-                          </svg>
-                          <span className="text-[9px] font-black text-white">78%</span>
-                        </div>
-                        <div>
-                          <div className="text-[9px] font-extrabold text-white">Attendance</div>
-                          <div className="text-[8px] font-bold text-emerald-450 uppercase tracking-wider mt-0.5">Safe</div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
+              {/* Widget 2: AI Analyzer */}
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="col-span-1 row-span-2 bg-[#111111] border border-[#1A1A1A] rounded-xl p-6 flex flex-col hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors">PYQ Analyzer</span>
+                  <Brain size={14} className="text-[#FF9000] group-hover:animate-pulse" />
+                </div>
+                <div className="flex-1 flex items-center justify-center relative">
+                  <div className="relative w-32 h-32 flex items-center justify-center">
+                    <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                      <circle cx="64" cy="64" r="60" className="stroke-[#222222] fill-none" strokeWidth="1" />
+                      <circle cx="64" cy="64" r="48" className="stroke-[#222222] fill-none" strokeWidth="1" />
+                      <motion.circle 
+                        initial={{ strokeDashoffset: 2 * Math.PI * 60 }}
+                        animate={{ strokeDashoffset: 2 * Math.PI * 60 * (1 - 0.85) }}
+                        transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }}
+                        cx="64" cy="64" r="60" 
+                        className="stroke-[#FF9000]/30 fill-none" 
+                        strokeWidth="1" 
+                        strokeDasharray={`${2 * Math.PI * 60}`}
+                      />
+                    </svg>
+                    <div className="text-center">
+                      <motion.p 
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.4, delay: 1 }}
+                        className="text-xl font-semibold text-white tracking-tight"
+                      >
+                        85%
+                      </motion.p>
+                      <p className="text-[9px] text-zinc-500 uppercase tracking-widest mt-1">Match</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 bg-[#050505] rounded-md border border-[#222222] p-2.5 text-center transition-colors group-hover:border-[#333]">
+                  <span className="text-[10px] font-medium text-zinc-300">Predictive Model Active</span>
+                </div>
+              </motion.div>
 
-                  {currentHeroFeature === 2 && (
-                    <motion.div
-                      key="assignments"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.25 }}
-                      className="space-y-3 text-left"
-                    >
-                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Assignments Tracker</div>
-                      <div className="p-3.5 rounded-xl bg-black/45 border border-[#272727] text-[10px] space-y-1.5 shadow-sm">
-                        <div className="flex justify-between items-center text-[8px] font-bold text-zinc-500">
-                          <span>ACTIVE TASKS</span>
-                          <span className="text-brand-500">2 pending</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input type="checkbox" readOnly className="rounded border-[#333333] bg-transparent text-brand-500 focus:ring-0 focus:ring-offset-0 h-3 w-3" />
-                          <span className="text-zinc-355">Submit OS lab report</span>
-                        </div>
+              {/* Widget 3: Assignments */}
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className="col-span-1 row-span-2 bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-6 flex flex-col justify-between hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <span className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors">Assignments</span>
+                    <span className="text-[10px] font-medium text-white px-2 py-0.5 bg-[#222222] rounded-md border border-[#333]">3 Due</span>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#FF9000] mt-1.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-white">OS Kernel Lab</p>
+                        <p className="text-[11px] text-zinc-500">Tomorrow, 11:59 PM</p>
                       </div>
-                    </motion.div>
-                  )}
-
-                  {currentHeroFeature === 3 && (
-                    <motion.div
-                      key="library"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.25 }}
-                      className="space-y-3 text-left"
-                    >
-                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Digital Library Repo</div>
-                      <div className="flex items-center gap-2.5 p-2 rounded-lg bg-black/60 border border-[#272727] text-[10px]">
-                        <div className="h-7 w-7 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
-                          <Library size={13} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-bold text-zinc-200 truncate">DBMS_Syllabus.pdf</div>
-                          <div className="text-[8px] text-zinc-550">1.2 MB</div>
-                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-zinc-700 mt-1.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-zinc-400">DBMS Schema</p>
+                        <p className="text-[11px] text-zinc-600">Jul 24</p>
                       </div>
-                    </motion.div>
-                  )}
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-5 mt-4">
+                  <div className="w-full h-1 bg-[#222222] rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: "65%" }}
+                      transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
+                      className="h-full bg-gradient-to-r from-[#FF9000]/80 to-[#FF9000]" 
+                    />
+                  </div>
+                  <p className="text-[10px] text-zinc-500 mt-2 text-right">65% Completed</p>
+                </div>
+              </motion.div>
 
-                  {currentHeroFeature === 4 && (
-                    <motion.div
-                      key="pyq"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.25 }}
-                      className="space-y-3 text-left"
-                    >
-                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Exam PYQ Analyzer</div>
-                      <div className="border border-emerald-500/20 bg-black/60 p-3.5 rounded-xl shadow-lg space-y-1.5">
-                        <div className="text-[8px] font-extrabold text-brand-400 uppercase tracking-wider flex items-center gap-1">
-                          <Brain size={10} className="text-brand-500" /> Topic Analysis
-                        </div>
-                        <p className="text-[10px] text-zinc-200 font-bold leading-snug">
-                          SQL Indexing Repeated 3x in Papers
-                        </p>
-                        <div className="text-[8px] font-bold text-emerald-450 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded inline-block">
-                          High Probability
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              {/* Widget 4: Notes/Library */}
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="col-span-1 row-span-1 bg-[#151515] border border-[#222222] rounded-xl p-5 flex items-center gap-5 hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-[#0A0A0A] border border-[#2A2A2A] flex items-center justify-center text-zinc-400 shrink-0 group-hover:text-white transition-colors">
+                  <Library size={16} />
+                </div>
+                <div>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-2xl font-semibold text-white tracking-tight"
+                  >
+                    143
+                  </motion.p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">Indexed Resources</p>
+                </div>
+              </motion.div>
 
-              {/* Bottom decorative stats bar */}
-              <div className="border-t border-[#272727] pt-3 flex justify-between items-center text-[10px] font-bold text-zinc-500">
-                <span className="flex items-center gap-1"><Brain size={12} className="text-brand-500" /> AI Vision Online</span>
-                <span className="text-emerald-500 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> 99.9% Up</span>
-              </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* 3. Platform Overview Section */}
-      <section id="features" className="py-24 px-6 max-w-6xl mx-auto space-y-16">
-        <div className="flex flex-col items-center gap-3">
-
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-[-0.02em]">System Architecture</h2>
-          <p className="text-zinc-500 text-sm max-w-xl mx-auto" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', letterSpacing: '0.02em' }}>Select any module to interface with its live interactive preview and core student workflows.</p>
+      <section id="features" className="py-24 px-6 max-w-7xl mx-auto space-y-16">
+        <div className="flex flex-col items-center max-w-2xl mx-auto text-center space-y-4">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Core Modules</h2>
+          <p className="text-zinc-400 text-base leading-relaxed">
+            Everything you need to manage your academic lifecycle, engineered into a single seamless workspace.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* Tabs selector column (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-3 justify-center relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start pt-8">
+          {/* Left Column: Feature Selection */}
+          <div className="lg:col-span-5 flex flex-col gap-2 relative">
             {features.map((feat, idx) => {
               const Icon = feat.icon;
               const isActive = activeFeature === idx;
@@ -769,419 +814,348 @@ export function LoginPage() {
                 <button
                   key={feat.title}
                   onClick={() => setActiveFeature(idx)}
-                  className={`relative flex items-start gap-4 p-4 border text-left transition-all duration-300 overflow-hidden ${
+                  className={`group relative flex flex-col items-start p-6 rounded-xl text-left transition-all duration-200 border ${
                     isActive
-                      ? "bg-[#1B1B1B] border-[#FF9000]/50"
-                      : "bg-[#0D0D0D] border-[#292929] hover:border-[#444444] hover:bg-[#151515]"
+                      ? "bg-[#111111] border-[#333333] shadow-soft"
+                      : "bg-transparent border-transparent hover:bg-[#0A0A0A] hover:border-[#222222]"
                   }`}
                 >
-                  {/* Sliding active tab indicator — sharp left orange line */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeFeatureIndicator"
-                      className="absolute inset-0 bg-gradient-to-r from-[#FF9000]/10 to-transparent border-l-[3px] border-[#FF9000] pointer-events-none -z-10"
-                      transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                    />
-                  )}
-
-                  <div className={`h-10 w-10 flex items-center justify-center flex-shrink-0 transition border ${
-                    isActive ? "bg-[#FF9000] text-black border-[#FF9000]" : "bg-[#1B1B1B] text-zinc-400 border-[#333333]"
-                  }`}>
-                    <Icon size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className={`text-sm font-bold transition ${isActive ? "text-white" : "text-zinc-300"}`}>
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors ${
+                      isActive ? "bg-white text-black" : "bg-[#111111] text-zinc-400 group-hover:text-zinc-200"
+                    }`}>
+                      <Icon size={20} />
+                    </div>
+                    <h3 className={`text-lg font-semibold transition-colors ${isActive ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"}`}>
                       {feat.title}
                     </h3>
-                    {isActive ? (
-                      <div className="text-[11px] mt-1.5 leading-relaxed space-y-1">
-                        {feat.mockup.type === "assignments" && (() => {
-                          const completed = mockAssignments.filter(a => a.status === 'Submitted').length;
-                          return (
-                            <p className="text-brand-400 font-semibold animate-pulse">
-                              🟢 {completed} of {mockAssignments.length} coursework tasks completed.
-                            </p>
-                          );
-                        })()}
-                        {feat.mockup.type === "attendance" && (() => {
-                          const attPct = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 1000) / 10 : 0;
-                          return (
-                            <p className="text-amber-400 font-semibold animate-pulse">
-                              📊 Current Attendance: {attPct}%. Safe status logged.
-                            </p>
-                          );
-                        })()}
-                        {feat.mockup.type === "library" && (() => {
-                          const fileCount = feat.mockup.files?.filter((f: any) => f.name.toLowerCase().includes(librarySearch.toLowerCase())).length || 0;
-                          return (
-                            <p className="text-emerald-450 font-semibold animate-pulse">
-                              🔍 Filter: {fileCount} note files index. {downloadingFile ? `Downloading ${downloadingFile}...` : ''}
-                            </p>
-                          );
-                        })()}
-                        {feat.mockup.type === "ai" && (() => {
-                          const lastMsg = aiConversation[aiConversation.length - 1];
-                          const previewText = lastMsg ? `"${lastMsg.role === 'user' ? 'You' : 'AI'}: ${lastMsg.text.slice(0, 50)}..."` : 'Simulate prompt clicks...';
-                          return (
-                            <div className="bg-black/60 p-2 rounded border border-[#272727] font-mono text-[9px] text-purple-400 mt-1 animate-pulse space-y-0.5">
-                              <span className="text-[8px] uppercase tracking-wider text-zinc-500 block">Live Chat Feed</span>
-                              <p className="line-clamp-2 leading-tight">{previewText}</p>
-                            </div>
-                          );
-                        })()}
-                        {feat.mockup.type === "pyq" && (
-                          <p className="text-indigo-400 font-semibold animate-pulse">
-                            {pyqScanState === 'idle' ? 'Ready to analyze. Click scan on right.' : pyqScanState === 'scanning' ? '⚡ OCR running & extracting data...' : '✅ Done. Normalization 40% weightage.'}
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-zinc-500 mt-1 line-clamp-2 leading-relaxed">
-                        {feat.description}
-                      </p>
-                    )}
+                  </div>
+                  
+                  <div className={`overflow-hidden transition-all duration-300 ${isActive ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}>
+                    <p className="text-sm text-zinc-400 leading-relaxed pl-14">
+                      {feat.description}
+                    </p>
+                    <ul className="mt-4 pl-14 space-y-2">
+                      {feat.bullets.map((bullet, bIdx) => (
+                        <li key={bIdx} className="flex items-center gap-2 text-xs text-zinc-500">
+                          <CheckCircle2 size={12} className="text-[#FF9000]" />
+                          {bullet}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Interactive display panel (7 cols) — Stitch Obsidian Pulse sharp panel */}
-          <div className="lg:col-span-7 border border-[#333333] bg-[#0D0D0D] p-6 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative min-h-[400px] overflow-hidden">
-            {/* Structural dot-grid background */}
-            <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#FF9000_1px,transparent_1px)] [background-size:16px_16px] -z-10" />
-            {/* Subtle orange ambient glow */}
-            <div className="absolute top-1/4 right-1/4 h-64 w-64 rounded-full bg-[#FF9000]/5 blur-[80px] pointer-events-none -z-10" />
-
+          {/* Right Column: Premium Mockup Display */}
+          <div className="lg:col-span-7 bg-[#050505] rounded-2xl border border-[#222222] p-8 min-h-[500px] flex items-center justify-center relative overflow-hidden shadow-soft">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeFeature}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.25 }}
-                className="flex-1 flex flex-col justify-between space-y-6"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.3 }}
+                className="w-full max-w-md mx-auto"
               >
-                {/* Panel Header — Stitch structural style */}
-                <div className="flex items-center justify-between border-b border-[#333333] pb-4 mb-1 text-left">
-                  <div>
-
-                    <h3 className="text-xl font-extrabold text-white tracking-[-0.01em]">
-                      {features[activeFeature].title}
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-[#1B1B1B] border border-[#333333] px-3 py-1.5" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', fontWeight: 500, color: '#808080', letterSpacing: '0.06em' }}>
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#00FF41] animate-pulse" />
-                    COMPUTE_ACTIVE
-                  </div>
-                </div>
-
-                {/* Feature specific live mockup */}
-                <div className="flex-1 flex flex-col justify-center bg-black/40 rounded-xl border border-[#272727] p-4 min-h-[180px] relative overflow-hidden">
-                  {features[activeFeature].mockup.type === "assignments" && (
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500">
-                        <span>INTERACTIVE WORKLIST</span>
-                        <span className="text-[9px] text-brand-500 uppercase font-bold">(Click row to check off)</span>
-                      </div>
-                      <motion.div
-                        variants={listContainerVariants}
-                        initial="hidden"
-                        animate="show"
-                        className="space-y-2"
-                      >
-                        {mockAssignments.map((item) => (
-                          <motion.button
-                            variants={listItemVariants}
-                            key={item.id}
-                            onClick={() => toggleAssignment(item.id)}
-                            className="w-full flex items-center justify-between p-2.5 rounded-lg bg-[#0a0a0a]/60 border border-[#272727] text-[11px] text-left hover:border-brand-500/20 hover:bg-[#0a0a0a]/80 transition duration-300"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className={`h-2 w-2 rounded-full transition-colors duration-300 ${item.status === 'Submitted' ? 'bg-emerald-500' : item.status === 'In Progress' ? 'bg-blue-500' : 'bg-slate-500'}`} />
-                              <div>
-                                <span className={`font-bold text-zinc-200 transition-all duration-300 ${item.status === 'Submitted' ? 'line-through text-zinc-500' : ''}`}>
-                                  {item.title}
-                                </span>
-                                <div className="text-[9px] text-zinc-500 mt-0.5">Weight: {item.weight}</div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 text-right">
-                              <span className="text-[10px] text-zinc-500">{item.due}</span>
-                              <span className={`text-[9px] px-2 py-0.5 rounded font-bold transition-all duration-350 ${
-                                item.status === 'Submitted' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'
-                              }`}>
-                                {item.status}
-                              </span>
-                            </div>
-                          </motion.button>
-                        ))}
-                      </motion.div>
+                
+                {/* Assignments Mockup */}
+                {features[activeFeature].mockup.type === "assignments" && (
+                  <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl overflow-hidden">
+                    <div className="border-b border-[#222222] bg-[#111111] px-5 py-4 flex items-center justify-between">
+                      <span className="text-sm font-semibold text-white">Tasks</span>
+                      <span className="text-xs font-medium px-2 py-1 bg-white text-black rounded">3 Active</span>
                     </div>
-                  )}
-
-                  {features[activeFeature].mockup.type === "attendance" && (() => {
-                    const attPct = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 1000) / 10 : 0;
-                    const isSafe = attPct >= 75;
-                    return (
-                      <div className="flex flex-col items-center justify-center space-y-3">
-                        <div className="flex justify-between items-center w-full text-[10px] font-bold text-zinc-500 px-1">
-                          <span>LIVE TRACKER CALCULATOR</span>
-                          <span className="text-[9px] text-brand-500 uppercase">(Test attendance bunk limits)</span>
-                        </div>
-                        <div className="flex items-center gap-6 bg-[#0a0a0a]/60 border border-[#272727] p-3 rounded-xl w-full max-w-[280px]">
-                          <div className="relative flex items-center justify-center h-14 w-14 flex-shrink-0">
-                            <svg className="absolute w-full h-full transform -rotate-90">
-                              <circle cx="28" cy="28" r="22" className="stroke-white/5 fill-none" strokeWidth="4" />
-                              <circle
-                                cx="28"
-                                cy="28"
-                                r="22"
-                                className="stroke-brand-500 fill-none animate-pulse"
-                                strokeWidth="4"
-                                strokeDasharray={`${2 * Math.PI * 22}`}
-                                strokeDashoffset={`${2 * Math.PI * 22 * (1 - attPct / 100)}`}
-                                strokeLinecap="round"
-                                style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}
-                              />
-                            </svg>
-                            <span className="text-[10px] font-black text-white">{attPct}%</span>
-                          </div>
-                          <div className="text-left flex-1 min-w-0">
-                            <div className="text-[10px] font-extrabold text-white truncate">Classes: {attendedClasses}/{totalClasses}</div>
-                            <div className={`text-[8.5px] font-bold uppercase tracking-wider mt-0.5 ${isSafe ? 'text-emerald-400' : 'text-red-400'}`}>
-                              {isSafe ? 'Safe! Above 75%' : 'Warning: Below 75%'}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleLogAttendance(true)}
-                            className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg hover:bg-emerald-500/20 transition active:scale-95"
-                          >
-                            Attend Class (+)
-                          </button>
-                          <button
-                            onClick={() => handleLogAttendance(false)}
-                            className="px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold rounded-lg hover:bg-red-500/20 transition active:scale-95"
-                          >
-                            Bunk Class (-)
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {features[activeFeature].mockup.type === "library" && (() => {
-                    const filteredFiles = features[activeFeature].mockup.files?.filter((file: any) =>
-                      file.name.toLowerCase().includes(librarySearch.toLowerCase())
-                    ) || [];
-                    return (
-                      <div className="space-y-2 text-left">
-                        <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
-                          <span>INTERACTIVE FILE INDEX</span>
-                          <span className="text-[9px] text-brand-500 uppercase">(Filter & Download)</span>
-                        </div>
-                        <input
-                          type="text"
-                          value={librarySearch}
-                          onChange={(e) => setLibrarySearch(e.target.value)}
-                          placeholder="Search notes (e.g. DBMS, OS)..."
-                          className="w-full bg-[#0a0a0a] border border-[#272727] px-2.5 py-1.5 rounded-lg text-[10px] text-white placeholder:text-zinc-500 focus:outline-none focus:border-brand-500/50 mb-2"
-                        />
-                        <motion.div
-                          variants={listContainerVariants}
-                          initial="hidden"
-                          animate="show"
-                          className="space-y-1.5 max-h-[110px] overflow-y-auto pr-1"
+                    <div className="p-2 space-y-1">
+                      {mockAssignments.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => toggleAssignment(item.id)}
+                          className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-[#111111] transition-colors text-left group"
                         >
-                          {filteredFiles.map((file: any, idx: number) => (
-                            <motion.button
-                              variants={listItemVariants}
-                              key={idx}
-                              onClick={() => handleDownloadFile(file.name)}
-                              disabled={downloadingFile !== null}
-                              className="w-full flex flex-col gap-1.5 p-2 rounded-lg bg-[#0a0a0a]/60 border border-[#272727] text-[11px] text-left hover:border-brand-500/20 hover:bg-[#0a0a0a]/80 transition duration-300"
-                            >
-                              <div className="w-full flex items-center gap-2">
-                                <div className="h-6 w-6 rounded bg-brand-500/10 text-brand-500 flex items-center justify-center flex-shrink-0">
-                                  <Library size={12} />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="font-bold text-zinc-200 truncate">{file.name}</div>
-                                  <div className="text-[8px] text-zinc-500">{file.size}</div>
-                                </div>
-                                <span className="text-[8px] bg-[#111111] text-zinc-400 px-2 py-0.5 rounded font-bold">
-                                  {downloadingFile === file.name ? 'Downloading...' : 'Click to Download'}
-                                </span>
-                              </div>
-                              {downloadingFile === file.name && (
-                                <div className="w-full bg-black rounded-full h-1 border border-[#272727] overflow-hidden">
-                                  <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: "100%" }}
-                                    transition={{ duration: 1.5, ease: "linear" }}
-                                    className="bg-brand-500 h-1 rounded-full"
-                                  />
-                                </div>
-                              )}
-                            </motion.button>
-                          ))}
-                        </motion.div>
-                      </div>
-                    );
-                  })()}
-
-                  {features[activeFeature].mockup.type === "ai" && (
-                    <div className="space-y-2 flex flex-col justify-between h-full text-left">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
-                        <span>STUDY CO-PILOT CHAT</span>
-                        <span className="text-[9px] text-brand-500 uppercase">(Select Prompt Below)</span>
-                      </div>
-                      <div className="space-y-2 max-h-[100px] overflow-y-auto pr-1 flex-1 flex flex-col justify-end">
-                        {aiConversation.map((msg, idx) => (
-                          <div key={idx} className={`p-2 rounded-lg text-[10px] leading-relaxed max-w-[85%] ${
-                            msg.role === 'user' ? 'bg-brand-500/10 border border-brand-500/20 text-brand-400 self-end' : 'bg-[#0a0a0a]/80 border border-[#272727] text-zinc-350 self-start'
-                          }`}>
-                            <div className="font-extrabold text-[8px] uppercase tracking-wider text-zinc-500 mb-0.5">
-                              {msg.role === 'user' ? 'You' : 'Stuhub AI'}
+                          <div className="flex items-center gap-3">
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                              item.status === 'Submitted' ? 'bg-[#FF9000] border-[#FF9000]' : 'border-[#444444] group-hover:border-[#666666]'
+                            }`}>
+                              {item.status === 'Submitted' && <CheckCircle2 size={10} className="text-white" />}
                             </div>
-                            {msg.text}
+                            <div>
+                              <p className={`text-sm font-medium transition-colors ${item.status === 'Submitted' ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
+                                {item.title}
+                              </p>
+                              <p className="text-xs text-zinc-500 mt-0.5">{item.weight} of final grade</p>
+                            </div>
                           </div>
-                        ))}
-                        {isAiTyping && (
-                          <div className="p-2 rounded-lg bg-[#0a0a0a]/80 border border-[#272727] text-zinc-300 self-start flex items-center gap-1 shadow-sm">
-                            <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-1.5 pt-2">
-                        {["Explain BST", "What is semaphore?"].map((prompt) => (
-                          <button
-                            key={prompt}
-                            onClick={() => handleAiPromptClick(prompt)}
-                            disabled={isAiTyping}
-                            className="text-[9px] bg-[#0a0a0a] border border-[#333333] hover:border-brand-500/40 hover:bg-[#0a0a0a]/80 text-zinc-300 px-2.5 py-1 rounded-full transition active:scale-95 disabled:opacity-50"
-                          >
-                            {prompt}
-                          </button>
-                        ))}
-                      </div>
+                          <span className="text-xs text-zinc-500">{item.due}</span>
+                        </button>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {features[activeFeature].mockup.type === "pyq" && (
-                    <div className="space-y-3 text-left">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
-                        <span>AI VISION SCANNER</span>
-                        <span className="text-[9px] text-brand-500 uppercase">(Simulate OCR Scan)</span>
+                {/* Attendance Mockup */}
+                {features[activeFeature].mockup.type === "attendance" && (() => {
+                  const attPct = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 1000) / 10 : 0;
+                  const isSafe = attPct >= 75;
+                  return (
+                    <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl p-6">
+                      <div className="flex items-center justify-between mb-8">
+                        <h4 className="text-sm font-semibold text-white">Attendance Overview</h4>
+                        <span className={`text-xs px-2 py-1 rounded font-medium ${isSafe ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                          {isSafe ? 'Safe' : 'Action Required'}
+                        </span>
                       </div>
                       
-                      {pyqScanState === 'idle' && (
-                        <div className="flex flex-col items-center justify-center py-4 border border-dashed border-[#333333] rounded-lg hover:border-brand-500/30 transition cursor-pointer" onClick={handlePyqScan}>
-                          <Brain size={24} className="text-brand-500/60 mb-1.5 animate-pulse" />
-                          <span className="text-[10px] font-bold text-zinc-300">Click to Scan Sample Paper</span>
-                          <span className="text-[8px] text-zinc-500 mt-0.5">Simulates PDF parsing & AI analysis</span>
+                      <div className="flex flex-col items-center justify-center mb-8">
+                        <div className="relative flex items-center justify-center h-32 w-32">
+                          <svg className="absolute w-full h-full transform -rotate-90">
+                            <circle cx="64" cy="64" r="56" className="stroke-[#111111] fill-none" strokeWidth="8" />
+                            <circle
+                              cx="64" cy="64" r="56"
+                              className="stroke-[#FF9000] fill-none transition-all duration-1000 ease-out"
+                              strokeWidth="8"
+                              strokeDasharray={`${2 * Math.PI * 56}`}
+                              strokeDashoffset={`${2 * Math.PI * 56 * (1 - attPct / 100)}`}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <div className="text-center">
+                            <span className="text-3xl font-semibold text-white block">{attPct}%</span>
+                            <span className="text-[10px] text-zinc-500">Present</span>
+                          </div>
                         </div>
-                      )}
+                      </div>
 
-                      {pyqScanState === 'scanning' && (
-                        <div className="relative flex flex-col items-center justify-center py-6 border border-brand-500/20 bg-brand-500/5 rounded-lg overflow-hidden">
-                          {/* Animated radar bar scanner */}
-                          <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand-500 shadow-[0_0_10px_#6366f1] animate-bounce" style={{ animationDuration: '1.5s' }} />
-                          <Brain size={24} className="text-brand-500 mb-1.5 animate-spin" style={{ animationDuration: '3s' }} />
-                          <span className="text-[10px] font-bold text-zinc-300">Parsing PDF / Running AI...</span>
+                      <div className="grid grid-cols-2 gap-4">
+                        <button
+                          onClick={() => handleLogAttendance(true)}
+                          className="py-2.5 bg-[#111111] border border-[#222222] hover:border-[#444444] rounded-lg text-xs font-medium text-white transition-colors"
+                        >
+                          Mark Present
+                        </button>
+                        <button
+                          onClick={() => handleLogAttendance(false)}
+                          className="py-2.5 bg-[#111111] border border-[#222222] hover:border-[#444444] rounded-lg text-xs font-medium text-white transition-colors"
+                        >
+                          Mark Absent
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Library Mockup */}
+                {features[activeFeature].mockup.type === "library" && (() => {
+                  const filteredFiles = features[activeFeature].mockup.files?.filter((file: any) =>
+                    file.name.toLowerCase().includes(librarySearch.toLowerCase())
+                  ) || [];
+                  return (
+                    <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl overflow-hidden">
+                      <div className="p-4 border-b border-[#222222] bg-[#111111]">
+                        <div className="relative">
+                          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                          <input
+                            type="text"
+                            value={librarySearch}
+                            onChange={(e) => setLibrarySearch(e.target.value)}
+                            placeholder="Search digital library..."
+                            className="w-full bg-[#050505] border border-[#333333] rounded pl-9 pr-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#FF9000] transition-colors"
+                          />
                         </div>
-                      )}
-
-                      {pyqScanState === 'done' && (
-                        <div className="space-y-2.5">
-                          {features[activeFeature].mockup.topics?.map((topic: any, idx: number) => (
-                            <div key={idx} className="space-y-1">
-                              <div className="flex justify-between text-[10px] font-bold text-zinc-200">
-                                <span>{topic.name}</span>
-                                <span className="text-brand-400">{topic.pct}% Weight</span>
+                      </div>
+                      <div className="p-2 h-[260px] overflow-y-auto">
+                        {filteredFiles.map((file: any, idx: number) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleDownloadFile(file.name)}
+                            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-[#111111] transition-colors text-left group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded bg-[#111111] flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                                <Library size={14} />
                               </div>
-                              <div className="w-full bg-[#0a0a0a] rounded-full h-1.5 border border-[#272727] overflow-hidden">
+                              <div>
+                                <p className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors">{file.name}</p>
+                                <p className="text-xs text-zinc-500 mt-0.5">{file.tag} • {file.size}</p>
+                              </div>
+                            </div>
+                            {downloadingFile === file.name && (
+                              <span className="text-xs text-[#FF9000] animate-pulse">Downloading...</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* AI Studio Mockup */}
+                {features[activeFeature].mockup.type === "ai" && (
+                  <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl flex flex-col h-[360px]">
+                    <div className="p-4 border-b border-[#222222] bg-[#111111] flex items-center gap-2">
+                      <Sparkles size={16} className="text-[#FF9000]" />
+                      <span className="text-sm font-semibold text-white">AI Studio</span>
+                    </div>
+                    
+                    <div className="flex-1 p-4 overflow-y-auto space-y-4">
+                      {aiConversation.map((msg, idx) => (
+                        <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[85%] rounded-lg p-3 text-sm leading-relaxed ${
+                            msg.role === 'user' 
+                              ? 'bg-white text-black rounded-br-none font-medium' 
+                              : 'bg-[#111111] border border-[#222222] text-zinc-300 rounded-bl-none'
+                          }`}>
+                            {msg.text}
+                          </div>
+                        </div>
+                      ))}
+                      {isAiTyping && (
+                        <div className="flex justify-start">
+                          <div className="bg-[#111111] border border-[#222222] rounded-lg rounded-bl-none p-4 flex gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="p-3 border-t border-[#222222] flex gap-2">
+                      {["Explain BST", "What is semaphore?"].map((prompt) => (
+                        <button
+                          key={prompt}
+                          onClick={() => handleAiPromptClick(prompt)}
+                          disabled={isAiTyping}
+                          className="text-xs bg-[#111111] border border-[#333333] hover:border-[#666666] text-zinc-300 px-3 py-2 rounded-lg transition-colors disabled:opacity-50 flex-1"
+                        >
+                          {prompt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* PYQ Analyzer Mockup */}
+                {features[activeFeature].mockup.type === "pyq" && (
+                  <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl p-6">
+                    <div className="flex items-center gap-3 mb-8">
+                      <Brain size={20} className="text-[#FF9000]" />
+                      <h4 className="text-sm font-semibold text-white">Pattern Recognition</h4>
+                    </div>
+                    
+                    {pyqScanState === 'idle' && (
+                      <button 
+                        onClick={handlePyqScan}
+                        className="w-full h-40 border border-dashed border-[#444444] rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-[#111111] hover:border-[#666666] transition-colors group"
+                      >
+                        <Brain size={24} className="text-zinc-500 group-hover:text-[#FF9000] transition-colors" />
+                        <span className="text-sm font-medium text-zinc-300">Run Deep Analysis</span>
+                      </button>
+                    )}
+
+                    {pyqScanState === 'scanning' && (
+                      <div className="h-40 flex flex-col items-center justify-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-[#111111] border border-[#333333] flex items-center justify-center relative overflow-hidden">
+                          <div className="absolute inset-0 bg-[#FF9000]/10 animate-pulse" />
+                          <Brain size={20} className="text-[#FF9000]" />
+                        </div>
+                        <span className="text-sm font-medium text-zinc-400">Processing past papers...</span>
+                      </div>
+                    )}
+
+                    {pyqScanState === 'done' && (
+                      <div className="space-y-6">
+                        <div className="space-y-4">
+                          {features[activeFeature].mockup.topics?.map((topic: any, idx: number) => (
+                            <div key={idx} className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="font-medium text-zinc-200">{topic.name}</span>
+                                <span className="text-zinc-500">{topic.pct}% weight</span>
+                              </div>
+                              <div className="w-full bg-[#111111] rounded-full h-1 overflow-hidden">
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: `${topic.pct}%` }}
-                                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                                  className="bg-brand-500 h-1.5 rounded-full"
+                                  transition={{ duration: 1, ease: "easeOut" }}
+                                  className="bg-[#FF9000] h-1 rounded-full"
                                 />
                               </div>
                             </div>
                           ))}
-                          <button
-                            onClick={() => setPyqScanState("idle")}
-                            className="w-full text-center text-[9px] text-zinc-500 hover:text-white transition font-bold"
-                          >
-                            Reset Scanner
-                          </button>
                         </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                        <button
+                          onClick={() => setPyqScanState("idle")}
+                          className="w-full py-2 bg-[#111111] border border-[#222222] hover:border-[#444444] rounded-lg text-xs font-medium text-white transition-colors"
+                        >
+                          Analyze Another Paper
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                {/* Key value list — Stitch structural tags */}
-                <div className="grid grid-cols-3 gap-2 border-t border-[#333333] pt-4">
-                  {features[activeFeature].bullets.map((bullet, idx) => (
-                    <div key={idx} className="flex items-start gap-1.5 text-[10px] text-zinc-400 leading-tight">
-                      <span className="h-1.5 w-1.5 bg-[#FF9000] mt-1.5 flex-shrink-0" />
-                      <span>{bullet}</span>
-                    </div>
-                  ))}
-                </div>
               </motion.div>
             </AnimatePresence>
           </div>
         </div>
       </section>
 
-      {/* 4. FAQ Section — Stitch Obsidian Pulse style */}
-      <section id="faq" className="py-24 bg-[#080808] border-t border-[#1F1F1F] px-6">
-        <div className="max-w-3xl mx-auto space-y-12">
-          <div className="flex flex-col items-center gap-3">
-
-            <h2 className="text-3xl font-extrabold text-white tracking-[-0.02em]">Frequently Asked</h2>
-            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#808080', letterSpacing: '0.02em' }}>Common queries about the StuHub platform.</p>
+      {/* 4. FAQ Section */}
+      <section id="faq" className="py-32 bg-black border-t border-[#111111] px-6">
+        <div className="max-w-3xl mx-auto space-y-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-semibold text-white tracking-tight">Frequently Asked Questions</h2>
+            <p className="text-zinc-500 text-base">Everything you need to know about the StuHub platform.</p>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-4">
             {faqData.map((item, idx) => (
-              <div key={idx} className={`border overflow-hidden transition-all duration-300 ${ activeFaq === idx ? 'border-[#FF9000]/40 bg-[#1B1B1B]' : 'border-[#292929] bg-[#0D0D0D] hover:border-[#3A3A3A]' }`}>
+              <div 
+                key={idx} 
+                className={`rounded-2xl border transition-all duration-300 overflow-hidden ${ 
+                  activeFaq === idx 
+                    ? 'border-[#333333] bg-[#0A0A0A]' 
+                    : 'border-[#222222] bg-transparent hover:border-[#333333] hover:bg-[#050505]' 
+                }`}
+              >
                 <button
                   onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                  className="w-full text-left px-6 py-5 font-bold text-zinc-200 hover:text-white transition flex justify-between items-center"
+                  className="w-full px-6 py-6 text-left flex justify-between items-center group"
                 >
-                  <span className="flex items-center gap-3">
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#FF9000', fontWeight: 600, letterSpacing: '0.06em' }}>0{idx + 1}</span>
+                  <span className={`font-medium transition-colors ${activeFaq === idx ? 'text-white' : 'text-zinc-300 group-hover:text-white'}`}>
                     {item.q}
                   </span>
-                  <span className="text-[#FF9000] text-xl font-light flex-shrink-0 ml-4">{activeFaq === idx ? "−" : "+"}</span>
-                </button>
-                {activeFaq === idx && (
-                  <div className="px-6 pb-5 pt-1 text-sm text-zinc-400 leading-relaxed border-t border-[#333333] bg-black/30">
-                    {item.a}
+                  <div className={`w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+                    activeFaq === idx ? 'border-[#FF9000] text-[#FF9000]' : 'border-[#333333] text-zinc-500 group-hover:border-[#555555]'
+                  }`}>
+                    <span className="text-sm leading-none mt-[-2px]">{activeFaq === idx ? "−" : "+"}</span>
                   </div>
-                )}
+                </button>
+                <div 
+                  className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${
+                    activeFaq === idx ? 'max-h-40 pb-6 opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <p className="text-sm text-zinc-400 leading-relaxed">
+                    {item.a}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 5. Footer — Stitch Obsidian Pulse */}
-      <footer className="py-8 border-t border-[#1F1F1F] bg-black">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#FF9000] animate-pulse" />
-            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#808080', letterSpacing: '0.06em' }}>STUHUB_OS // ALL_SYSTEMS_OPERATIONAL</span>
+      {/* 5. Footer */}
+      <footer className="py-12 border-t border-[#111111] bg-black">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3 bg-[#0A0A0A] border border-[#222222] px-3 py-1.5 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-medium text-zinc-400">All systems operational</span>
           </div>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#555', letterSpacing: '0.04em' }}>
+          <p className="text-sm text-zinc-500 font-medium">
             &copy; {new Date().getFullYear()} Stuhub. All rights reserved.
           </p>
         </div>
