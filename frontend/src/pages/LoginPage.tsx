@@ -621,9 +621,7 @@ export function LoginPage() {
                   <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
                 </div>
-                <span className="text-[9px] font-bold text-zinc-500 tracking-wider uppercase bg-white/5 px-2.5 py-0.5 rounded">
-                  dashboard.stuhub.io
-                </span>
+
               </div>
 
               {/* Central region with auto-rotating mockup feature */}
