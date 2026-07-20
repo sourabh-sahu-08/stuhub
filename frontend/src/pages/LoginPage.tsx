@@ -134,7 +134,7 @@ const features = [
 ];
 
 export function LoginPage() {
-  const { user, login, register, socialLogin } = useAuth();
+  const { user, login, register, socialLogin, setAuthSession } = useAuth();
   const { metrics, assignments, recentNotes } = useWorkspace();
   
   // Navigation & UI States
@@ -271,7 +271,7 @@ export function LoginPage() {
 
       api.post(`/auth/${provider}`, payload)
         .then((res: any) => {
-          login(res.data.token, res.data.user);
+          setAuthSession(res.data.token, res.data.user);
         })
         .catch((err: any) => {
           setError(err.response?.data?.message || `${provider} authentication failed.`);

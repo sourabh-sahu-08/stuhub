@@ -11,6 +11,7 @@ interface AuthContextValue {
   socialLogin(idToken: string): Promise<void>;
   completeProfile(payload: { name: string; rollNumber: string; department?: string; semester?: number; section?: string }): Promise<void>;
   logout(): void;
+  setAuthSession(token: string, user: User): void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -63,6 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("stuhub-token");
       setToken(null);
       setUser(null);
+    },
+    setAuthSession(newToken, newUser) {
+      localStorage.setItem("stuhub-token", newToken);
+      setToken(newToken);
+      setUser(newUser);
     }
   }), [loading, token, user]);
 
