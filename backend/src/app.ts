@@ -1,3 +1,5 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import compression from "compression";
 import cors from "cors";
 import express from "express";
@@ -35,7 +37,21 @@ export function createApp() {
     "/api/assignments"
   ], (_req, res) => res.json([]));
 
-  app.use(notFound);
+  // Serve Frontend in Production
+  if (env.NODE_ENV === "production") {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    // Serve static files from frontend/dist
+    app.use(express.static(path.join(__dirname, "../../frontend/dist")));
+
+    // Handle React Router catch-all
+    app.get("*", (_req, res) => {
+      res.sendFile(path.resolve(__dirname, "../../frontend/dist", "index.html"));
+    });
+  } else {
+    app.use(notFound);
+  }
+
   app.use(errorHandler);
 
   return app;
