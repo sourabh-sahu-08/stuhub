@@ -756,11 +756,7 @@ export function LoginPage() {
       {/* 3. Platform Overview Section */}
       <section id="features" className="py-24 px-6 max-w-6xl mx-auto space-y-16">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 w-16 bg-[#333333]" />
-            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.12em', fontWeight: 500, color: '#FF9000', textTransform: 'uppercase' }}>Core Modules // 001 — 004</span>
-            <div className="h-px flex-1 w-16 bg-[#333333]" />
-          </div>
+
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-[-0.02em]">System Architecture</h2>
           <p className="text-zinc-500 text-sm max-w-xl mx-auto" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', letterSpacing: '0.02em' }}>Select any module to interface with its live interactive preview and core student workflows.</p>
         </div>
@@ -871,7 +867,7 @@ export function LoginPage() {
                 {/* Panel Header — Stitch structural style */}
                 <div className="flex items-center justify-between border-b border-[#333333] pb-4 mb-1 text-left">
                   <div>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.1em', fontWeight: 500, color: '#FF9000', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Stuhub // Live Preview</span>
+
                     <h3 className="text-xl font-extrabold text-white tracking-[-0.01em]">
                       {features[activeFeature].title}
                     </h3>
@@ -1151,11 +1147,7 @@ export function LoginPage() {
       <section id="faq" className="py-24 bg-[#080808] border-t border-[#1F1F1F] px-6">
         <div className="max-w-3xl mx-auto space-y-12">
           <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center gap-3 w-full max-w-sm">
-              <div className="h-px flex-1 bg-[#333333]" />
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.12em', fontWeight: 500, color: '#FF9000', textTransform: 'uppercase' }}>FAQ // DOCS</span>
-              <div className="h-px flex-1 bg-[#333333]" />
-            </div>
+
             <h2 className="text-3xl font-extrabold text-white tracking-[-0.02em]">Frequently Asked</h2>
             <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#808080', letterSpacing: '0.02em' }}>Common queries about the StuHub platform.</p>
           </div>
