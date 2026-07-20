@@ -25,7 +25,7 @@ import {
   Sparkles,
   X,
   Brain,
-  ClipboardCheck,
+  ClipboardList,
   Library
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -37,7 +37,7 @@ const features = [
     title: "Assignments Tracker",
     shortTitle: "Assignments",
     description: "Centralize your coursework. Monitor deadlines, track submission status, and record scores in a structured student workflow.",
-    icon: ClipboardCheck,
+    icon: ClipboardList,
     color: "from-blue-500 to-indigo-500",
     bullets: [
       "Deadlines alert & notification bubble",
