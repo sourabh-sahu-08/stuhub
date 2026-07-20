@@ -127,10 +127,10 @@ export function ModulePage() {
 
     // Load backend stubs
     Promise.all([
-      api.get("/notes/recent").then(res => setLibraryFiles(res.data)).catch(() => {}),
-      api.get("/dashboard/student").then(res => setNotices(res.data?.notices || [])).catch(() => {})
+      api.get("/notes/recent").then(res => setLibraryFiles(res.data)).catch(() => {})
     ]).finally(() => {
       setLoadingApis(false);
+      setNotices([]);
     });
   }, [module]);
 

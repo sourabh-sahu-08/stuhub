@@ -129,6 +129,148 @@ authRouter.post("/social-login", async (req, res, next) => {
   }
 });
 
+authRouter.post("/github", async (req, res, next) => {
+  try {
+    const { code } = z.object({ code: z.string() }).parse(req.body);
+
+    if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
+      return res.status(500).json({ message: "GitHub OAuth is not configured on the server." });
+    }
+
+    const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({
+        client_id: env.GITHUB_CLIENT_ID,
+        client_secret: env.GITHUB_CLIENT_SECRET,
+        code
+      })
+    });
+
+    const tokenData = await tokenResponse.json();
+    if (tokenData.error) {
+      return res.status(400).json({ message: tokenData.error_description || "Invalid GitHub auth code" });
+    }
+
+    const accessToken = tokenData.access_token;
+
+    const userResponse = await fetch("https://api.github.com/user", {
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Accept": "application/json"
+      }
+    });
+
+    const userData = await userResponse.json();
+    let email = userData.email;
+
+    // GitHub users can have private emails. We fetch the emails array if primary is null.
+    if (!email) {
+      const emailResponse = await fetch("https://api.github.com/user/emails", {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Accept": "application/json"
+        }
+      });
+      const emails = await emailResponse.json();
+      const primaryEmail = emails.find((e: any) => e.primary && e.verified);
+      if (primaryEmail) email = primaryEmail.email;
+    }
+
+    if (!email) {
+      return res.status(400).json({ message: "No verified email found on GitHub account" });
+    }
+
+    const name = userData.name || userData.login || "GitHub User";
+    const avatar = userData.avatar_url;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        password: Math.random().toString(36).slice(-10) + "Aa1!",
+        role: "student",
+        avatar,
+        isProfileComplete: false
+      });
+      await Student.create({ user: user._id, rollNumber: `TEMP-STU-${Date.now()}` });
+    }
+
+    const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
+    res.json({ token, user: sanitizeUser(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+authRouter.post("/linkedin", async (req, res, next) => {
+  try {
+    const { code, redirectUri } = z.object({ code: z.string(), redirectUri: z.string() }).parse(req.body);
+
+    if (!env.LINKEDIN_CLIENT_ID || !env.LINKEDIN_CLIENT_SECRET) {
+      return res.status(500).json({ message: "LinkedIn OAuth is not configured on the server." });
+    }
+
+    const tokenResponse = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        client_id: env.LINKEDIN_CLIENT_ID,
+        client_secret: env.LINKEDIN_CLIENT_SECRET,
+        code,
+        redirect_uri: redirectUri
+      }).toString()
+    });
+
+    const tokenData = await tokenResponse.json();
+    if (tokenData.error) {
+      return res.status(400).json({ message: tokenData.error_description || "Invalid LinkedIn auth code" });
+    }
+
+    const accessToken = tokenData.access_token;
+
+    const userResponse = await fetch("https://api.linkedin.com/v2/userinfo", {
+      headers: {
+        "Authorization": `Bearer ${accessToken}`
+      }
+    });
+
+    const userData = await userResponse.json();
+    if (!userData.email) {
+      return res.status(400).json({ message: "No email returned from LinkedIn" });
+    }
+
+    const email = userData.email;
+    const name = userData.name || "LinkedIn User";
+    const avatar = userData.picture;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        password: Math.random().toString(36).slice(-10) + "Aa1!",
+        role: "student",
+        avatar,
+        isProfileComplete: false
+      });
+      await Student.create({ user: user._id, rollNumber: `TEMP-STU-${Date.now()}` });
+    }
+
+    const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
+    res.json({ token, user: sanitizeUser(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
 authRouter.put("/complete-profile", requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const { name, rollNumber, department, semester, section } = z.object({
