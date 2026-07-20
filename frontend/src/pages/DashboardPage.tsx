@@ -1,66 +1,27 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useWorkspace } from "../context/WorkspaceContext";
 import { api } from "../lib/api";
-
-const DEFAULT_SUBJECTS = [
-  { id: "1", name: "Database Management Systems", baselineAttended: 12, baselineTotal: 16 },
-  { id: "2", name: "Operating Systems", baselineAttended: 15, baselineTotal: 18 },
-  { id: "3", name: "Applied AI", baselineAttended: 9, baselineTotal: 15 },
-  { id: "4", name: "Computer Networks", baselineAttended: 19, baselineTotal: 22 },
-];
 
 const QUICK_LINKS = [
   { label: "Attendance", icon: "calendar_month", to: "/dashboard/attendance", desc: "Track your class attendance" },
+  { label: "Assignments", icon: "assignment", to: "/dashboard/assignments", desc: "Manage your coursework" },
   { label: "Notes", icon: "folder_open", to: "/dashboard/library", desc: "Access your study notes" },
   { label: "PYQs", icon: "description", to: "/dashboard/pyq", desc: "Browse past exam papers" },
-  { label: "AI Analyzer", icon: "psychology_alt", to: "/dashboard/pyq-analyzer", desc: "Analyze papers with AI" },
 ];
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const [overallAttendance, setOverallAttendance] = useState(0);
-  const [criticalCount, setCriticalCount] = useState(0);
-  const [deadlines, setDeadlines] = useState<any[]>([]);
-  const [resources, setResources] = useState<any[]>([]);
+  const { metrics, recentNotes, loading } = useWorkspace();
 
-  useEffect(() => {
-    const savedSubjects = localStorage.getItem("stuhub-attendance-subjects-v2");
-    const savedLogs = localStorage.getItem("stuhub-attendance-logs-v2");
-    const subjects = savedSubjects ? JSON.parse(savedSubjects) : DEFAULT_SUBJECTS;
-    const logs = savedLogs ? JSON.parse(savedLogs) : [];
-
-    let totalAttended = 0;
-    let totalConducted = 0;
-    let criticals = 0;
-
-    subjects.forEach((sub: any) => {
-      const subLogs = logs.filter((l: any) => l.subjectId === sub.id);
-      const attendedLogs = subLogs.filter((l: any) => l.status === "attended").length;
-      const bunkedLogs = subLogs.filter((l: any) => l.status === "bunked").length;
-      const attended = (sub.baselineAttended ?? 0) + attendedLogs;
-      const total = (sub.baselineTotal ?? 0) + attendedLogs + bunkedLogs;
-      const pct = total > 0 ? (attended / total) * 100 : 0;
-      totalAttended += attended;
-      totalConducted += total;
-      if (pct < (sub.required ?? 75)) criticals++;
-    });
-
-    if (totalConducted > 0) setOverallAttendance((totalAttended / totalConducted) * 100);
-    setCriticalCount(criticals);
-
-    Promise.all([
-      api.get("/assignments").then(res => setDeadlines(res.data)).catch(() => {}),
-      api.get("/notes/recent").then(res => setResources(res.data)).catch(() => {}),
-    ]);
-  }, []);
-
+  const overallAttendance = metrics.attendancePercentage;
   const attendanceOk = overallAttendance >= 75;
   const greetingHour = new Date().getHours();
   const greeting = greetingHour < 12 ? "Good morning" : greetingHour < 17 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 py-2">
+    <div className="max-w-4xl mx-auto space-y-8 py-2 animate-in fade-in zoom-in-95 duration-300">
 
       {/* ── Greeting ── */}
       <div>
@@ -84,7 +45,7 @@ export function DashboardPage() {
             {overallAttendance > 0 ? `${overallAttendance.toFixed(1)}%` : "—"}
           </p>
           <p className={`text-[11px] mt-1 ${attendanceOk ? "text-emerald-500/80" : "text-red-400/80"}`}>
-            {attendanceOk ? "All clear" : `${criticalCount} subject${criticalCount !== 1 ? "s" : ""} below 75%`}
+            {attendanceOk ? "All clear" : "Needs attention"}
           </p>
         </div>
 
@@ -94,9 +55,9 @@ export function DashboardPage() {
             <p className="text-xs text-zinc-400 font-medium">Upcoming Tasks</p>
             <span className="material-symbols-outlined text-[18px] text-[#FF9000]">timer</span>
           </div>
-          <p className="text-3xl font-extrabold text-white">{deadlines.length}</p>
+          <p className="text-3xl font-extrabold text-white">{metrics.pendingAssignments}</p>
           <p className="text-[11px] mt-1 text-zinc-500">
-            {deadlines.length === 0 ? "Nothing due — you're all set" : "pending assignments"}
+            {metrics.pendingAssignments === 0 ? "Nothing due — you're all set" : "pending assignments"}
           </p>
         </div>
 
@@ -106,9 +67,9 @@ export function DashboardPage() {
             <p className="text-xs text-zinc-400 font-medium">Saved Notes</p>
             <span className="material-symbols-outlined text-[18px] text-[#FF9000]">folder_open</span>
           </div>
-          <p className="text-3xl font-extrabold text-white">{resources.length > 0 ? resources.length : "—"}</p>
+          <p className="text-3xl font-extrabold text-white">{metrics.notesUploaded > 0 ? metrics.notesUploaded : "—"}</p>
           <p className="text-[11px] mt-1 text-zinc-500">
-            {resources.length > 0 ? "files in your library" : "No files yet"}
+            {metrics.notesUploaded > 0 ? "files in your library" : "No files yet"}
           </p>
         </div>
       </div>
@@ -161,9 +122,9 @@ export function DashboardPage() {
             See all →
           </Link>
         </div>
-        {resources.length > 0 ? (
+        {recentNotes.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {resources.slice(0, 4).map((item, idx) => (
+            {recentNotes.slice(0, 4).map((item: any, idx: number) => (
               <div
                 key={idx}
                 className="flex items-center gap-3 p-4 rounded-xl border border-[#2a2a2a] bg-[#0f0f0f] hover:border-[#444] transition-colors cursor-pointer"

@@ -12,6 +12,8 @@ import { pyqRouter } from "./routes/pyq.routes.js";
 import { pyqAnalyzerRouter } from "./routes/pyq-analyzer.routes.js";
 import { notesRouter } from "./routes/notes.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
+import { assignmentsRouter } from "./routes/assignments.routes.js";
+import { dashboardRouter } from "./routes/dashboard.routes.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
 export function createApp() {
@@ -32,13 +34,11 @@ export function createApp() {
   app.use("/api/pyq", pyqRouter);
   app.use("/api/pyq-analyzer", pyqAnalyzerRouter);
   app.use("/api/notes", notesRouter);
+  app.use("/api/assignments", assignmentsRouter);
+  app.use("/api/dashboard", dashboardRouter);
   
   // Stubs for features to be rebuilt from scratch
-  app.use("/api/dashboard/:role", (_req, res) => res.json({ metrics: {}, notices: [] }));
   app.use("/api/ai/chat", (_req, res) => res.json({ answer: "AI Studio is currently offline. Ready to be built from scratch." }));
-  app.get([
-    "/api/assignments"
-  ], (_req, res) => res.json([]));
 
   // Serve Frontend statically (works regardless of NODE_ENV on Render)
   const __filename = fileURLToPath(import.meta.url);
