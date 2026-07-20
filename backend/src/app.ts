@@ -37,20 +37,21 @@ export function createApp() {
     "/api/assignments"
   ], (_req, res) => res.json([]));
 
-  // Serve Frontend in Production
-  if (env.NODE_ENV === "production") {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    // Serve static files from frontend/dist
-    app.use(express.static(path.join(__dirname, "../../frontend/dist")));
+  // Serve Frontend statically (works regardless of NODE_ENV on Render)
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  app.use(express.static(path.join(__dirname, "../../frontend/dist")));
 
-    // Handle React Router catch-all
-    app.get("*", (_req, res) => {
-      res.sendFile(path.resolve(__dirname, "../../frontend/dist", "index.html"));
-    });
-  } else {
-    app.use(notFound);
-  }
+  // Catch-all for non-API routes (serves React app)
+  app.get(/^(?!\/api).*/, (_req, res) => {
+    res.sendFile(path.resolve(__dirname, "../../frontend/dist", "index.html"));
+  });
+
+  // Any remaining /api/* routes that weren't caught will hit this 404
+  app.use("/api", notFound);
+
+  // General 404 for anything else just in case
+  app.use(notFound);
 
   app.use(errorHandler);
 
