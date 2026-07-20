@@ -16,7 +16,10 @@ import { errorHandler, notFound } from "./middleware/error.js";
 
 export function createApp() {
   const app = express();
-  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(helmet({ 
+    contentSecurityPolicy: false,
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+  }));
   app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
   app.use(compression());
   app.use(express.json({ limit: "2mb" }));
