@@ -2,6 +2,7 @@ import { Router } from "express";
 import { User } from "../models/User.js";
 import { Note } from "../models/Note.js";
 import { Pyq } from "../models/Pyq.js";
+import { Assignment } from "../models/Assignment.js";
 import { requireAuth, allowRoles } from "../middleware/auth.js";
 
 const router = Router();
@@ -98,6 +99,28 @@ router.delete("/pyqs/:id", async (req, res, next) => {
     const pyq = await Pyq.findByIdAndDelete(req.params.id);
     if (!pyq) return res.status(404).json({ message: "PYQ not found" });
     res.json({ message: "PYQ deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── Assignments (Admin: all assignments) ──────────────────────────────────
+router.get("/assignments", async (_req, res, next) => {
+  try {
+    const assignments = await Assignment.find()
+      .populate("userId", "name email")
+      .sort({ dueDate: 1 });
+    res.json(assignments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/assignments/:id", async (req, res, next) => {
+  try {
+    const assignment = await Assignment.findByIdAndDelete(req.params.id);
+    if (!assignment) return res.status(404).json({ message: "Assignment not found" });
+    res.json({ message: "Assignment deleted" });
   } catch (error) {
     next(error);
   }
