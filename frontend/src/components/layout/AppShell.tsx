@@ -1,9 +1,12 @@
 import {
   ChevronDown,
+  Bell,
+  Search,
   LogOut,
   Menu,
   User as UserIcon,
   X,
+  Shield,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
@@ -139,13 +142,7 @@ export function AppShell() {
 
         {/* Navigation */}
         <nav className="space-y-6" aria-label="Primary navigation">
-          {[
-            ...navGroups,
-            ...(user?.role === 'admin' ? [{
-              groupName: "ADMINISTRATION",
-              items: [{ label: "Admin Panel", path: "/dashboard/admin", materialIcon: "admin_panel_settings", icon: undefined }]
-            }] : [])
-          ].map((group) => (
+          {navGroups.map((group) => (
             <div key={group.groupName}>
               <p className="mb-2 px-2 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
                 {group.groupName}
@@ -357,12 +354,20 @@ export function AppShell() {
                           onClick={() => setProfileDropdownOpen(false)}
                           className="flex items-center gap-2 rounded-md p-2 text-xs text-zinc-200 transition-colors hover:bg-surface-container"
                         >
-                          <UserIcon
-                            size={14}
-                            className="text-[#F5A524]"
-                          />
+                          <UserIcon size={14} className="text-[#F5A524]" />
                           My Profile
                         </Link>
+
+                        {user?.role === "admin" && (
+                          <Link
+                            to="/admin"
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className="flex items-center gap-2 rounded-md p-2 text-xs text-zinc-200 transition-colors hover:bg-surface-container"
+                          >
+                            <Shield size={14} className="text-[#FF9000]" />
+                            Admin Panel
+                          </Link>
+                        )}
 
                         <button
                           type="button"

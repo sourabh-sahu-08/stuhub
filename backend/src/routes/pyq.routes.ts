@@ -109,11 +109,14 @@ pyqRouter.get("/download/:id", requireAuth, async (req: AuthRequest, res: Respon
     if (!pyq) {
       return res.status(404).json({ message: "PYQ not found." });
     }
+    if (!pyq.fileData) {
+      return res.status(404).json({ message: "File data not found (this might be a Drive Link note)." });
+    }
 
     const fileBuffer = Buffer.from(pyq.fileData, "base64");
 
-    res.setHeader("Content-Type", pyq.mimeType);
-    res.setHeader("Content-Disposition", `inline; filename="${pyq.fileName}"`);
+    res.setHeader("Content-Type", pyq.mimeType || "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename="${pyq.fileName || 'pyq.pdf'}"`);
     res.send(fileBuffer);
   } catch (error) {
     next(error);
