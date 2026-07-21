@@ -60,7 +60,6 @@ await Student.create({
   course: btechCse._id,
   department: cse._id,
   semester: 5,
-  section: "A",
   cgpa: 8.42,
   feeStatus: "partial",
   skills: ["React", "Node.js", "MongoDB"]

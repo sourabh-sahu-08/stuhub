@@ -40,35 +40,38 @@ interface AttendanceLog {
   status: "attended" | "bunked" | "leave";
 }
 
-const DEFAULT_SUBJECTS: Subject[] = [
-  { id: "1", name: "Database Management Systems", baselineAttended: 12, baselineTotal: 16, required: 75 },
-  { id: "2", name: "Operating Systems", baselineAttended: 15, baselineTotal: 18, required: 75 },
-  { id: "3", name: "Applied AI", baselineAttended: 9, baselineTotal: 15, required: 75 },
-  { id: "4", name: "Computer Networks", baselineAttended: 19, baselineTotal: 22, required: 75 }
-];
-
-const DEFAULT_LOGS: AttendanceLog[] = [
-  { id: "log_1", date: new Date(Date.now() - 86400000 * 2).toISOString().slice(0, 10), subjectId: "1", status: "attended" },
-  { id: "log_2", date: new Date(Date.now() - 86400000 * 2).toISOString().slice(0, 10), subjectId: "2", status: "attended" },
-  { id: "log_3", date: new Date(Date.now() - 86400000 * 1).toISOString().slice(0, 10), subjectId: "1", status: "bunked" },
-  { id: "log_4", date: new Date(Date.now() - 86400000 * 1).toISOString().slice(0, 10), subjectId: "3", status: "leave" },
-  { id: "log_5", date: new Date().toISOString().slice(0, 10), subjectId: "2", status: "attended" },
-  { id: "log_6", date: new Date().toISOString().slice(0, 10), subjectId: "4", status: "attended" }
-];
+const DEFAULT_SUBJECTS: Subject[] = [];
+const DEFAULT_LOGS: AttendanceLog[] = [];
 
 export function AttendancePage() {
   const { user } = useAuth();
   
   // Data States
   const [subjects, setSubjects] = useState<Subject[]>(() => {
-    const saved = localStorage.getItem("stuhub-attendance-subjects-v2");
-    return saved ? JSON.parse(saved) : DEFAULT_SUBJECTS;
+    if (!user?.id) return [];
+    const saved = localStorage.getItem(`stuhub-attendance-subjects-${user.id}`);
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [logs, setLogs] = useState<AttendanceLog[]>(() => {
-    const saved = localStorage.getItem("stuhub-attendance-logs-v2");
-    return saved ? JSON.parse(saved) : DEFAULT_LOGS;
+    if (!user?.id) return [];
+    const saved = localStorage.getItem(`stuhub-attendance-logs-${user.id}`);
+    return saved ? JSON.parse(saved) : [];
   });
+
+  // Sync when user loads
+  useEffect(() => {
+    if (user?.id) {
+      const savedSubjects = localStorage.getItem(`stuhub-attendance-subjects-${user.id}`);
+      setSubjects(savedSubjects ? JSON.parse(savedSubjects) : []);
+      
+      const savedLogs = localStorage.getItem(`stuhub-attendance-logs-${user.id}`);
+      setLogs(savedLogs ? JSON.parse(savedLogs) : []);
+    } else {
+      setSubjects([]);
+      setLogs([]);
+    }
+  }, [user?.id]);
 
   // Calendar Navigation States
   const [calendarDate, setCalendarDate] = useState(new Date());
@@ -87,12 +90,16 @@ export function AttendancePage() {
 
   // Persist State to Local Storage
   useEffect(() => {
-    localStorage.setItem("stuhub-attendance-subjects-v2", JSON.stringify(subjects));
-  }, [subjects]);
+    if (user?.id) {
+      localStorage.setItem(`stuhub-attendance-subjects-${user.id}`, JSON.stringify(subjects));
+    }
+  }, [subjects, user?.id]);
 
   useEffect(() => {
-    localStorage.setItem("stuhub-attendance-logs-v2", JSON.stringify(logs));
-  }, [logs]);
+    if (user?.id) {
+      localStorage.setItem(`stuhub-attendance-logs-${user.id}`, JSON.stringify(logs));
+    }
+  }, [logs, user?.id]);
 
   // Compute computed subjects (baselines + logs)
   const computedSubjects = subjects.map(sub => {
@@ -367,12 +374,6 @@ export function AttendancePage() {
             />
           </div>
 
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 h-9 px-4 rounded bg-surface-container border border-outline text-zinc-50 hover:bg-surface-container-high text-xs font-semibold font-mono"
-          >
-            <Printer size={14} /> PDF AUDIT
-          </button>
           <button
             onClick={handleResetData}
             className="flex items-center gap-2 h-9 px-4 rounded bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 text-xs font-semibold font-mono"

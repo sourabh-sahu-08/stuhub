@@ -51,7 +51,6 @@ export function ModulePage() {
   // Local storage loaded states
   const [subjects, setSubjects] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
-  const [streakDays, setStreakDays] = useState(0);
 
   // API states
   const [notices, setNotices] = useState<any[]>([]);
@@ -91,39 +90,7 @@ export function ModulePage() {
       modified: "Recently"
     })));
 
-    // Calculate real study streak from logs
-    if (lgs.length > 0) {
-      const uniqueDates = Array.from(new Set(lgs.map((l: any) => l.date))).sort((a: any, b: any) => b.localeCompare(a)) as string[];
-      if (uniqueDates.length > 0) {
-        let streak = 0;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
 
-        const latestDate = new Date(uniqueDates[0] as string);
-        latestDate.setHours(0, 0, 0, 0);
-
-        const diffTime = today.getTime() - latestDate.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays <= 1) {
-          let currentDate = latestDate;
-          for (let i = 0; i < uniqueDates.length; i++) {
-            const hasLogOnDate = uniqueDates.some((d: any) => {
-              const dObj = new Date(d);
-              dObj.setHours(0, 0, 0, 0);
-              return dObj.getTime() === currentDate.getTime();
-            });
-            if (hasLogOnDate) {
-              streak++;
-              currentDate.setDate(currentDate.getDate() - 1);
-            } else {
-              break;
-            }
-          }
-        }
-        setStreakDays(streak);
-      }
-    }
 
     // Load backend stubs
     Promise.all([
@@ -201,13 +168,7 @@ export function ModulePage() {
                   <div className="h-full bg-primary" style={{ width: "0%" }}></div>
                 </div>
               </div>
-              <div className="bg-surface-container border border-outline p-5 rounded">
-                <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">Real-time Streak</p>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <Flame size={14} className="text-primary animate-pulse" />
-                  <span className="text-xs text-white">{streakDays} Days</span>
-                </div>
-              </div>
+
               <div className="bg-surface-container border border-outline p-5 rounded">
                 <p className="text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider font-mono">AI Summaries</p>
                 <div className="flex items-baseline gap-2">
@@ -514,23 +475,12 @@ export function ModulePage() {
                       {user?.semester ? `Semester ${user.semester}` : "Not Set"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-on-surface-variant">Class Section</span>
-                    <span className="font-bold text-white">{user?.section || "Not Set"}</span>
-                  </div>
                 </div>
               </div>
 
               {/* Right Column: Statistics & Highlights */}
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-surface-container border border-outline p-5 rounded flex flex-col justify-between h-28">
-                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider font-mono">Study Streak</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Flame className="text-primary animate-pulse" size={20} fill="#F5A524" />
-                      <span className="text-2xl font-extrabold text-white">{streakDays} Days</span>
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 gap-4">
                   <div className="bg-surface-container border border-outline p-5 rounded flex flex-col justify-between h-28">
                     <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider font-mono">Avg Attendance</p>
                     <div>

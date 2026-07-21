@@ -50,7 +50,6 @@ export const Student = mongoose.model(
       course: { type: Schema.Types.ObjectId, ref: "Course" },
       department: { type: Schema.Types.ObjectId, ref: "Department" },
       semester: Number,
-      section: String,
       cgpa: { type: Number, default: 0 },
       feeStatus: { type: String, enum: ["paid", "partial", "due"], default: "due" },
       skills: [String],
