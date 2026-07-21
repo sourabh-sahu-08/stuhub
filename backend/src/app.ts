@@ -14,6 +14,7 @@ import { notesRouter } from "./routes/notes.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
 import { assignmentsRouter } from "./routes/assignments.routes.js";
 import { dashboardRouter } from "./routes/dashboard.routes.js";
+import { aiRouter } from "./routes/ai.routes.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
 export function createApp() {
@@ -37,8 +38,7 @@ export function createApp() {
   app.use("/api/assignments", assignmentsRouter);
   app.use("/api/dashboard", dashboardRouter);
   
-  // Stubs for features to be rebuilt from scratch
-  app.use("/api/ai/chat", (_req, res) => res.json({ answer: "AI Studio is currently offline. Ready to be built from scratch." }));
+  app.use("/api/ai", aiRouter);
 
   // Serve Frontend statically (works regardless of NODE_ENV on Render)
   const __filename = fileURLToPath(import.meta.url);
