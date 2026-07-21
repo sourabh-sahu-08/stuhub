@@ -25,7 +25,7 @@ authRouter.post("/register", async (req, res, next) => {
     if (exists) return res.status(409).json({ message: "Email already exists" });
 
     const user = await User.create(data);
-    await Student.create({ user: user._id, rollNumber: `STU-${Date.now()}`, semester: 1, section: "A" });
+    await Student.create({ user: user._id, rollNumber: `STU-${Date.now()}`, semester: 1 });
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
     res.status(201).json({ token, user: sanitizeUser(user) });
   } catch (error) {
@@ -60,7 +60,7 @@ authRouter.get("/me", requireAuth, async (req: AuthRequest, res, next) => {
         ...sanitizeUser(user),
         rollNumber: student?.rollNumber,
         semester: student?.semester,
-        section: student?.section,
+
         cgpa: student?.cgpa
       }
     });
@@ -273,12 +273,11 @@ authRouter.post("/linkedin", async (req, res, next) => {
 
 authRouter.put("/complete-profile", requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    const { name, rollNumber, department, semester, section } = z.object({
-      name: z.string().min(2),
-      rollNumber: z.string().min(2),
+    const { name, rollNumber, department, semester } = z.object({
+      name: z.string().min(2, "Name is too short"),
+      rollNumber: z.string().min(5, "Invalid roll number"),
       department: z.string().optional(),
-      semester: z.number().optional(),
-      section: z.string().optional()
+      semester: z.number().min(1).max(8).optional()
     }).parse(req.body);
 
     const userId = req.user?.id;
@@ -303,7 +302,6 @@ authRouter.put("/complete-profile", requireAuth, async (req: AuthRequest, res, n
     student.rollNumber = rollNumber;
     if (department) student.department = department as any;
     if (semester) student.semester = semester;
-    if (section) student.section = section;
     await student.save();
 
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: true });
@@ -313,7 +311,6 @@ authRouter.put("/complete-profile", requireAuth, async (req: AuthRequest, res, n
         ...sanitizeUser(user),
         rollNumber: student.rollNumber,
         semester: student.semester,
-        section: student.section,
         cgpa: student.cgpa
       }
     });

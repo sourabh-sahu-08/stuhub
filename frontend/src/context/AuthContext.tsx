@@ -9,7 +9,7 @@ interface AuthContextValue {
   login(email: string, password: string): Promise<void>;
   register(payload: { name: string; email: string; password: string; role: Role }): Promise<void>;
   socialLogin(idToken: string): Promise<void>;
-  completeProfile(payload: { name: string; rollNumber: string; department?: string; semester?: number; section?: string }): Promise<void>;
+  completeProfile(payload: { name: string; rollNumber: string; department?: string; semester?: number }): Promise<void>;
   logout(): void;
   setAuthSession(token: string, user: User): void;
 }

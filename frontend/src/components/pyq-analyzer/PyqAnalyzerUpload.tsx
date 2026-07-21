@@ -153,7 +153,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
 
   // Submit check
   const isFormValid =
-    subject.trim().length >= 3 &&
+    subject.trim().length >= 2 &&
     branch.trim().length >= 2 &&
     semester !== "" &&
     syllabus !== null &&
@@ -418,7 +418,7 @@ export function PyqAnalyzerUpload({ onAnalyze, loading }: PyqAnalyzerUploadProps
         {/* Dynamic tips for user */}
         {!isFormValid && (
           <p className="text-[10px] text-on-surface-variant font-mono">
-            REQUIREMENTS: 3+ char subject, 2+ char branch, select semester, syllabus PDF, and 3–10 PYQ PDFs.
+            REQUIREMENTS: 2+ char subject, 2+ char branch, select semester, syllabus PDF, and 3–10 PYQ PDFs.
           </p>
         )}
         {isFormValid && (

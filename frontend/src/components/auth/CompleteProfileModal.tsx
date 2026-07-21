@@ -17,8 +17,7 @@ export function CompleteProfileModal() {
   const [name, setName] = useState(user?.name ?? "");
   const [rollNumber, setRollNumber] = useState("");
   const [department, setDepartment] = useState("");
-  const [semester, setSemester] = useState(1);
-  const [section, setSection] = useState("");
+  const [semester, setSemester] = useState<number | "">("");
   
   // UI states
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -58,8 +57,7 @@ export function CompleteProfileModal() {
     // Validations
     if (!name.trim()) return setError("Name is required");
     if (!rollNumber.trim()) return setError("Roll number is required");
-    if (!department) return setError("Please select a department");
-    if (!section.trim()) return setError("Section is required (e.g. A, B, C)");
+    if (!semester) return setError("Semester is required");
 
     setLoading(true);
     try {
@@ -67,8 +65,7 @@ export function CompleteProfileModal() {
         name,
         rollNumber,
         department,
-        semester,
-        section: section.toUpperCase()
+        semester: Number(semester)
       });
     } catch (err: any) {
       setError(err.response?.data?.message ?? "Failed to save profile details. Please try again.");
@@ -118,8 +115,8 @@ export function CompleteProfileModal() {
               required
               value={rollNumber}
               onChange={(e) => setRollNumber(e.target.value)}
-              placeholder="e.g. CSE-2026-042"
-              className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white transition-all"
+              placeholder="Enter your Roll Number"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-primary transition-colors"
             />
           </div>
 
@@ -144,7 +141,7 @@ export function CompleteProfileModal() {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div>
             {/* Semester */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Semester *</label>
@@ -154,24 +151,11 @@ export function CompleteProfileModal() {
                 onChange={(e) => setSemester(Number(e.target.value))}
                 className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white transition-all"
               >
+                <option value="">Select Semester</option>
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
                   <option key={sem} value={sem} className="bg-surface-container">Semester {sem}</option>
                 ))}
               </select>
-            </div>
-
-            {/* Section */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Section *</label>
-              <input
-                type="text"
-                required
-                value={section}
-                onChange={(e) => setSection(e.target.value)}
-                placeholder="e.g. A"
-                maxLength={2}
-                className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white transition-all text-center"
-              />
             </div>
           </div>
 
