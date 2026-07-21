@@ -40,6 +40,7 @@ export function AdminPage() {
   const [users, setUsers]   = useState<User[]>([]);
   const [notes, setNotes]   = useState<Note[]>([]);
   const [pyqs,  setPyqs]    = useState<Pyq[]>([]);
+  const [aiEnabled, setAiEnabled] = useState(true);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [toast, setToast]   = useState<string | null>(null);
@@ -54,20 +55,34 @@ export function AdminPage() {
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [s, u, n, p] = await Promise.all([
+      const [s, u, n, p, set] = await Promise.all([
         api.get("/admin/stats"),
         api.get("/admin/users"),
         api.get("/admin/notes"),
         api.get("/admin/pyqs"),
+        api.get("/settings"),
       ]);
       setStats(s.data);
       setUsers(Array.isArray(u.data) ? u.data : []);
       setNotes(Array.isArray(n.data) ? n.data : []);
       setPyqs(Array.isArray(p.data)  ? p.data  : []);
+      setAiEnabled(set.data?.isAiChatbotEnabled ?? true);
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleAiChatbot = async () => {
+    try {
+      const newStatus = !aiEnabled;
+      await api.put("/settings/ai-chatbot", { isAiChatbotEnabled: newStatus });
+      setAiEnabled(newStatus);
+      showToast(`AI Chatbot is now ${newStatus ? 'enabled' : 'disabled'}`);
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to update AI settings");
     }
   };
 
@@ -186,6 +201,28 @@ export function AdminPage() {
                 <StatCard icon="group"       label="Total Users" value={stats.totalUsers} color="border-[#2a2a2a]" />
                 <StatCard icon="folder_open" label="Notes"       value={stats.totalNotes} color="border-[#2a2a2a]" />
                 <StatCard icon="description" label="PYQs"        value={stats.totalPyqs}  color="border-[#2a2a2a]" />
+              </div>
+
+              {/* System Settings */}
+              <div>
+                <h2 className="text-sm font-semibold text-zinc-400 mb-3">System Settings</h2>
+                <div className="rounded-xl border border-[#1f1f1f] overflow-hidden bg-[#0f0f0f] p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF9000] to-[#E58100] flex items-center justify-center text-white shadow-lg shadow-[#FF9000]/20">
+                      <span className="material-symbols-outlined text-[20px]">smart_toy</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white">Global AI Chatbot</p>
+                      <p className="text-xs text-zinc-500">Enable or disable the floating AI assistant site-wide.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={toggleAiChatbot}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${aiEnabled ? 'bg-[#FF9000]' : 'bg-[#333]'}`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${aiEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                </div>
               </div>
 
               {/* Recent Users */}

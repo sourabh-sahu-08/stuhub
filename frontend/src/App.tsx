@@ -8,10 +8,10 @@ import { PyqAnalyzerPage } from "./pages/PyqAnalyzerPage";
 import { NotesPage } from "./pages/NotesPage";
 import { AdminPage } from "./pages/AdminPage";
 import { AssignmentsPage } from "./pages/AssignmentsPage";
-import { AiChatPage } from "./pages/AiChatPage";
 import { AppShell } from "./components/layout/AppShell";
 import { useAuth } from "./context/AuthContext";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
+import { AiChatWidget } from "./components/chat/AiChatWidget";
 
 export function App() {
   const { user, loading } = useAuth();
@@ -19,28 +19,30 @@ export function App() {
   if (loading) return <LoadingScreen label="Opening Stuhub" />;
 
   return (
-    <Routes>
-      {/* Root landing and overview page */}
-      <Route path="/" element={<LoginPage />} />
-      
-      {/* Dashboard workspace nested under /dashboard */}
-      <Route
-        path="/dashboard"
-        element={user ? <AppShell /> : <Navigate to="/" replace />}
-      >
-        <Route index element={<DashboardPage />} />
-        <Route path="attendance" element={<AttendancePage />} />
-        <Route path="assignments" element={<AssignmentsPage />} />
-        <Route path="pyq" element={<PyqPage />} />
-        <Route path="pyq-analyzer" element={<PyqAnalyzerPage />} />
-        <Route path="library" element={<NotesPage />} />
-        <Route path="ai-chat" element={<AiChatPage />} />
-        <Route path="admin" element={<AdminPage />} />
-        <Route path=":module" element={<ModulePage />} />
-      </Route>
+    <>
+      <Routes>
+        {/* Root landing and overview page */}
+        <Route path="/" element={<LoginPage />} />
+        
+        {/* Dashboard workspace nested under /dashboard */}
+        <Route
+          path="/dashboard"
+          element={user ? <AppShell /> : <Navigate to="/" replace />}
+        >
+          <Route index element={<DashboardPage />} />
+          <Route path="attendance" element={<AttendancePage />} />
+          <Route path="assignments" element={<AssignmentsPage />} />
+          <Route path="pyq" element={<PyqPage />} />
+          <Route path="pyq-analyzer" element={<PyqAnalyzerPage />} />
+          <Route path="library" element={<NotesPage />} />
+          <Route path="admin" element={<AdminPage />} />
+          <Route path=":module" element={<ModulePage />} />
+        </Route>
 
-      {/* Redirect all unmatched routes to root */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Redirect all unmatched routes to root */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <AiChatWidget />
+    </>
   );
 }

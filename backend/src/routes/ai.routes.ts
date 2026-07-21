@@ -10,7 +10,7 @@ const groq = new Groq({
   apiKey: env.GROQ_API_KEY || "dummy", // use dummy if not provided so it doesn't crash on init
 });
 
-aiRouter.post("/chat", requireAuth, async (req, res, next) => {
+aiRouter.post("/chat", async (req, res, next) => {
   try {
     if (!env.GROQ_API_KEY) {
       return res.status(503).json({ 
@@ -30,7 +30,8 @@ aiRouter.post("/chat", requireAuth, async (req, res, next) => {
       role: "system",
       content: `You are a highly intelligent, empathetic, and expert academic assistant built for StuHub, an advanced student workspace platform.
 Your goal is to help students with their studies, assignments, and understanding of complex topics.
-- Provide clear, concise, and structured answers.
+- Provide SMALL, CRISP, and EASY TO UNDERSTAND answers. Keep it brief and to the point.
+- Use simple language.
 - Use markdown for formatting, including bolding, lists, and code blocks.
 - If asked about StuHub, you know it's a premium academic platform with AI capabilities, PYQ (Previous Year Questions) analysis, and assignment tracking.
 - Be encouraging and supportive.`
