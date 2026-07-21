@@ -121,11 +121,14 @@ notesRouter.get("/download/:id", requireAuth, async (req: AuthRequest, res: Resp
     if (!note) {
       return res.status(404).json({ message: "Note not found." });
     }
+    if (!note.fileData) {
+      return res.status(404).json({ message: "File data not found (this might be a Drive Link note)." });
+    }
 
     const fileBuffer = Buffer.from(note.fileData, "base64");
 
-    res.setHeader("Content-Type", note.mimeType);
-    res.setHeader("Content-Disposition", `inline; filename="${note.fileName}"`);
+    res.setHeader("Content-Type", note.mimeType || "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${note.fileName || 'note.pdf'}"`);
     res.send(fileBuffer);
   } catch (error) {
     next(error);

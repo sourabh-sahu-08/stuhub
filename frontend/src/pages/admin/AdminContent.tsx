@@ -12,6 +12,19 @@ export function AdminContent() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Upload state
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadType, setUploadType] = useState<"note"|"pyq">("note");
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    subject: "",
+    semester: "1",
+    syllabus: "new",
+    branch: "CSE",
+    driveUrl: ""
+  });
+
   useEffect(() => {
     loadContent();
   }, []);
@@ -30,6 +43,33 @@ export function AdminContent() {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUploadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUploadLoading(true);
+    try {
+      if (uploadType === "note") {
+        await api.post("/admin/notes/link", formData);
+      } else {
+        await api.post("/admin/pyqs/link", {
+          paperName: formData.title,
+          subject: formData.subject,
+          semester: formData.semester,
+          syllabus: formData.syllabus,
+          branch: formData.branch,
+          driveUrl: formData.driveUrl
+        });
+      }
+      setShowUpload(false);
+      setFormData({ title: "", subject: "", semester: "1", syllabus: "new", branch: "CSE", driveUrl: "" });
+      loadContent();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to upload link");
+    } finally {
+      setUploadLoading(false);
     }
   };
 
@@ -75,9 +115,21 @@ export function AdminContent() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Content Management</h1>
-        <p className="text-zinc-400 mt-1">Manage notes, previous year questions, and assignments uploaded by users.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Content Management</h1>
+          <p className="text-zinc-400 mt-1">Manage notes, previous year questions, and assignments uploaded by users.</p>
+        </div>
+        
+        {tab !== "assignments" && (
+          <button
+            onClick={() => { setUploadType(tab === "notes" ? "note" : "pyq"); setShowUpload(true); }}
+            className="bg-[#FF9000] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#E58100] transition-colors flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            Add {tab === "notes" ? "Note" : "PYQ"} Link
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-1 border-b border-[#1f1f1f]">
@@ -196,6 +248,62 @@ export function AdminContent() {
             </table>
           )}
         </div>
+
+        {showUpload && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-2xl w-full max-w-md overflow-hidden">
+              <div className="p-4 border-b border-[#1f1f1f] flex items-center justify-between">
+                <h2 className="text-lg font-bold text-white">Upload {uploadType === "note" ? "Note" : "PYQ"} Link</h2>
+                <button onClick={() => setShowUpload(false)} className="text-zinc-500 hover:text-white transition-colors">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              
+              <form onSubmit={handleUploadSubmit} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 mb-1">Title / Paper Name</label>
+                  <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]" placeholder="e.g. Unit 1 Operating Systems" />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 mb-1">Google Drive Link</label>
+                  <input required type="url" value={formData.driveUrl} onChange={e => setFormData({...formData, driveUrl: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]" placeholder="https://drive.google.com/..." />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Subject</label>
+                    <input required type="text" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Branch</label>
+                    <input required type="text" value={formData.branch} onChange={e => setFormData({...formData, branch: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Semester</label>
+                    <select required value={formData.semester} onChange={e => setFormData({...formData, semester: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]">
+                      {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1">Syllabus</label>
+                    <select required value={formData.syllabus} onChange={e => setFormData({...formData, syllabus: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]">
+                      <option value="new">New</option>
+                      <option value="old">Old</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button disabled={uploadLoading} type="submit" className="w-full bg-[#FF9000] text-black font-bold py-3 rounded-lg mt-6 hover:bg-[#E58100] transition-colors disabled:opacity-50">
+                  {uploadLoading ? "Saving..." : "Save Link"}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

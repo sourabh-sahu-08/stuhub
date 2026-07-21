@@ -36,7 +36,8 @@ interface PyqPaper {
     name: string;
     role: string;
   };
-  mimeType: string;
+  mimeType?: string;
+  driveUrl?: string;
   createdAt: string;
 }
 
@@ -63,20 +64,10 @@ export function PyqPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSyllabusTab, setActiveSyllabusTab] = useState<"new" | "old">("new");
 
-  // Upload Modal State
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [paperName, setPaperName] = useState("");
-  const [subject, setSubject] = useState("");
-  const [syllabusType, setSyllabusType] = useState<"new" | "old">("new");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [dragActive, setDragActive] = useState(false);
-
   // Autocomplete suggestions
   const [subjectOptions, setSubjectOptions] = useState<SubjectOption[]>([]);
   const [subjectDropdownOpen, setSubjectDropdownOpen] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch papers for the selected path
@@ -140,93 +131,17 @@ export function PyqPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // File drag & drop
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      validateAndSetFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      validateAndSetFile(e.target.files[0]);
-    }
-  };
-
-  const validateAndSetFile = (file: File) => {
-    const isPdf = file.type === "application/pdf";
-    const isImage = file.type.startsWith("image/");
-    if (!isPdf && !isImage) {
-      alert("Unsupported file format! Please upload a PDF or an Image.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert("File is too large! Maximum allowed size is 5MB.");
-      return;
-    }
-    setSelectedFile(file);
-    if (!paperName) {
-      const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf("."));
-      setPaperName(nameWithoutExt);
-    }
-  };
-
-  const handleUploadSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedFile || !paperName.trim() || !subject.trim() || !selectedBranch || selectedSemester === null) {
-      alert("Please fill in all fields and select a file.");
-      return;
-    }
-
-    setUploadLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("paperName", paperName.trim());
-      formData.append("subject", subject.trim());
-      formData.append("semester", selectedSemester.toString());
-      formData.append("syllabus", syllabusType);
-      formData.append("branch", selectedBranch);
-
-      await api.post("/pyq/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-
-      setPaperName("");
-      setSubject("");
-      setSelectedFile(null);
-      setIsUploadOpen(false);
-
-      fetchPapers(selectedBranch, selectedSemester, searchQuery, activeSyllabusTab);
-    } catch (err: any) {
-      console.error(err);
-      alert(err.response?.data?.message || "Failed to upload paper. Please try again.");
-    } finally {
-      setUploadLoading(false);
-    }
-  };
-
   // View file inline
-  const handleView = async (id: string, mimeType: string) => {
+  const handleView = async (paper: PyqPaper) => {
     try {
-      const response = await api.get(`/pyq/download/${id}`, {
+      if (paper.driveUrl) {
+        window.open(paper.driveUrl, "_blank");
+        return;
+      }
+      const response = await api.get(`/pyq/download/${paper._id}`, {
         responseType: "blob"
       });
-      const blob = new Blob([response.data], { type: mimeType });
+      const blob = new Blob([response.data], { type: paper.mimeType });
       const url = window.URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (err) {
@@ -236,7 +151,11 @@ export function PyqPage() {
   };
 
   // Download file
-  const handleDownload = async (id: string, fileName: string, mimeType: string) => {
+  const handleDownload = async (id: string, fileName: string, mimeType: string | undefined, driveUrl?: string) => {
+    if (driveUrl) {
+        window.open(driveUrl, "_blank");
+        return;
+    }
     try {
       const response = await api.get(`/pyq/download/${id}`, {
         responseType: "blob"
@@ -269,9 +188,6 @@ export function PyqPage() {
   };
 
   const semesters = Array.from({ length: 8 }, (_, i) => i + 1);
-  const filteredSubjects = subjectOptions.filter((opt) =>
-    opt.name.toLowerCase().includes(subject.toLowerCase())
-  );
 
   const getBranchName = (code: string) => {
     return BRANCHES.find((b) => b.code === code)?.name ?? code;
@@ -331,7 +247,7 @@ export function PyqPage() {
                 Previous Year Question Papers
               </h1>
               <p className="mt-2 text-sm text-zinc-400">
-                Select your engineering branch to browse and upload past exam question papers.
+                Select your engineering branch to browse past exam question papers.
               </p>
             </div>
 
@@ -436,13 +352,6 @@ export function PyqPage() {
                   </p>
                 </div>
               </div>
-
-              <button
-                onClick={() => setIsUploadOpen(true)}
-                className="flex items-center justify-center gap-2 rounded-md bg-[#F5A524] px-4 py-2 text-xs font-bold text-black transition-transform hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <Plus size={15} /> Upload PYQ Paper
-              </button>
             </div>
 
             {/* Filter and search bar */}
@@ -493,14 +402,8 @@ export function PyqPage() {
                 <AlertCircle size={28} className="text-zinc-500" />
                 <h3 className="mt-3 text-sm font-bold text-zinc-200">No papers found</h3>
                 <p className="mt-1 max-w-xs text-xs text-zinc-500">
-                  No past papers uploaded for this selection yet.
+                  No past papers available for this selection yet.
                 </p>
-                <button
-                  onClick={() => setIsUploadOpen(true)}
-                  className="mt-4 text-xs font-bold text-[#F5A524] hover:underline"
-                >
-                  Upload a paper
-                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -554,14 +457,14 @@ export function PyqPage() {
 
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleView(paper._id, paper.mimeType)}
+                          onClick={() => handleView(paper)}
                           className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
                         >
                           <Eye size={12} /> View
                         </button>
                         <button
                           onClick={() =>
-                            handleDownload(paper._id, paper.fileName, paper.mimeType)
+                            handleDownload(paper._id, paper.fileName, paper.mimeType, paper.driveUrl)
                           }
                           className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
                         >
@@ -574,223 +477,6 @@ export function PyqPage() {
               </div>
             )}
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ================= UPLOAD MODAL ================= */}
-      <AnimatePresence>
-        {isUploadOpen && selectedBranch !== null && selectedSemester !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => {
-                if (!uploadLoading) setIsUploadOpen(false);
-              }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
-            />
-
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 15 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 15 }}
-              className="relative w-full max-w-lg rounded-xl border border-outline bg-surface p-6 shadow-2xl"
-            >
-              <button
-                onClick={() => {
-                  if (!uploadLoading) setIsUploadOpen(false);
-                }}
-                disabled={uploadLoading}
-                className="absolute right-4 top-4 text-zinc-500 hover:text-white disabled:opacity-50"
-              >
-                <X size={18} />
-              </button>
-
-              <h2 className="text-lg font-bold text-white">Upload Question Paper</h2>
-              <p className="text-xs text-zinc-500">
-                Uploading paper to {selectedBranch} - Semester {selectedSemester} repository.
-              </p>
-
-              <form onSubmit={handleUploadSubmit} className="mt-5 space-y-4">
-                {/* Paper Name */}
-                <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                    Paper Title / Description
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    disabled={uploadLoading}
-                    placeholder="e.g. End Semester Exam 2024"
-                    value={paperName}
-                    onChange={(e) => setPaperName(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-outline bg-surface-container px-3 py-2 text-xs text-white outline-none focus:border-[#F5A524] disabled:opacity-65"
-                  />
-                </div>
-
-                {/* Subject autocomplete */}
-                <div className="relative" ref={dropdownRef}>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                    Subject Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    disabled={uploadLoading}
-                    placeholder="e.g. Database Management Systems"
-                    value={subject}
-                    onChange={(e) => {
-                      setSubject(e.target.value);
-                      setSubjectDropdownOpen(true);
-                    }}
-                    onFocus={() => setSubjectDropdownOpen(true)}
-                    className="mt-1 w-full rounded-md border border-outline bg-surface-container px-3 py-2 text-xs text-white outline-none focus:border-[#F5A524] disabled:opacity-65"
-                  />
-
-                  {/* Autocomplete list */}
-                  {subjectDropdownOpen && filteredSubjects.length > 0 && (
-                    <div className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-outline bg-surface-container p-1 shadow-xl">
-                      {filteredSubjects.map((opt) => (
-                        <button
-                          key={opt.code}
-                          type="button"
-                          onClick={() => {
-                            setSubject(opt.name);
-                            setSubjectDropdownOpen(false);
-                          }}
-                          className="w-full rounded px-2.5 py-1.5 text-left text-xs hover:bg-[#27272D] text-zinc-200"
-                        >
-                          <span className="font-bold text-[#F5A524] mr-2">
-                            [{opt.code}]
-                          </span>
-                          {opt.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Syllabus Type */}
-                  <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                      Syllabus Version
-                    </label>
-                    <select
-                      required
-                      disabled={uploadLoading}
-                      value={syllabusType}
-                      onChange={(e) => setSyllabusType(e.target.value as "new" | "old")}
-                      className="mt-1 w-full h-9 rounded-md border border-outline bg-surface-container px-2 text-xs text-white focus:border-[#F5A524] disabled:opacity-65"
-                    >
-                      <option value="new">New Syllabus</option>
-                      <option value="old">Old Syllabus</option>
-                    </select>
-                  </div>
-
-                  {/* Semester locked */}
-                  <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                      Semester
-                    </label>
-                    <input
-                      type="text"
-                      disabled
-                      value={`Semester ${selectedSemester}`}
-                      className="mt-1 w-full h-9 rounded-md border border-outline bg-surface-container/50 px-3 py-2 text-xs text-zinc-500 outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Dropzone file input */}
-                <div
-                  onDragEnter={handleDrag}
-                  onDragOver={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDrop={handleDrop}
-                  className={`mt-2 flex flex-col items-center justify-center rounded-lg border border-dashed p-6 text-center transition-all ${
-                    dragActive
-                      ? "border-[#F5A524] bg-[#F5A524]/5"
-                      : "border-outline bg-surface-container hover:border-[#3F3F46]"
-                  }`}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    disabled={uploadLoading}
-                    onChange={handleFileChange}
-                    accept="application/pdf,image/*"
-                    className="hidden"
-                  />
-
-                  {selectedFile ? (
-                    <div className="flex flex-col items-center">
-                      <FileText size={24} className="text-[#F5A524]" />
-                      <p className="mt-2 text-xs font-bold text-zinc-200 max-w-[250px] truncate">
-                        {selectedFile.name}
-                      </p>
-                      <p className="text-[10px] text-zinc-500">
-                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFile(null)}
-                        disabled={uploadLoading}
-                        className="mt-3 text-[10px] font-bold text-red-500 hover:underline disabled:opacity-50"
-                      >
-                        Remove file
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <UploadCloud size={28} className="text-zinc-500" />
-                      <p className="mt-2 text-xs font-semibold text-zinc-200">
-                        Drag and drop your paper, or{" "}
-                        <button
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={uploadLoading}
-                          className="text-[#F5A524] hover:underline"
-                        >
-                          browse
-                        </button>
-                      </p>
-                      <p className="text-[9px] text-zinc-500 mt-1">
-                        Supports PDF, PNG, JPG, or JPEG (Max 5MB)
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer Actions */}
-                <div className="mt-6 flex justify-end gap-3 border-t border-outline pt-4">
-                  <button
-                    type="button"
-                    disabled={uploadLoading}
-                    onClick={() => setIsUploadOpen(false)}
-                    className="rounded-md bg-surface-container px-4 py-2 text-xs font-bold text-zinc-200 hover:bg-[#27272D] transition-colors disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={uploadLoading || !selectedFile}
-                    className="flex items-center justify-center gap-1.5 rounded-md bg-[#F5A524] px-4 py-2 text-xs font-bold text-black transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 disabled:opacity-50"
-                  >
-                    {uploadLoading ? (
-                      <>
-                        <span className="h-3 w-3 animate-spin rounded-full border border-black border-t-transparent" />
-                        Uploading...
-                      </>
-                    ) : (
-                      "Upload"
-                    )}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
         )}
       </AnimatePresence>
     </div>

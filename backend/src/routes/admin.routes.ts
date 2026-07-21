@@ -1,9 +1,10 @@
-import { Router } from "express";
+import { Router, Response, NextFunction } from "express";
 import { User } from "../models/User.js";
 import { Note } from "../models/Note.js";
 import { Pyq } from "../models/Pyq.js";
 import { Assignment } from "../models/Assignment.js";
 import { requireAuth, allowRoles } from "../middleware/auth.js";
+import type { AuthRequest } from "../types.js";
 
 const router = Router();
 
@@ -71,6 +72,28 @@ router.get("/notes", async (_req, res, next) => {
   }
 });
 
+router.post("/notes/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { title, subject, semester, syllabus, branch, driveUrl } = req.body;
+    if (!title || !subject || !semester || !syllabus || !branch || !driveUrl) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const note = await Note.create({
+      user: req.user?.id,
+      title,
+      subject,
+      semester: parseInt(semester),
+      syllabus,
+      branch,
+      driveUrl
+    });
+    res.status(201).json(note);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.delete("/notes/:id", async (req, res, next) => {
   try {
     const note = await Note.findByIdAndDelete(req.params.id);
@@ -89,6 +112,28 @@ router.get("/pyqs", async (_req, res, next) => {
       .populate("uploadedBy", "name email")
       .sort({ createdAt: -1 });
     res.json(pyqs);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/pyqs/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { paperName, subject, semester, syllabus, branch, driveUrl } = req.body;
+    if (!paperName || !subject || !semester || !syllabus || !branch || !driveUrl) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const pyq = await Pyq.create({
+      user: req.user?.id,
+      paperName,
+      subject,
+      semester: parseInt(semester),
+      syllabus,
+      branch,
+      driveUrl
+    });
+    res.status(201).json(pyq);
   } catch (error) {
     next(error);
   }
