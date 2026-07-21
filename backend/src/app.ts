@@ -14,6 +14,7 @@ import { notesRouter } from "./routes/notes.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
 import { assignmentsRouter } from "./routes/assignments.routes.js";
 import { dashboardRouter } from "./routes/dashboard.routes.js";
+import { settingsRouter } from "./routes/settings.routes.js";
 import { aiRouter } from "./routes/ai.routes.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
@@ -37,7 +38,7 @@ export function createApp() {
   app.use("/api/notes", notesRouter);
   app.use("/api/assignments", assignmentsRouter);
   app.use("/api/dashboard", dashboardRouter);
-  
+  app.use("/api/settings", settingsRouter);
   app.use("/api/ai", aiRouter);
 
   // Serve Frontend statically (works regardless of NODE_ENV on Render)
