@@ -1,4 +1,3 @@
-import fs from "fs";
 import { Router, Response, NextFunction } from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
@@ -137,23 +136,31 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
     }
 
     try {
-      // 1. Parse Syllabus (first 10000 characters to save tokens but retain more context)
+      // Adaptive per-paper char limit to keep total prompt within ~80k tokens
+      // Groq llama-3.3-70b context = 128k tokens, ~4 chars/token
+      // Total char budget for papers ≈ 80k tokens × 4 = 320k chars
+      // Subtract syllabus (5k) and prompt schema (~8k) → ~30k chars left for papers
+      // Each paper gets: min(8000, 30000 / count) chars
+      const pyqCount = pyqFiles.length;
+      const PER_PAPER_LIMIT = Math.max(3000, Math.floor(30000 / pyqCount));
+      const SYLLABUS_LIMIT = 5000;
+
+      // 1. Parse Syllabus
       const syllabusParser = new PDFParse({ data: syllabusFiles[0].buffer });
       const syllabusData = await syllabusParser.getText();
-      const syllabusText = syllabusData.text.slice(0, 10000);
+      const syllabusText = syllabusData.text.slice(0, SYLLABUS_LIMIT);
 
-      // 2. Parse PYQs (truncate to first 15000 chars per PDF to analyze deep patterns)
+      // 2. Parse PYQs with adaptive limit per paper
       const pyqTexts = await Promise.all(
         pyqFiles.map(async (file) => {
           const parser = new PDFParse({ data: file.buffer });
           const data = await parser.getText();
-          return `--- PYQ: ${file.originalname} ---\n` + data.text.slice(0, 15000);
+          return `--- PYQ: ${file.originalname} ---\n` + data.text.slice(0, PER_PAPER_LIMIT);
         })
       );
       const combinedPyqText = pyqTexts.join("\n\n");
 
       // 3. Construct V2 mega-prompt
-      const pyqCount = pyqFiles.length;
       const prompt = `
 You are an AI Exam Intelligence Engine and Chief Examination Strategist with decades of experience analyzing university exam patterns.
 You are given ${pyqCount} past year question papers and a syllabus for:
@@ -377,10 +384,14 @@ Output STRICTLY as a single JSON object (no markdown, no extra text). Replace AL
       return res.status(200).json(parsedJSON);
     } catch (error: any) {
       console.error("AI Analysis Error:", error);
-      try {
-        fs.writeFileSync("analyze-error.txt", error.stack || error.message);
-      } catch (e) {}
-      return res.status(500).json({ message: "Failed to analyze documents. " + (error.message || "") });
+      // Surface Groq API errors properly
+      const groqMsg = error?.error?.message || error?.message || "Unknown error";
+      const statusCode = error?.status === 413 || groqMsg.includes("too large") ? 413 : 500;
+      return res.status(statusCode).json({
+        message: statusCode === 413
+          ? "Your uploaded files contain too much text. Try using shorter or fewer PDFs."
+          : "AI Analysis failed: " + groqMsg
+      });
     }
   });
 });
