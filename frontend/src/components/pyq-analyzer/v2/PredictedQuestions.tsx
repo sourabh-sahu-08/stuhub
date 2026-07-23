@@ -10,6 +10,8 @@ interface PredictedQuestionsProps {
     probability: number;
     confidence: string;
     reason: string;
+    timesAsked?: number;
+    yearsAppeared?: string[];
     relatedPastQuestions: string[];
   }>;
 }
@@ -85,6 +87,12 @@ export function PredictedQuestions({ questions }: PredictedQuestionsProps) {
                       </span>
                       <span className="text-[9px] text-zinc-600 font-mono">[{pq.marks} marks]</span>
                       <span className="text-[9px] text-zinc-600 font-mono truncate">→ {pq.unit}</span>
+                      {pq.timesAsked && pq.timesAsked > 0 && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-white/5 text-zinc-300 font-mono flex items-center gap-1">
+                          <Flame size={10} className="text-[#FF9000]" />
+                          Asked {pq.timesAsked}x
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-sm text-zinc-200 leading-relaxed font-medium">"{pq.question}"</p>
@@ -109,6 +117,15 @@ export function PredictedQuestions({ questions }: PredictedQuestionsProps) {
                       <div>
                         <div className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-mono mb-1.5">Why Predicted?</div>
                         <p className="text-xs text-zinc-400 leading-relaxed">{pq.reason}</p>
+                        {pq.yearsAppeared && pq.yearsAppeared.length > 0 && (
+                          <div className="flex gap-1.5 mt-2 flex-wrap">
+                            {pq.yearsAppeared.map(y => (
+                              <span key={y} className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 font-mono border border-white/10">
+                                {y}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       {pq.relatedPastQuestions?.length > 0 && (
                         <div>

@@ -178,8 +178,8 @@ TASK: Perform a deep multi-dimensional analysis of ALL provided exam papers agai
 
 CRITICAL RULES — YOU MUST FOLLOW THESE:
 1. UNITS: Identify EVERY unit/chapter in the syllabus. For EACH unit, generate a separate entry in "units" array. Do NOT merge units. Do NOT give only one unit. If the syllabus has 5 units, return 5 unit objects. If it has 6, return 6.
-2. TOP REPEATED TOPICS: List the top 15-20 most frequently repeated topics across ALL units, sorted by frequency. Provide deep analysis of their trends.
-3. PREDICTED QUESTIONS: Generate at least 20 predicted questions spread across different units, sorted by probability descending.
+2. TOP REPEATED TOPICS: List the top 20-25 most frequently repeated topics across ALL units, sorted by frequency. Provide deep analysis of their trends.
+3. PREDICTED QUESTIONS: Generate at least 30 predicted questions spread across different units, sorted by probability descending. Include how many times it was asked.
 4. Be data-driven. Count actual frequencies from the provided papers. Do not guess.
 
 Output STRICTLY as a single JSON object (no markdown, no extra text). Replace ALL placeholder values with real data from the analysis:
@@ -226,7 +226,7 @@ Output STRICTLY as a single JSON object (no markdown, no extra text). Replace AL
           "difficulty": "FILL: Easy/Medium/Hard",
           "lastAskedYear": "FILL: Year"
         }
-      ],
+      ], // Provide top 5-8 most asked questions for this unit
       "canSkip": false,
       "skipReason": ""
     }
@@ -252,6 +252,8 @@ Output STRICTLY as a single JSON object (no markdown, no extra text). Replace AL
       "probability": 88,
       "confidence": "Very High",
       "reason": "Asked in 4 out of ${pyqCount} papers with slight variation each time",
+      "timesAsked": 4,
+      "yearsAppeared": ["2020", "2021", "2023"],
       "relatedPastQuestions": ["Similar past question 1", "Similar past question 2"]
     }
   ],
