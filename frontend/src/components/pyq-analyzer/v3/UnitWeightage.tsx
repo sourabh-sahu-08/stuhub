@@ -27,8 +27,8 @@ export const UnitWeightage: React.FC<Props> = ({ data }) => {
               <div 
                 className="h-full rounded-full transition-all duration-1000 ease-out"
                 style={{ 
-                  width: \`\${unit.percentage}%\`,
-                  background: \`linear-gradient(90deg, var(--tw-gradient-stops))\`,
+                  width: `${unit.percentage}%`,
+                  background: `linear-gradient(90deg, var(--tw-gradient-stops))`,
                   // using different colors based on rank
                   ...(index === 0 ? { backgroundImage: 'linear-gradient(to right, #ef4444, #f97316)' } : 
                       index === 1 ? { backgroundImage: 'linear-gradient(to right, #f59e0b, #eab308)' } :

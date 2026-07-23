@@ -38,11 +38,11 @@ export const FrequentlyAskedQuestions: React.FC<Props> = ({ data }) => {
               </div>
               
               <div className="shrink-0">
-                <div className={\`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 \${
+                <div className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 ${
                   q.trend === "Very High Probability" ? "bg-red-500/20 text-red-400 border border-red-500/20" :
                   q.trend === "High Probability" ? "bg-orange-500/20 text-orange-400 border border-orange-500/20" :
                   "bg-green-500/20 text-green-400 border border-green-500/20"
-                }\`}>
+                }`}>
                   <TrendingUp className="w-3.5 h-3.5" />
                   {q.trend}
                 </div>

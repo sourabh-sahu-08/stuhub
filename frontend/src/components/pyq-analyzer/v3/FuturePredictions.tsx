@@ -31,11 +31,11 @@ export const FuturePredictions: React.FC<Props> = ({ data }) => {
             <div className="flex justify-between items-start mb-3">
               <h4 className="text-lg font-bold text-gray-100 pr-4">{pred.topic}</h4>
               <div className="text-right shrink-0">
-                <span className={\`text-xl font-black \${
+                <span className={`text-xl font-black ${
                   pred.probability >= 85 ? 'text-red-400' : 
                   pred.probability >= 70 ? 'text-orange-400' : 
                   pred.probability >= 55 ? 'text-yellow-400' : 'text-blue-400'
-                }\`}>
+                }`}>
                   {pred.probability}%
                 </span>
               </div>
