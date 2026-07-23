@@ -1,5 +1,5 @@
 import React from "react";
-import { Pyq3DashboardJSON } from "../../../../types/pyq3";
+import { Pyq3DashboardJSON } from "../../../types/pyq3";
 import { CalendarDays, CheckCircle2, XCircle } from "lucide-react";
 
 interface Props {

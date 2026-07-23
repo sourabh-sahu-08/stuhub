@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Pyq3DashboardJSON } from "../../../../types/pyq3";
+import { Pyq3DashboardJSON } from "../../../types/pyq3";
 import { Search, Filter, BookOpen } from "lucide-react";
 
 interface Props {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Pyq3DashboardJSON } from "../../../../types/pyq3";
+import { Pyq3DashboardJSON } from "../../../types/pyq3";
 import { Layers, FileText, Repeat, Target, BarChart2 } from "lucide-react";
 
 interface Props {
