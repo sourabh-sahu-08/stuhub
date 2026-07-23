@@ -169,7 +169,9 @@ ${combinedPyqText}
 Task:
 Perform a MAX LEVEL deep analysis of the provided exam papers against the syllabus. Your goal is to provide a highly actionable, highly accurate study guide for the student, ending with a complete predicted mock exam paper.
 
-1. Identify the main chapters/topics from the syllabus and calculate an estimated percentage "weightage" for each based on how frequently they appear in the PYQs. For each chapter, also list 2-3 "importantConcepts" that specifically appear often.
+1. Identify the main chapters/units from the syllabus and calculate an estimated percentage "weightage" for each based on how frequently they appear in the PYQs. For each chapter:
+   - List 2-3 "importantConcepts" that specifically appear often.
+   - Extract the 1-3 "mostAskedQuestions" specifically from that unit/chapter and state the exact "timesAsked" based on the provided PYQs.
 2. Determine the "overallDifficulty" trend of these papers (Easy, Medium, Hard, or a mix).
 3. Identify 3-4 "questionPatterns" (e.g., "Numerical focused", "Derivations frequently asked", "Direct theoretical questions", "Scenario-based").
 4. Provide a step-by-step "studyStrategy". Give 3-5 actionable steps for the student to master this subject based on the past trends.
@@ -181,10 +183,16 @@ Output STRICTLY in the following JSON format without any markdown or extra text:
   "questionPatterns": ["Pattern 1", "Pattern 2"],
   "chapters": [
     {
-      "name": "Chapter Name",
+      "name": "Unit/Chapter Name",
       "weightage": 25,
       "description": "Brief description of topics covered",
-      "importantConcepts": ["Concept A", "Concept B"]
+      "importantConcepts": ["Concept A", "Concept B"],
+      "mostAskedQuestions": [
+        {
+          "question": "Explain the working of Z...",
+          "timesAsked": 4
+        }
+      ]
     }
   ],
   "studyStrategy": [

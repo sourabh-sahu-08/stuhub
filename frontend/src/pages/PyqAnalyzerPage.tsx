@@ -396,6 +396,24 @@ export function PyqAnalyzerPage() {
                           ))}
                         </div>
                       )}
+
+                      {chapter.mostAskedQuestions && chapter.mostAskedQuestions.length > 0 && (
+                        <div className="mt-4 pt-3 border-t border-outline/50 space-y-2">
+                          <h6 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider font-mono">Most Asked Questions in this Unit</h6>
+                          <div className="space-y-2">
+                            {chapter.mostAskedQuestions.map((mq: any, mIdx: number) => (
+                              <div key={mIdx} className="flex gap-2 items-start bg-surface/50 p-2 rounded border border-outline/30">
+                                <span className="bg-primary/10 text-primary text-[9px] px-1.5 py-0.5 rounded font-mono whitespace-nowrap shrink-0 mt-0.5 border border-primary/20">
+                                  {mq.timesAsked}x Asked
+                                </span>
+                                <p className="text-xs text-white leading-relaxed">
+                                  "{mq.question}"
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
