@@ -5,22 +5,14 @@ import { api } from "../lib/api";
 import { PyqAnalyzerUpload } from "../components/pyq-analyzer/PyqAnalyzerUpload";
 import { motion, AnimatePresence } from "framer-motion";
 
-// V2 Components
-import { AnalysisHero } from "../components/pyq-analyzer/v2/AnalysisHero";
-import { QuickStats } from "../components/pyq-analyzer/v2/QuickStats";
-import { AISummary } from "../components/pyq-analyzer/v2/AISummary";
-import { UnitCards } from "../components/pyq-analyzer/v2/UnitCards";
-import { TopRepeatedTopics } from "../components/pyq-analyzer/v2/TopRepeatedTopics";
-import { PredictedQuestions } from "../components/pyq-analyzer/v2/PredictedQuestions";
-
-
-const TABS = [
-  { id: "overview", label: "Overview", icon: BarChart2 },
-  { id: "units", label: "Units", icon: Layers },
-  { id: "topics", label: "Top Topics", icon: Trophy },
-  { id: "predictions", label: "Predictions", icon: Target },
-
-];
+// V3 Components
+import { OverallAnalysis } from "../components/pyq-analyzer/v3/OverallAnalysis";
+import { UnitWeightage } from "../components/pyq-analyzer/v3/UnitWeightage";
+import { FrequentlyAskedTopics } from "../components/pyq-analyzer/v3/FrequentlyAskedTopics";
+import { FrequentlyAskedQuestions } from "../components/pyq-analyzer/v3/FrequentlyAskedQuestions";
+import { QuestionTimeline } from "../components/pyq-analyzer/v3/QuestionTimeline";
+import { FuturePredictions } from "../components/pyq-analyzer/v3/FuturePredictions";
+import { SearchAndFilter } from "../components/pyq-analyzer/v3/SearchAndFilter";
 
 export function PyqAnalyzerPage() {
   const [loading, setLoading] = useState(false);
@@ -212,61 +204,29 @@ export function PyqAnalyzerPage() {
           </motion.div>
 
         ) : (
-          /* Phase 3: Full V2 Dashboard */
-          <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            {/* Hero */}
-            <AnalysisHero meta={analysisResult.meta ?? {
-              subject: validationResult?.subject,
-              branch: validationResult?.branch,
-              semester: validationResult?.semester,
-              totalPapers: validationResult?.pyqs?.length,
-              overallDifficulty: "Medium",
-              confidenceScore: 85,
-              estimatedStudyHours: 30,
-              theoryVsNumerical: { theory: 65, numerical: 35 }
-            }} generatedAt={generatedAt} />
-
-            {/* AI Summary */}
-            {analysisResult.aiSummary && (
-              <AISummary summary={analysisResult.aiSummary} importantTopics={analysisResult.importantTopics ?? []} />
-            )}
-
-            {/* Tabs */}
-            <div className="sticky top-0 z-10 bg-[#09090B]/90 backdrop-blur-sm pt-1 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6">
-              <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
-                {TABS.map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all font-mono shrink-0 ${
-                      activeTab === tab.id
-                        ? "bg-[#FF9000] text-black"
-                        : "text-zinc-500 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <tab.icon size={12} />
-                    {tab.label}
-                  </button>
-                ))}
+          /* Phase 3: Full V3 Linear Dashboard */
+          <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 max-w-5xl mx-auto pb-20">
+            {/* Header info */}
+            <div className="flex justify-between items-center bg-[#111] p-6 rounded-xl border border-gray-800">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-100">{validationResult?.subject}</h2>
+                <p className="text-gray-400 mt-1">{validationResult?.branch} • Semester {validationResult?.semester}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-sm bg-[#FF9000]/10 text-[#FF9000] px-3 py-1.5 rounded-lg border border-[#FF9000]/20 font-mono">
+                  {validationResult?.pyqs?.length} Papers Analyzed
+                </span>
               </div>
             </div>
 
-            {/* Tab Content */}
-            <AnimatePresence mode="wait">
-              <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-                {activeTab === "overview" && (
-                  <QuickStats stats={analysisResult.quickStats ?? {
-                    totalQuestions: 0, uniqueQuestions: 0, repeatedQuestions: 0,
-                    totalUnits: analysisResult.units?.length ?? 0, totalTopics: analysisResult.topRepeatedTopics?.length ?? 0,
-                    expectedMarksCoverage: 85, questionPatterns: []
-                  }} />
-                )}
-                {activeTab === "units" && <UnitCards units={analysisResult.units ?? []} />}
-                {activeTab === "topics" && <TopRepeatedTopics topics={analysisResult.topRepeatedTopics ?? []} />}
-                {activeTab === "predictions" && <PredictedQuestions questions={analysisResult.predictedQuestions ?? []} />}
-
-              </motion.div>
-            </AnimatePresence>
+            {/* 7-Section Architecture */}
+            <OverallAnalysis data={analysisResult.overallAnalysis} />
+            <UnitWeightage data={analysisResult.unitWeightage} />
+            <FrequentlyAskedTopics data={analysisResult.frequentlyAskedTopics} />
+            <FrequentlyAskedQuestions data={analysisResult.frequentlyAskedQuestions} />
+            <QuestionTimeline data={analysisResult.questionTimeline} />
+            <FuturePredictions data={analysisResult.futurePredictions} />
+            <SearchAndFilter data={analysisResult.allQuestions} />
           </motion.div>
         )}
       </AnimatePresence>

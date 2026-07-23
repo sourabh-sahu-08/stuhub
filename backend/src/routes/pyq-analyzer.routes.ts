@@ -5,6 +5,14 @@ import type { AuthRequest } from "../types.js";
 import { PDFParse } from "pdf-parse";
 import { Groq } from "groq-sdk";
 import { env } from "../config/env.js";
+import { QuestionExtractorService } from "../services/pyq/questionExtractor.service.js";
+import { QuestionNormalizerService } from "../services/pyq/questionNormalizer.service.js";
+import { DuplicateDetectorService } from "../services/pyq/duplicateDetector.service.js";
+import { FrequencyAnalyzerService } from "../services/pyq/frequencyAnalyzer.service.js";
+import { UnitAnalyzerService } from "../services/pyq/unitAnalyzer.service.js";
+import { TimelineGeneratorService } from "../services/pyq/timelineGenerator.service.js";
+import { PredictionEngineService } from "../services/pyq/predictionEngine.service.js";
+import { RawQuestion, DashboardJSON } from "../services/pyq/types.js";
 
 const groq = new Groq({
   apiKey: env.GROQ_API_KEY || "dummy",
@@ -136,11 +144,7 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
     }
 
     try {
-      // Adaptive per-paper char limit to keep total prompt within ~80k tokens
-      // Groq llama-3.3-70b context = 128k tokens, ~4 chars/token
-      // Total char budget for papers ≈ 80k tokens × 4 = 320k chars
-      // Subtract syllabus (5k) and prompt schema (~8k) → ~30k chars left for papers
-      // Each paper gets: min(8000, 30000 / count) chars
+      // Adaptive per-paper char limit
       const pyqCount = pyqFiles.length;
       const PER_PAPER_LIMIT = Math.max(3000, Math.floor(30000 / pyqCount));
       const SYLLABUS_LIMIT = 5000;
@@ -150,151 +154,86 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       const syllabusData = await syllabusParser.getText();
       const syllabusText = syllabusData.text.slice(0, SYLLABUS_LIMIT);
 
-      // 2. Parse PYQs with adaptive limit per paper
-      const pyqTexts = await Promise.all(
-        pyqFiles.map(async (file) => {
-          const parser = new PDFParse({ data: file.buffer });
-          const data = await parser.getText();
-          return `--- PYQ: ${file.originalname} ---\n` + data.text.slice(0, PER_PAPER_LIMIT);
-        })
-      );
-      const combinedPyqText = pyqTexts.join("\n\n");
+      // 2. Multi-Stage Pipeline: Extract Questions from each PYQ
+      let allRawQuestions: RawQuestion[] = [];
+      const allYearsSet = new Set<string>();
 
-      // 3. Construct V2 mega-prompt
-      const prompt = `
-You are an AI Exam Intelligence Engine and Chief Examination Strategist with decades of experience analyzing university exam patterns.
-You are given ${pyqCount} past year question papers and a syllabus for:
-Subject: ${subject}
-Branch: ${branch}
-Semester: ${semester}
-
-SYLLABUS:
-${syllabusText}
-
-PAST YEAR PAPERS (${pyqCount} papers):
-${combinedPyqText}
-
-TASK: Perform a deep multi-dimensional analysis of ALL provided exam papers against the syllabus.
-
-CRITICAL RULES — YOU MUST FOLLOW THESE:
-1. UNITS: Identify EVERY unit/chapter in the syllabus. For EACH unit, generate a separate entry in "units" array. Do NOT merge units. Do NOT give only one unit. If the syllabus has 5 units, return 5 unit objects. If it has 6, return 6.
-2. TOP REPEATED TOPICS: List the top 20-25 most frequently repeated topics across ALL units, sorted by frequency. Provide deep analysis of their trends.
-3. PREDICTED QUESTIONS: Generate at least 30 predicted questions spread across different units, sorted by probability descending. Include how many times it was asked.
-4. Be data-driven. Count actual frequencies from the provided papers. Do not guess.
-
-Output STRICTLY as a single JSON object (no markdown, no extra text). Replace ALL placeholder values with real data from the analysis:
-{
-  "meta": {
-    "totalPapers": ${pyqCount},
-    "subject": "${subject}",
-    "branch": "${branch}",
-    "semester": ${semester},
-    "overallDifficulty": "FILL: Easy/Medium/Hard/Medium-Hard based on actual paper analysis",
-    "confidenceScore": 0,
-    "estimatedStudyHours": 0,
-    "theoryVsNumerical": { "theory": 0, "numerical": 0 }
-  },
-  "aiSummary": "FILL: 2-3 sentence summary mentioning which units dominate, the question pattern, and the best preparation strategy.",
-  "quickStats": {
-    "totalQuestions": 0,
-    "uniqueQuestions": 0,
-    "repeatedQuestions": 0,
-    "totalUnits": 0,
-    "totalTopics": 0,
-    "expectedMarksCoverage": 0,
-    "questionPatterns": ["FILL pattern 1", "FILL pattern 2", "FILL pattern 3"]
-  },
-  "units": [
-    {
-      "name": "FILL: Exact unit name from syllabus (e.g. Unit 1: Introduction to OS)",
-      "weightage": 0,
-      "importanceScore": 0,
-      "difficulty": "FILL: Easy/Medium/Hard",
-      "preparationHours": 0,
-      "riskLevel": "FILL: High/Medium/Low",
-      "priority": "FILL: Must Study/High Priority/Medium Priority/Low Priority/Can Skip",
-      "description": "FILL: What this unit covers",
-      "importantConcepts": ["FILL concept 1", "FILL concept 2", "FILL concept 3"],
-      "trend": "FILL: Increasing/Stable/Declining",
-      "expectedMarks": 0,
-      "repeatedTopics": ["FILL topic 1", "FILL topic 2"],
-      "mostAskedQuestions": [
-        {
-          "question": "FILL: Actual question text that appeared in the papers",
-          "timesAsked": 0,
-          "marks": 0,
-          "difficulty": "FILL: Easy/Medium/Hard",
-          "lastAskedYear": "FILL: Year"
-        }
-      ], // Provide top 5-8 most asked questions for this unit
-      "canSkip": false,
-      "skipReason": ""
-    }
-  ],
-  "topRepeatedTopics": [
-    {
-      "rank": 1,
-      "topic": "Topic Name",
-      "unit": "Unit Name",
-      "timesAsked": 5,
-      "yearsAppeared": ["2020", "2021", "2022", "2023", "2024"],
-      "expectedMarks": 10,
-      "probability": 92,
-      "difficulty": "Medium",
-      "trend": "Stable"
-    }
-  ],
-  "predictedQuestions": [
-    {
-      "question": "Full predicted question text",
-      "unit": "Unit Name",
-      "marks": 10,
-      "probability": 88,
-      "confidence": "Very High",
-      "reason": "Asked in 4 out of ${pyqCount} papers with slight variation each time",
-      "timesAsked": 4,
-      "yearsAppeared": ["2020", "2021", "2023"],
-      "relatedPastQuestions": ["Similar past question 1", "Similar past question 2"]
-    }
-  ],
-
-  "importantTopics": ["Topic 1", "Topic 2", "Topic 3"]
-}
-`;
-
-      const completion = await groq.chat.completions.create({
-        messages: [
-          {
-            role: "system",
-            content: `You are an AI Exam Intelligence Engine. You always return COMPLETE, VALID JSON. You MUST include ALL units from the syllabus — never truncate or combine them into one. Every array must contain multiple real entries based on the data provided. Never return placeholder text like "FILL" in the final output — replace all placeholders with real analyzed values.`
-          },
-          { role: "user", content: prompt }
-        ],
-        model: "llama-3.3-70b-versatile",
-        response_format: { type: "json_object" },
-        temperature: 0.15,
-        max_tokens: 8000,
-      });
-
-      const responseContent = completion.choices[0]?.message?.content;
-      if (!responseContent) {
-        throw new Error("No response from Groq");
+      for (const file of pyqFiles) {
+        const parser = new PDFParse({ data: file.buffer });
+        const data = await parser.getText();
+        const textToProcess = data.text.slice(0, PER_PAPER_LIMIT);
+        
+        const extracted = await QuestionExtractorService.extract(file.originalname, textToProcess);
+        allRawQuestions = [...allRawQuestions, ...extracted];
+        
+        // Collect years
+        extracted.forEach(q => {
+          if (q.paperYear && q.paperYear !== "Unknown") {
+            allYearsSet.add(q.paperYear);
+          }
+        });
       }
 
-      const parsedJSON = JSON.parse(responseContent);
+      // If no valid years found, inject some defaults based on count or filenames
+      if (allYearsSet.size === 0) {
+        allYearsSet.add("Unknown Year");
+      }
+      const allYears = Array.from(allYearsSet);
 
-      return res.status(200).json(parsedJSON);
+      // 3. Multi-Stage Pipeline: Normalize Questions
+      const normalizedQuestions = await QuestionNormalizerService.normalize(allRawQuestions, syllabusText);
+
+      // 4. Multi-Stage Pipeline: Duplicate Detection & Grouping
+      const topicGroups = DuplicateDetectorService.detectAndGroup(normalizedQuestions);
+
+      // 5. Deterministic Analytics
+      const frequentlyAskedTopics = FrequencyAnalyzerService.getTopicsByUnit(topicGroups);
+      const frequentlyAskedQuestions = FrequencyAnalyzerService.getTopQuestions(normalizedQuestions, 6);
+      const unitWeightage = UnitAnalyzerService.calculateWeightage(topicGroups);
+      const questionTimeline = TimelineGeneratorService.generate(topicGroups, allYears, 10);
+      
+      // 6. Hybrid Analytics (Algorithm + LLM)
+      const futurePredictions = await PredictionEngineService.predict(topicGroups, allYears, 15);
+
+      // 7. Calculate Overall Analysis Stats
+      const totalQuestions = allRawQuestions.length;
+      const uniqueQuestions = new Set(normalizedQuestions.map(q => q.normalizedQuestion.toLowerCase().trim())).size;
+      const mostRepeatedTopicObj = topicGroups[0];
+      const mostRepeatedQuestionObj = frequentlyAskedQuestions[0];
+      const mostImportantUnitObj = unitWeightage[0];
+
+      // 8. Assemble Dashboard JSON
+      const dashboardJson: DashboardJSON = {
+        overallAnalysis: {
+          totalPapers: pyqCount,
+          totalQuestions,
+          uniqueQuestions,
+          repeatedQuestions: totalQuestions - uniqueQuestions,
+          mostRepeatedQuestion: mostRepeatedQuestionObj ? mostRepeatedQuestionObj.question : "N/A",
+          mostRepeatedTopic: mostRepeatedTopicObj ? mostRepeatedTopicObj.topic : "N/A",
+          mostImportantUnit: mostImportantUnitObj ? mostImportantUnitObj.unit : "N/A",
+        },
+        unitWeightage,
+        frequentlyAskedTopics,
+        frequentlyAskedQuestions,
+        questionTimeline,
+        futurePredictions,
+        allQuestions: normalizedQuestions
+      };
+
+      return res.status(200).json(dashboardJson);
     } catch (error: any) {
-      console.error("AI Analysis Error:", error);
-      // Surface Groq API errors properly
+      console.error("AI Analysis Pipeline Error:", error);
       const groqMsg = error?.error?.message || error?.message || "Unknown error";
       const statusCode = error?.status === 413 || groqMsg.includes("too large") ? 413 : 500;
       return res.status(statusCode).json({
         message: statusCode === 413
           ? "Your uploaded files contain too much text. Try using shorter or fewer PDFs."
-          : "AI Analysis failed: " + groqMsg
+          : "AI Analysis Pipeline failed: " + groqMsg
       });
     }
   });
 });
+
+export default pyqAnalyzerRouter;
 
