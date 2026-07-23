@@ -167,51 +167,59 @@ ${syllabusText}
 PAST YEAR PAPERS (${pyqCount} papers):
 ${combinedPyqText}
 
-TASK: Perform the deepest possible analysis of these exam papers. Extract every insight a student needs to maximize marks. Be precise, data-driven, and base everything on actual question patterns found in the provided papers.
+TASK: Perform a deep multi-dimensional analysis of ALL provided exam papers against the syllabus.
 
-Output STRICTLY as a single JSON object (no markdown, no extra text):
+CRITICAL RULES — YOU MUST FOLLOW THESE:
+1. UNITS: Identify EVERY unit/chapter in the syllabus. For EACH unit, generate a separate entry in "units" array. Do NOT merge units. Do NOT give only one unit. If the syllabus has 5 units, return 5 unit objects. If it has 6, return 6.
+2. TOP REPEATED TOPICS: List the top 8-10 most frequently repeated topics across ALL units, sorted by frequency.
+3. PREDICTED QUESTIONS: Generate at least 8 predicted questions spread across different units, sorted by probability descending.
+4. PREDICTED PAPER: Generate a realistic full exam paper with 2-3 sections (Short Answer, Long Answer, etc.) with 5-8 questions per section covering multiple units.
+5. YEAR-WISE ANALYSIS: Analyze each uploaded paper separately (use filenames if visible, else "Paper 1", "Paper 2", etc.).
+6. Be data-driven. Count actual frequencies from the provided papers. Do not guess.
+
+Output STRICTLY as a single JSON object (no markdown, no extra text). Replace ALL placeholder values with real data from the analysis:
 {
   "meta": {
     "totalPapers": ${pyqCount},
     "subject": "${subject}",
     "branch": "${branch}",
     "semester": ${semester},
-    "overallDifficulty": "Medium",
-    "confidenceScore": 87,
-    "estimatedStudyHours": 40,
-    "theoryVsNumerical": { "theory": 65, "numerical": 35 }
+    "overallDifficulty": "FILL: Easy/Medium/Hard/Medium-Hard based on actual paper analysis",
+    "confidenceScore": 0,
+    "estimatedStudyHours": 0,
+    "theoryVsNumerical": { "theory": 0, "numerical": 0 }
   },
-  "aiSummary": "2–3 sentence natural language summary of the most important findings from this analysis. Mention which units dominate, what pattern the papers follow, and the key strategy.",
+  "aiSummary": "FILL: 2-3 sentence summary mentioning which units dominate, the question pattern, and the best preparation strategy.",
   "quickStats": {
     "totalQuestions": 0,
     "uniqueQuestions": 0,
     "repeatedQuestions": 0,
     "totalUnits": 0,
     "totalTopics": 0,
-    "expectedMarksCoverage": 85,
-    "questionPatterns": ["Pattern 1", "Pattern 2", "Pattern 3"]
+    "expectedMarksCoverage": 0,
+    "questionPatterns": ["FILL pattern 1", "FILL pattern 2", "FILL pattern 3"]
   },
   "units": [
     {
-      "name": "Unit 1: Name",
-      "weightage": 30,
-      "importanceScore": 9,
-      "difficulty": "Medium",
-      "preparationHours": 8,
-      "riskLevel": "High",
-      "priority": "Must Study",
-      "description": "Brief description of what this unit covers",
-      "importantConcepts": ["Concept A", "Concept B", "Concept C"],
-      "trend": "Increasing",
-      "expectedMarks": 15,
-      "repeatedTopics": ["Topic 1", "Topic 2"],
+      "name": "FILL: Exact unit name from syllabus (e.g. Unit 1: Introduction to OS)",
+      "weightage": 0,
+      "importanceScore": 0,
+      "difficulty": "FILL: Easy/Medium/Hard",
+      "preparationHours": 0,
+      "riskLevel": "FILL: High/Medium/Low",
+      "priority": "FILL: Must Study/High Priority/Medium Priority/Low Priority/Can Skip",
+      "description": "FILL: What this unit covers",
+      "importantConcepts": ["FILL concept 1", "FILL concept 2", "FILL concept 3"],
+      "trend": "FILL: Increasing/Stable/Declining",
+      "expectedMarks": 0,
+      "repeatedTopics": ["FILL topic 1", "FILL topic 2"],
       "mostAskedQuestions": [
         {
-          "question": "Full question text here",
-          "timesAsked": 4,
-          "marks": 10,
-          "difficulty": "Medium",
-          "lastAskedYear": "2024"
+          "question": "FILL: Actual question text that appeared in the papers",
+          "timesAsked": 0,
+          "marks": 0,
+          "difficulty": "FILL: Easy/Medium/Hard",
+          "lastAskedYear": "FILL: Year"
         }
       ],
       "canSkip": false,
@@ -346,10 +354,17 @@ Output STRICTLY as a single JSON object (no markdown, no extra text):
 `;
 
       const completion = await groq.chat.completions.create({
-        messages: [{ role: "user", content: prompt }],
-        model: "llama-3.3-70b-versatile", // Use a powerful model for deep reasoning
+        messages: [
+          {
+            role: "system",
+            content: `You are an AI Exam Intelligence Engine. You always return COMPLETE, VALID JSON. You MUST include ALL units from the syllabus — never truncate or combine them into one. Every array must contain multiple real entries based on the data provided. Never return placeholder text like "FILL" in the final output — replace all placeholders with real analyzed values.`
+          },
+          { role: "user", content: prompt }
+        ],
+        model: "llama-3.3-70b-versatile",
         response_format: { type: "json_object" },
-        temperature: 0.2,
+        temperature: 0.15,
+        max_tokens: 8000,
       });
 
       const responseContent = completion.choices[0]?.message?.content;
