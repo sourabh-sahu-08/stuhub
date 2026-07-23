@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft, RefreshCw, CheckCircle2, ShieldAlert, Cpu, Network, Sparkles, BookOpen } from "lucide-react";
+import { ArrowLeft, RefreshCw, CheckCircle2, ShieldAlert, Cpu, Network, Sparkles, BookOpen, Flame, Crosshair, Target, ListChecks, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { PyqAnalyzerUpload } from "../components/pyq-analyzer/PyqAnalyzerUpload";
@@ -306,38 +306,137 @@ export function PyqAnalyzerPage() {
                 </button>
               </div>
 
-              {/* Chapter Weightages */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-bold text-primary uppercase tracking-wider font-mono">Chapter Weightage Distribution</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {analysisResult?.chapters?.map((chapter: any, idx: number) => (
-                    <div key={idx} className="bg-surface-container border border-outline p-4 rounded hover:border-[#3f3f46] transition-colors relative overflow-hidden group">
-                      <div className="absolute top-0 left-0 h-1 bg-primary" style={{ width: `${chapter.weightage}%` }}></div>
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="space-y-1 mt-1">
-                          <h5 className="font-bold text-sm text-white">{chapter.name}</h5>
-                          <p className="text-[10px] text-on-surface-variant">{chapter.description}</p>
+              {/* Top Overview Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-surface-container border border-outline rounded-xl p-4 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-primary font-mono text-xs uppercase tracking-wider font-bold">
+                    <Flame size={14} /> Difficulty
+                  </div>
+                  <div className="text-xl font-bold text-white">
+                    {analysisResult?.overallDifficulty || "N/A"}
+                  </div>
+                </div>
+
+                <div className="bg-surface-container border border-outline rounded-xl p-4 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-primary font-mono text-xs uppercase tracking-wider font-bold">
+                    <Crosshair size={14} /> Patterns
+                  </div>
+                  <div className="text-sm font-medium text-white truncate" title={analysisResult?.questionPatterns?.join(", ")}>
+                    {analysisResult?.questionPatterns?.length || 0} Key Formats
+                  </div>
+                </div>
+
+                <div className="bg-surface-container border border-outline rounded-xl p-4 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-primary font-mono text-xs uppercase tracking-wider font-bold">
+                    <Target size={14} /> Predicted Qs
+                  </div>
+                  <div className="text-xl font-bold text-white">
+                    {analysisResult?.predictedQuestions?.length || 0} <span className="text-sm text-on-surface-variant font-normal">Highly Likely</span>
+                  </div>
+                </div>
+
+                <div className="bg-surface-container border border-outline rounded-xl p-4 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-primary font-mono text-xs uppercase tracking-wider font-bold">
+                    <BookOpen size={14} /> Top Chapter
+                  </div>
+                  <div className="text-sm font-bold text-white truncate" title={analysisResult?.chapters?.[0]?.name}>
+                    {analysisResult?.chapters?.[0]?.name || "N/A"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Study Strategy Timeline */}
+              <div className="space-y-4 pt-4 border-t border-outline">
+                <h4 className="text-sm font-bold text-primary uppercase tracking-wider font-mono flex items-center gap-2">
+                  <ListChecks size={16} /> Optimal Study Strategy
+                </h4>
+                <div className="space-y-3">
+                  {analysisResult?.studyStrategy?.map((strategy: any, idx: number) => (
+                    <div key={idx} className="flex gap-4 p-4 rounded-lg bg-surface border border-outline hover:border-[#3f3f46] transition-all">
+                      <div className="flex flex-col items-center gap-1 shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-extrabold text-sm font-mono">
+                          {strategy.step || idx + 1}
                         </div>
-                        <div className="bg-primary/10 text-primary px-3 py-1.5 rounded border border-primary/20 text-xs font-bold shrink-0">
-                          {chapter.weightage}%
-                        </div>
+                        {idx !== analysisResult.studyStrategy.length - 1 && (
+                          <div className="w-px h-full bg-outline flex-1 mt-1"></div>
+                        )}
+                      </div>
+                      <div className="pb-2">
+                        <h5 className="font-bold text-white text-sm mb-1">{strategy.title}</h5>
+                        <p className="text-xs text-on-surface-variant leading-relaxed">{strategy.description}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Important Topics */}
+              {/* Chapter Weightages & Concepts */}
               <div className="space-y-4 pt-4 border-t border-outline">
-                <h4 className="text-sm font-bold text-primary uppercase tracking-wider font-mono">Highly Repeated Topics</h4>
-                <div className="flex flex-wrap gap-2">
-                  {analysisResult?.importantTopics?.map((topic: string, idx: number) => (
-                    <span key={idx} className="px-3 py-1.5 bg-surface-container border border-outline text-white text-xs rounded-full font-mono">
-                      {topic}
-                    </span>
+                <h4 className="text-sm font-bold text-primary uppercase tracking-wider font-mono">Chapter Weightage & Key Concepts</h4>
+                <div className="grid grid-cols-1 gap-4">
+                  {analysisResult?.chapters?.map((chapter: any, idx: number) => (
+                    <div key={idx} className="bg-surface-container border border-outline p-5 rounded-lg hover:border-[#3f3f46] transition-colors relative overflow-hidden group">
+                      <div className="absolute top-0 left-0 h-1 bg-primary transition-all duration-1000" style={{ width: `${chapter.weightage}%` }}></div>
+                      <div className="flex justify-between items-start gap-4 mb-3">
+                        <div className="space-y-1 mt-1">
+                          <h5 className="font-bold text-base text-white">{chapter.name}</h5>
+                          <p className="text-xs text-on-surface-variant max-w-2xl">{chapter.description}</p>
+                        </div>
+                        <div className="bg-primary/10 text-primary px-3 py-1.5 rounded border border-primary/20 text-sm font-bold shrink-0">
+                          {chapter.weightage}%
+                        </div>
+                      </div>
+                      
+                      {chapter.importantConcepts && chapter.importantConcepts.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-outline/50">
+                          {chapter.importantConcepts.map((concept: string, cIdx: number) => (
+                            <span key={cIdx} className="px-2.5 py-1 bg-surface border border-outline text-white text-[10px] rounded font-mono uppercase tracking-wide">
+                              {concept}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
+
+              {/* Predicted Questions */}
+              <div className="space-y-4 pt-4 border-t border-outline">
+                <h4 className="text-sm font-bold text-primary uppercase tracking-wider font-mono flex items-center gap-2">
+                  <Target size={16} /> Highly Probable Exam Questions
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {analysisResult?.predictedQuestions?.map((pq: any, idx: number) => (
+                    <div key={idx} className="p-4 bg-surface border border-outline rounded-lg flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-2 border-b border-outline/50 pb-3">
+                        <span className="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider bg-surface-container px-2 py-0.5 rounded border border-outline shrink-0">
+                          Q{idx + 1}
+                        </span>
+                        <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-500 px-2.5 py-0.5 rounded border border-emerald-500/20 text-[10px] font-bold shrink-0">
+                          <Flame size={12} /> {pq.probability}% Probability
+                        </div>
+                      </div>
+                      <p className="text-sm text-white font-medium flex-1">"{pq.question}"</p>
+                      <p className="text-xs text-primary font-mono mt-1">→ {pq.chapter}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* General Question Patterns */}
+              {analysisResult?.questionPatterns && (
+                <div className="space-y-4 pt-4 border-t border-outline">
+                  <h4 className="text-sm font-bold text-primary uppercase tracking-wider font-mono">Exam Patterns Identified</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {analysisResult.questionPatterns.map((pattern: string, idx: number) => (
+                      <span key={idx} className="px-3 py-1.5 flex items-center gap-2 bg-surface border border-outline text-on-surface-variant hover:text-white text-xs rounded transition-colors">
+                        <ChevronRight size={14} className="text-primary" /> {pattern}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

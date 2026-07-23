@@ -137,24 +137,24 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
     }
 
     try {
-      // 1. Parse Syllabus (first 5000 characters to save tokens)
+      // 1. Parse Syllabus (first 10000 characters to save tokens but retain more context)
       const syllabusParser = new PDFParse({ data: syllabusFiles[0].buffer });
       const syllabusData = await syllabusParser.getText();
-      const syllabusText = syllabusData.text.slice(0, 5000);
+      const syllabusText = syllabusData.text.slice(0, 10000);
 
-      // 2. Parse PYQs (truncate to first 3000 chars per PDF to keep it under token limits)
+      // 2. Parse PYQs (truncate to first 15000 chars per PDF to analyze deep patterns)
       const pyqTexts = await Promise.all(
         pyqFiles.map(async (file) => {
           const parser = new PDFParse({ data: file.buffer });
           const data = await parser.getText();
-          return `--- PYQ: ${file.originalname} ---\n` + data.text.slice(0, 3000);
+          return `--- PYQ: ${file.originalname} ---\n` + data.text.slice(0, 15000);
         })
       );
       const combinedPyqText = pyqTexts.join("\n\n");
 
-      // 3. Construct prompt
+      // 3. Construct advanced prompt
       const prompt = `
-You are an expert academic AI.
+You are an expert academic AI and Chief Examination Strategist.
 I am providing you with a course syllabus and a set of past year exam questions (PYQs).
 Subject: ${subject}
 Branch: ${branch}
@@ -167,18 +167,38 @@ PAST EXAM PAPERS EXTRACT:
 ${combinedPyqText}
 
 Task:
-1. Identify the main chapters/topics from the syllabus.
-2. Analyze the PYQs to see which chapters are asked the most.
-3. Calculate an estimated percentage "weightage" for each chapter based on frequency.
-4. Also list 3-5 "importantTopics" that repeat often.
+Perform a MAX LEVEL deep analysis of the provided exam papers against the syllabus. Your goal is to provide a highly actionable, highly accurate study guide for the student.
+
+1. Identify the main chapters/topics from the syllabus and calculate an estimated percentage "weightage" for each based on how frequently they appear in the PYQs. For each chapter, also list 2-3 "importantConcepts" that specifically appear often.
+2. Determine the "overallDifficulty" trend of these papers (Easy, Medium, Hard, or a mix).
+3. Identify 3-4 "questionPatterns" (e.g., "Numerical focused", "Derivations frequently asked", "Direct theoretical questions", "Scenario-based").
+4. Provide a step-by-step "studyStrategy". Give 3-5 actionable steps for the student to master this subject based on the past trends.
+5. Predict exactly 5 "predictedQuestions" that have a high probability of appearing in the next exam. Make them realistic.
 
 Output STRICTLY in the following JSON format without any markdown or extra text:
 {
+  "overallDifficulty": "Medium-Hard",
+  "questionPatterns": ["Pattern 1", "Pattern 2"],
   "chapters": [
     {
       "name": "Chapter Name",
       "weightage": 25,
-      "description": "Brief description of topics covered"
+      "description": "Brief description of topics covered",
+      "importantConcepts": ["Concept A", "Concept B"]
+    }
+  ],
+  "studyStrategy": [
+    {
+      "step": 1,
+      "title": "Master High-Weightage Theoretical Concepts",
+      "description": "Start with chapter X because..."
+    }
+  ],
+  "predictedQuestions": [
+    {
+      "question": "Explain the architecture of Y...",
+      "chapter": "Chapter Name",
+      "probability": 85
     }
   ],
   "importantTopics": ["Topic 1", "Topic 2"]
@@ -187,7 +207,7 @@ Output STRICTLY in the following JSON format without any markdown or extra text:
 
       const completion = await groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
-        model: "llama-3.1-8b-instant", // Use a smaller, faster model with 8k context
+        model: "llama-3.3-70b-versatile", // Use a powerful model for deep reasoning
         response_format: { type: "json_object" },
         temperature: 0.2,
       });
