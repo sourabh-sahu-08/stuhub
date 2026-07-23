@@ -1,0 +1,6 @@
+Error: 413 {"error":{"message":"Request too large for model `llama-3.3-70b-versatile` in organization `org_01kkp6bhzeffebmeg4ncff5097` service tier `on_demand` on tokens per minute (TPM): Limit 12000, Requested 12131, please reduce your message size and try again. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}}
+    at APIError.generate (D:\webD\stuhub\node_modules\groq-sdk\src\core\error.ts:91:12)
+    at Groq.makeStatusError (D:\webD\stuhub\node_modules\groq-sdk\src\client.ts:286:28)
+    at Groq.makeRequest (D:\webD\stuhub\node_modules\groq-sdk\src\client.ts:506:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async <anonymous> (D:\webD\stuhub\backend\src\routes\pyq-analyzer.routes.ts:356:26)

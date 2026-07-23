@@ -3,6 +3,7 @@ import { User } from "../models/User.js";
 import { Note } from "../models/Note.js";
 import { Pyq } from "../models/Pyq.js";
 import { Assignment } from "../models/Assignment.js";
+import { Feedback } from "../models/Feedback.js";
 import { requireAuth, allowRoles } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
 
@@ -166,6 +167,30 @@ router.delete("/assignments/:id", async (req, res, next) => {
     const assignment = await Assignment.findByIdAndDelete(req.params.id);
     if (!assignment) return res.status(404).json({ message: "Assignment not found" });
     res.json({ message: "Assignment deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── Feedback (Admin: all feedback) ────────────────────────────────────────
+router.get("/feedback", async (_req, res, next) => {
+  try {
+    const feedback = await Feedback.find().sort({ createdAt: -1 });
+    res.json(feedback);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put("/feedback/:id/status", async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    if (!['new', 'reviewed', 'resolved'].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+    const updated = await Feedback.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!updated) return res.status(404).json({ message: "Feedback not found" });
+    res.json(updated);
   } catch (error) {
     next(error);
   }

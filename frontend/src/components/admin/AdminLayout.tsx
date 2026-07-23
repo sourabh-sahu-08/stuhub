@@ -1,6 +1,6 @@
 import { Outlet, Navigate, NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Shield, Users, Home, LogOut, FileText } from "lucide-react";
+import { Shield, Users, Home, LogOut, FileText, MessageSquare } from "lucide-react";
 
 export function AdminLayout() {
   const { user, logout } = useAuth();
@@ -14,6 +14,7 @@ export function AdminLayout() {
     { label: "Overview", path: "/admin", icon: Shield, end: true },
     { label: "Users", path: "/admin/users", icon: Users },
     { label: "Content", path: "/admin/content", icon: FileText },
+    { label: "Feedback", path: "/admin/feedback", icon: MessageSquare },
   ];
 
   return (

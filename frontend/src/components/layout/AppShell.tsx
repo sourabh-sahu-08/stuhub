@@ -199,10 +199,11 @@ export function AppShell() {
       </div>
 
       {/* Footer */}
+      {/* Footer */}
       <div className="mt-8 flex items-center gap-2 border-t border-outline pt-4">
         <span className="h-2 w-2 shrink-0 rounded-full bg-[#22C55E]" />
 
-        <span className="truncate text-[10px] uppercase tracking-wider text-zinc-400">
+        <span className="truncate text-[10px] leading-none uppercase tracking-wider text-zinc-400">
           Connected as {user?.role}
         </span>
       </div>
@@ -210,7 +211,7 @@ export function AppShell() {
   );
 
   return (
-    <div className="min-h-[100dvh] w-full overflow-x-hidden bg-background text-zinc-200">
+    <div className="min-h-[100dvh] w-full bg-background text-zinc-200">
       <div className="flex min-h-[100dvh] w-full">
         {/* =====================================================
             DESKTOP SIDEBAR
@@ -259,9 +260,9 @@ export function AppShell() {
         ====================================================== */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-outline bg-black/85 px-4 backdrop-blur-md sm:px-6">
+          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-outline bg-black/85 px-4 backdrop-blur-md sm:px-6 md:border-none md:bg-transparent md:backdrop-blur-none md:justify-end">
             {/* Left side */}
-            <div className="flex min-w-0 flex-1 items-center gap-3">
+            <div className="flex min-w-0 flex-1 items-center gap-3 md:hidden">
               {/* Mobile menu button */}
               <button
                 type="button"

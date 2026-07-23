@@ -1,4 +1,3 @@
-import fs from "fs";
 import { Router, Response, NextFunction } from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
@@ -137,59 +136,144 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
     }
 
     try {
-      // 1. Parse Syllabus (first 5000 characters to save tokens)
+      // Adaptive per-paper char limit to keep total prompt within ~80k tokens
+      // Groq llama-3.3-70b context = 128k tokens, ~4 chars/token
+      // Total char budget for papers ≈ 80k tokens × 4 = 320k chars
+      // Subtract syllabus (5k) and prompt schema (~8k) → ~30k chars left for papers
+      // Each paper gets: min(8000, 30000 / count) chars
+      const pyqCount = pyqFiles.length;
+      const PER_PAPER_LIMIT = Math.max(3000, Math.floor(30000 / pyqCount));
+      const SYLLABUS_LIMIT = 5000;
+
+      // 1. Parse Syllabus
       const syllabusParser = new PDFParse({ data: syllabusFiles[0].buffer });
       const syllabusData = await syllabusParser.getText();
-      const syllabusText = syllabusData.text.slice(0, 5000);
+      const syllabusText = syllabusData.text.slice(0, SYLLABUS_LIMIT);
 
-      // 2. Parse PYQs (truncate to first 3000 chars per PDF to keep it under token limits)
+      // 2. Parse PYQs with adaptive limit per paper
       const pyqTexts = await Promise.all(
         pyqFiles.map(async (file) => {
           const parser = new PDFParse({ data: file.buffer });
           const data = await parser.getText();
-          return `--- PYQ: ${file.originalname} ---\n` + data.text.slice(0, 3000);
+          return `--- PYQ: ${file.originalname} ---\n` + data.text.slice(0, PER_PAPER_LIMIT);
         })
       );
       const combinedPyqText = pyqTexts.join("\n\n");
 
-      // 3. Construct prompt
+      // 3. Construct V2 mega-prompt
       const prompt = `
-You are an expert academic AI.
-I am providing you with a course syllabus and a set of past year exam questions (PYQs).
+You are an AI Exam Intelligence Engine and Chief Examination Strategist with decades of experience analyzing university exam patterns.
+You are given ${pyqCount} past year question papers and a syllabus for:
 Subject: ${subject}
 Branch: ${branch}
 Semester: ${semester}
 
-SYLLABUS EXTRACT:
+SYLLABUS:
 ${syllabusText}
 
-PAST EXAM PAPERS EXTRACT:
+PAST YEAR PAPERS (${pyqCount} papers):
 ${combinedPyqText}
 
-Task:
-1. Identify the main chapters/topics from the syllabus.
-2. Analyze the PYQs to see which chapters are asked the most.
-3. Calculate an estimated percentage "weightage" for each chapter based on frequency.
-4. Also list 3-5 "importantTopics" that repeat often.
+TASK: Perform a deep multi-dimensional analysis of ALL provided exam papers against the syllabus.
 
-Output STRICTLY in the following JSON format without any markdown or extra text:
+CRITICAL RULES — YOU MUST FOLLOW THESE:
+1. UNITS: Identify EVERY unit/chapter in the syllabus. For EACH unit, generate a separate entry in "units" array. Do NOT merge units. Do NOT give only one unit. If the syllabus has 5 units, return 5 unit objects. If it has 6, return 6.
+2. TOP REPEATED TOPICS: List the top 20-25 most frequently repeated topics across ALL units, sorted by frequency. Provide deep analysis of their trends.
+3. PREDICTED QUESTIONS: Generate at least 30 predicted questions spread across different units, sorted by probability descending. Include how many times it was asked.
+4. Be data-driven. Count actual frequencies from the provided papers. Do not guess.
+
+Output STRICTLY as a single JSON object (no markdown, no extra text). Replace ALL placeholder values with real data from the analysis:
 {
-  "chapters": [
+  "meta": {
+    "totalPapers": ${pyqCount},
+    "subject": "${subject}",
+    "branch": "${branch}",
+    "semester": ${semester},
+    "overallDifficulty": "FILL: Easy/Medium/Hard/Medium-Hard based on actual paper analysis",
+    "confidenceScore": 0,
+    "estimatedStudyHours": 0,
+    "theoryVsNumerical": { "theory": 0, "numerical": 0 }
+  },
+  "aiSummary": "FILL: 2-3 sentence summary mentioning which units dominate, the question pattern, and the best preparation strategy.",
+  "quickStats": {
+    "totalQuestions": 0,
+    "uniqueQuestions": 0,
+    "repeatedQuestions": 0,
+    "totalUnits": 0,
+    "totalTopics": 0,
+    "expectedMarksCoverage": 0,
+    "questionPatterns": ["FILL pattern 1", "FILL pattern 2", "FILL pattern 3"]
+  },
+  "units": [
     {
-      "name": "Chapter Name",
-      "weightage": 25,
-      "description": "Brief description of topics covered"
+      "name": "FILL: Exact unit name from syllabus (e.g. Unit 1: Introduction to OS)",
+      "weightage": 0,
+      "importanceScore": 0,
+      "difficulty": "FILL: Easy/Medium/Hard",
+      "preparationHours": 0,
+      "riskLevel": "FILL: High/Medium/Low",
+      "priority": "FILL: Must Study/High Priority/Medium Priority/Low Priority/Can Skip",
+      "description": "FILL: What this unit covers",
+      "importantConcepts": ["FILL concept 1", "FILL concept 2", "FILL concept 3"],
+      "trend": "FILL: Increasing/Stable/Declining",
+      "expectedMarks": 0,
+      "repeatedTopics": ["FILL topic 1", "FILL topic 2"],
+      "mostAskedQuestions": [
+        {
+          "question": "FILL: Actual question text that appeared in the papers",
+          "timesAsked": 0,
+          "marks": 0,
+          "difficulty": "FILL: Easy/Medium/Hard",
+          "lastAskedYear": "FILL: Year"
+        }
+      ], // Provide top 5-8 most asked questions for this unit
+      "canSkip": false,
+      "skipReason": ""
     }
   ],
-  "importantTopics": ["Topic 1", "Topic 2"]
+  "topRepeatedTopics": [
+    {
+      "rank": 1,
+      "topic": "Topic Name",
+      "unit": "Unit Name",
+      "timesAsked": 5,
+      "yearsAppeared": ["2020", "2021", "2022", "2023", "2024"],
+      "expectedMarks": 10,
+      "probability": 92,
+      "difficulty": "Medium",
+      "trend": "Stable"
+    }
+  ],
+  "predictedQuestions": [
+    {
+      "question": "Full predicted question text",
+      "unit": "Unit Name",
+      "marks": 10,
+      "probability": 88,
+      "confidence": "Very High",
+      "reason": "Asked in 4 out of ${pyqCount} papers with slight variation each time",
+      "timesAsked": 4,
+      "yearsAppeared": ["2020", "2021", "2023"],
+      "relatedPastQuestions": ["Similar past question 1", "Similar past question 2"]
+    }
+  ],
+
+  "importantTopics": ["Topic 1", "Topic 2", "Topic 3"]
 }
 `;
 
       const completion = await groq.chat.completions.create({
-        messages: [{ role: "user", content: prompt }],
-        model: "llama-3.1-8b-instant", // Use a smaller, faster model with 8k context
+        messages: [
+          {
+            role: "system",
+            content: `You are an AI Exam Intelligence Engine. You always return COMPLETE, VALID JSON. You MUST include ALL units from the syllabus — never truncate or combine them into one. Every array must contain multiple real entries based on the data provided. Never return placeholder text like "FILL" in the final output — replace all placeholders with real analyzed values.`
+          },
+          { role: "user", content: prompt }
+        ],
+        model: "llama-3.3-70b-versatile",
         response_format: { type: "json_object" },
-        temperature: 0.2,
+        temperature: 0.15,
+        max_tokens: 8000,
       });
 
       const responseContent = completion.choices[0]?.message?.content;
@@ -202,10 +286,14 @@ Output STRICTLY in the following JSON format without any markdown or extra text:
       return res.status(200).json(parsedJSON);
     } catch (error: any) {
       console.error("AI Analysis Error:", error);
-      try {
-        fs.writeFileSync("analyze-error.txt", error.stack || error.message);
-      } catch (e) {}
-      return res.status(500).json({ message: "Failed to analyze documents. " + (error.message || "") });
+      // Surface Groq API errors properly
+      const groqMsg = error?.error?.message || error?.message || "Unknown error";
+      const statusCode = error?.status === 413 || groqMsg.includes("too large") ? 413 : 500;
+      return res.status(statusCode).json({
+        message: statusCode === 413
+          ? "Your uploaded files contain too much text. Try using shorter or fewer PDFs."
+          : "AI Analysis failed: " + groqMsg
+      });
     }
   });
 });
