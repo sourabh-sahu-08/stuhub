@@ -12,6 +12,7 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 import { AdminOverview } from "./pages/admin/AdminOverview";
 import { AdminUsers } from "./pages/admin/AdminUsers";
 import { AdminContent } from "./pages/admin/AdminContent";
+import { AdminFeedback } from "./pages/admin/AdminFeedback";
 import { useAuth } from "./context/AuthContext";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
 import { AiChatWidget } from "./components/chat/AiChatWidget";
@@ -46,6 +47,7 @@ export function App() {
           <Route index element={<AdminOverview />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="content" element={<AdminContent />} />
+          <Route path="feedback" element={<AdminFeedback />} />
         </Route>
 
         {/* Redirect all unmatched routes to root */}

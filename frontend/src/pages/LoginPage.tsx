@@ -176,6 +176,30 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Feedback Form States
+  const [feedbackForm, setFeedbackForm] = useState({ name: "", email: "", type: "suggestion", message: "" });
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState(false);
+  const [feedbackError, setFeedbackError] = useState("");
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedbackLoading(true);
+    setFeedbackError("");
+    setFeedbackSuccess(false);
+    
+    try {
+      await api.post("/feedback", feedbackForm);
+      setFeedbackSuccess(true);
+      setFeedbackForm({ name: "", email: "", type: "suggestion", message: "" });
+      setTimeout(() => setFeedbackSuccess(false), 5000);
+    } catch (err: any) {
+      setFeedbackError(err.response?.data?.message || "Failed to submit feedback. Please try again later.");
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
   // Tracks whether google.accounts.id.initialize() has already been called
   // to prevent the "called multiple times" GSI warning on modal re-opens.
   const gsiInitialized = useRef(false);
@@ -1034,7 +1058,7 @@ export function LoginPage() {
             Have questions, feedback, or want to collaborate? I'm always open to discussing new projects, creative ideas, or opportunities.
           </p>
           
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-16">
             <a href="https://github.com/sourabh-sahu-08" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-3 rounded-lg border border-[#333333] bg-[#0A0A0A] hover:bg-[#111111] hover:border-[#FF9000] transition-colors group">
               <svg viewBox="0 0 24 24" className="w-5 h-5 fill-zinc-400 group-hover:fill-white transition-colors"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
               <span className="font-semibold text-zinc-300 group-hover:text-white transition-colors">GitHub</span>
@@ -1049,6 +1073,105 @@ export function LoginPage() {
               <svg viewBox="0 0 24 24" className="w-5 h-5 fill-zinc-400 group-hover:fill-[#EA4335] transition-colors"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
               <span className="font-semibold text-zinc-300 group-hover:text-white transition-colors">Email Me</span>
             </a>
+          </div>
+
+          <div className="bg-[#0A0A0A] border border-[#222222] rounded-xl p-8 max-w-2xl mx-auto text-left shadow-2xl relative overflow-hidden">
+            {/* Glow effect */}
+            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-40 h-40 rounded-full bg-[#FF9000]/10 blur-3xl"></div>
+            
+            <div className="relative z-10">
+              <h3 className="text-xl font-bold text-white mb-2">Help shape StuHub</h3>
+              <p className="text-sm text-zinc-400 mb-6">Report a bug or suggest a new feature. All feedback goes directly to my admin dashboard.</p>
+              
+              <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label htmlFor="fb-name" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Name</label>
+                    <input 
+                      id="fb-name" 
+                      type="text" 
+                      required
+                      value={feedbackForm.name}
+                      onChange={(e) => setFeedbackForm({...feedbackForm, name: e.target.value})}
+                      className="w-full bg-[#111111] border border-[#333333] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#FF9000] transition-colors" 
+                      placeholder="Your name" 
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="fb-email" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email</label>
+                    <input 
+                      id="fb-email" 
+                      type="email" 
+                      required
+                      value={feedbackForm.email}
+                      onChange={(e) => setFeedbackForm({...feedbackForm, email: e.target.value})}
+                      className="w-full bg-[#111111] border border-[#333333] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#FF9000] transition-colors" 
+                      placeholder="Your email" 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Type</label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer group">
+                      <input 
+                        type="radio" 
+                        name="type" 
+                        value="suggestion" 
+                        checked={feedbackForm.type === 'suggestion'}
+                        onChange={() => setFeedbackForm({...feedbackForm, type: 'suggestion'})}
+                        className="accent-[#FF9000]"
+                      />
+                      <span className="group-hover:text-white transition-colors">Suggestion</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer group">
+                      <input 
+                        type="radio" 
+                        name="type" 
+                        value="issue"
+                        checked={feedbackForm.type === 'issue'}
+                        onChange={() => setFeedbackForm({...feedbackForm, type: 'issue'})}
+                        className="accent-[#FF9000]" 
+                      />
+                      <span className="group-hover:text-white transition-colors">Issue / Bug</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <div className="space-y-1.5">
+                  <label htmlFor="fb-message" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Message</label>
+                  <textarea 
+                    id="fb-message" 
+                    rows={4}
+                    required
+                    value={feedbackForm.message}
+                    onChange={(e) => setFeedbackForm({...feedbackForm, message: e.target.value})}
+                    className="w-full bg-[#111111] border border-[#333333] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#FF9000] transition-colors resize-none" 
+                    placeholder="Tell me what's on your mind..."
+                  ></textarea>
+                </div>
+                
+                <button 
+                  type="submit" 
+                  disabled={feedbackLoading}
+                  className="w-full bg-[#FF9000] hover:bg-[#e68200] disabled:bg-[#FF9000]/50 disabled:cursor-not-allowed text-black font-bold py-2.5 rounded-md transition-colors flex items-center justify-center gap-2"
+                >
+                  {feedbackLoading ? 'Submitting...' : 'Submit Feedback'}
+                </button>
+                
+                {feedbackSuccess && (
+                  <p className="text-emerald-500 text-sm text-center font-medium mt-2">
+                    Thanks for your feedback! It's been sent to the admin dashboard.
+                  </p>
+                )}
+                {feedbackError && (
+                  <p className="text-red-500 text-sm text-center font-medium mt-2">
+                    {feedbackError}
+                  </p>
+                )}
+              </form>
+            </div>
           </div>
         </div>
       </section>
