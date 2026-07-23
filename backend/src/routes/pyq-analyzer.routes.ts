@@ -152,71 +152,196 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       );
       const combinedPyqText = pyqTexts.join("\n\n");
 
-      // 3. Construct advanced prompt
+      // 3. Construct V2 mega-prompt
+      const pyqCount = pyqFiles.length;
       const prompt = `
-You are an expert academic AI and Chief Examination Strategist.
-I am providing you with a course syllabus and a set of past year exam questions (PYQs).
+You are an AI Exam Intelligence Engine and Chief Examination Strategist with decades of experience analyzing university exam patterns.
+You are given ${pyqCount} past year question papers and a syllabus for:
 Subject: ${subject}
 Branch: ${branch}
 Semester: ${semester}
 
-SYLLABUS EXTRACT:
+SYLLABUS:
 ${syllabusText}
 
-PAST EXAM PAPERS EXTRACT:
+PAST YEAR PAPERS (${pyqCount} papers):
 ${combinedPyqText}
 
-Task:
-Perform a MAX LEVEL deep analysis of the provided exam papers against the syllabus. Your goal is to provide a highly actionable, highly accurate study guide for the student, ending with a complete predicted mock exam paper.
+TASK: Perform the deepest possible analysis of these exam papers. Extract every insight a student needs to maximize marks. Be precise, data-driven, and base everything on actual question patterns found in the provided papers.
 
-1. Identify the main chapters/units from the syllabus and calculate an estimated percentage "weightage" for each based on how frequently they appear in the PYQs. For each chapter:
-   - List 2-3 "importantConcepts" that specifically appear often.
-   - Extract the 1-3 "mostAskedQuestions" specifically from that unit/chapter and state the exact "timesAsked" based on the provided PYQs.
-2. Determine the "overallDifficulty" trend of these papers (Easy, Medium, Hard, or a mix).
-3. Identify 3-4 "questionPatterns" (e.g., "Numerical focused", "Derivations frequently asked", "Direct theoretical questions", "Scenario-based").
-4. Provide a step-by-step "studyStrategy". Give 3-5 actionable steps for the student to master this subject based on the past trends.
-5. Generate a full "predictedPaper". This paper should mimic a real university exam layout. Divide it into logical sections (e.g., Section A: Short Questions, Section B: Long Questions). For each question, predict the highest probability questions based on PYQ frequency, include the probability percentage, and assign marks.
-
-Output STRICTLY in the following JSON format without any markdown or extra text:
+Output STRICTLY as a single JSON object (no markdown, no extra text):
 {
-  "overallDifficulty": "Medium-Hard",
-  "questionPatterns": ["Pattern 1", "Pattern 2"],
-  "chapters": [
+  "meta": {
+    "totalPapers": ${pyqCount},
+    "subject": "${subject}",
+    "branch": "${branch}",
+    "semester": ${semester},
+    "overallDifficulty": "Medium",
+    "confidenceScore": 87,
+    "estimatedStudyHours": 40,
+    "theoryVsNumerical": { "theory": 65, "numerical": 35 }
+  },
+  "aiSummary": "2–3 sentence natural language summary of the most important findings from this analysis. Mention which units dominate, what pattern the papers follow, and the key strategy.",
+  "quickStats": {
+    "totalQuestions": 0,
+    "uniqueQuestions": 0,
+    "repeatedQuestions": 0,
+    "totalUnits": 0,
+    "totalTopics": 0,
+    "expectedMarksCoverage": 85,
+    "questionPatterns": ["Pattern 1", "Pattern 2", "Pattern 3"]
+  },
+  "units": [
     {
-      "name": "Unit/Chapter Name",
-      "weightage": 25,
-      "description": "Brief description of topics covered",
-      "importantConcepts": ["Concept A", "Concept B"],
+      "name": "Unit 1: Name",
+      "weightage": 30,
+      "importanceScore": 9,
+      "difficulty": "Medium",
+      "preparationHours": 8,
+      "riskLevel": "High",
+      "priority": "Must Study",
+      "description": "Brief description of what this unit covers",
+      "importantConcepts": ["Concept A", "Concept B", "Concept C"],
+      "trend": "Increasing",
+      "expectedMarks": 15,
+      "repeatedTopics": ["Topic 1", "Topic 2"],
       "mostAskedQuestions": [
         {
-          "question": "Explain the working of Z...",
-          "timesAsked": 4
+          "question": "Full question text here",
+          "timesAsked": 4,
+          "marks": 10,
+          "difficulty": "Medium",
+          "lastAskedYear": "2024"
         }
-      ]
+      ],
+      "canSkip": false,
+      "skipReason": ""
     }
   ],
-  "studyStrategy": [
+  "topRepeatedTopics": [
     {
-      "step": 1,
-      "title": "Master High-Weightage Theoretical Concepts",
-      "description": "Start with chapter X because..."
+      "rank": 1,
+      "topic": "Topic Name",
+      "unit": "Unit Name",
+      "timesAsked": 5,
+      "yearsAppeared": ["2020", "2021", "2022", "2023", "2024"],
+      "expectedMarks": 10,
+      "probability": 92,
+      "difficulty": "Medium",
+      "trend": "Stable"
+    }
+  ],
+  "predictedQuestions": [
+    {
+      "question": "Full predicted question text",
+      "unit": "Unit Name",
+      "marks": 10,
+      "probability": 88,
+      "confidence": "Very High",
+      "reason": "Asked in 4 out of ${pyqCount} papers with slight variation each time",
+      "relatedPastQuestions": ["Similar past question 1", "Similar past question 2"]
     }
   ],
   "predictedPaper": [
     {
-      "sectionName": "Section A: Short Answer Type",
-      "instructions": "Attempt all questions. Each carries 2 marks.",
+      "sectionName": "Section A: Short Answer",
+      "instructions": "Attempt all. Each carries 2 marks.",
+      "totalMarks": 20,
       "questions": [
         {
-          "question": "Define Y and state its advantages.",
-          "chapter": "Chapter Name",
+          "qNo": "Q1",
+          "question": "Full question text",
+          "unit": "Unit Name",
           "marks": 2,
-          "probability": 92
+          "probability": 85,
+          "difficulty": "Easy"
         }
       ]
     }
   ],
-  "importantTopics": ["Topic 1", "Topic 2"]
+  "marksDistribution": [
+    { "unit": "Unit Name", "marks": 20, "percentage": 30 }
+  ],
+  "yearwiseAnalysis": [
+    {
+      "year": "2024",
+      "dominantUnit": "Unit Name",
+      "totalQuestions": 15,
+      "difficulty": "Medium",
+      "highlights": ["Key observation about this year's paper"]
+    }
+  ],
+  "trendAnalysis": {
+    "increasing": ["Topic gaining importance"],
+    "stable": ["Consistently asked topic"],
+    "declining": ["Topic appearing less"],
+    "neverAsked": ["Topic in syllabus but never appeared"],
+    "recentlyIntroduced": ["New topic in last 1-2 years"]
+  },
+  "numericals": [
+    {
+      "topic": "Topic requiring numerical",
+      "unit": "Unit Name",
+      "timesAsked": 3,
+      "difficulty": "Hard",
+      "probability": 75,
+      "formulaHint": "Formula or method to use",
+      "studyTip": "Focus on this type of problem"
+    }
+  ],
+  "formulaSheet": [
+    {
+      "formula": "Formula expression",
+      "meaning": "What this formula calculates",
+      "usage": "When to use it",
+      "unit": "Unit Name",
+      "importance": "Critical"
+    }
+  ],
+  "definitionBank": [
+    {
+      "term": "Term to define",
+      "definition": "The definition",
+      "unit": "Unit Name",
+      "probability": 80,
+      "timesAsked": 2
+    }
+  ],
+  "smartInsights": [
+    {
+      "badge": "High ROI",
+      "title": "Insight title",
+      "description": "Actionable insight for the student",
+      "unit": "Unit Name",
+      "icon": "trending-up"
+    }
+  ],
+  "studyPlan": {
+    "totalDays": 7,
+    "dailySchedule": [
+      {
+        "day": 1,
+        "focus": "Unit 1",
+        "hours": 4,
+        "tasks": ["Task 1", "Task 2"],
+        "priority": "High"
+      }
+    ],
+    "oneNightStrategy": {
+      "fourHours": "Focus on Units with highest weightage: prioritize repeated questions and key definitions",
+      "twoHours": "Solve the top 5 most repeated questions from each unit",
+      "oneHour": "Revise formula sheet and definition bank",
+      "thirtyMinutes": "Read AI summary and smart insights one final time"
+    }
+  },
+  "studyStrategy": [
+    {
+      "step": 1,
+      "title": "Strategy Step Title",
+      "description": "Actionable description of this step"
+    }
+  ],
+  "importantTopics": ["Topic 1", "Topic 2", "Topic 3"]
 }
 `;
 
