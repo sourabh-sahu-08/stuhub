@@ -331,7 +331,7 @@ export function PyqAnalyzerPage() {
                     <Target size={14} /> Predicted Qs
                   </div>
                   <div className="text-xl font-bold text-white">
-                    {analysisResult?.predictedQuestions?.length || 0} <span className="text-sm text-on-surface-variant font-normal">Highly Likely</span>
+                    {analysisResult?.predictedPaper?.reduce((acc: number, section: any) => acc + (section.questions?.length || 0), 0) || 0} <span className="text-sm text-on-surface-variant font-normal">Highly Likely</span>
                   </div>
                 </div>
 
@@ -401,24 +401,55 @@ export function PyqAnalyzerPage() {
                 </div>
               </div>
 
-              {/* Predicted Questions */}
-              <div className="space-y-4 pt-4 border-t border-outline">
-                <h4 className="text-sm font-bold text-primary uppercase tracking-wider font-mono flex items-center gap-2">
-                  <Target size={16} /> Highly Probable Exam Questions
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {analysisResult?.predictedQuestions?.map((pq: any, idx: number) => (
-                    <div key={idx} className="p-4 bg-surface border border-outline rounded-lg flex flex-col gap-3">
-                      <div className="flex items-start justify-between gap-2 border-b border-outline/50 pb-3">
-                        <span className="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider bg-surface-container px-2 py-0.5 rounded border border-outline shrink-0">
-                          Q{idx + 1}
-                        </span>
-                        <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-500 px-2.5 py-0.5 rounded border border-emerald-500/20 text-[10px] font-bold shrink-0">
-                          <Flame size={12} /> {pq.probability}% Probability
-                        </div>
+              {/* Full Predicted Mock Exam Paper */}
+              <div className="space-y-6 pt-6 border-t border-outline">
+                <div className="text-center space-y-2">
+                  <h4 className="text-xl font-extrabold text-white uppercase tracking-widest font-mono flex items-center justify-center gap-2">
+                    <Target size={20} className="text-primary" /> AI Predicted Mock Paper
+                  </h4>
+                  <p className="text-xs text-on-surface-variant">Generated based on historical patterns and chapter weightages.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {analysisResult?.predictedPaper?.map((section: any, sIdx: number) => (
+                    <div key={sIdx} className="bg-surface border border-outline rounded-xl overflow-hidden">
+                      <div className="bg-surface-container border-b border-outline p-4 text-center">
+                        <h5 className="font-bold text-primary text-lg font-mono">{section.sectionName}</h5>
+                        {section.instructions && (
+                          <p className="text-xs text-on-surface-variant mt-1 italic">{section.instructions}</p>
+                        )}
                       </div>
-                      <p className="text-sm text-white font-medium flex-1">"{pq.question}"</p>
-                      <p className="text-xs text-primary font-mono mt-1">→ {pq.chapter}</p>
+                      <div className="p-4 sm:p-6 space-y-5">
+                        {section.questions?.map((pq: any, qIdx: number) => (
+                          <div key={qIdx} className="flex gap-4 group">
+                            <div className="shrink-0 pt-0.5">
+                              <span className="text-sm font-bold text-on-surface-variant font-mono w-6 inline-block text-right">
+                                Q{qIdx + 1}.
+                              </span>
+                            </div>
+                            <div className="flex-1 space-y-2">
+                              <div className="flex items-start justify-between gap-4">
+                                <p className="text-sm text-white font-medium leading-relaxed">
+                                  {pq.question}
+                                </p>
+                                {pq.marks && (
+                                  <span className="shrink-0 text-xs font-bold text-on-surface-variant font-mono">
+                                    [{pq.marks} Marks]
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider">
+                                  <Flame size={10} /> {pq.probability}% Probability
+                                </span>
+                                <span className="text-[10px] text-primary font-mono opacity-60 group-hover:opacity-100 transition-opacity">
+                                  → {pq.chapter}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
