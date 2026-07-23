@@ -13,10 +13,7 @@ import { UnitCards } from "../components/pyq-analyzer/v2/UnitCards";
 import { TopRepeatedTopics } from "../components/pyq-analyzer/v2/TopRepeatedTopics";
 import { PredictedQuestions } from "../components/pyq-analyzer/v2/PredictedQuestions";
 import { PredictedPaper } from "../components/pyq-analyzer/v2/PredictedPaper";
-import { MarksDistribution } from "../components/pyq-analyzer/v2/MarksDistribution";
 import { TrendAnalysis } from "../components/pyq-analyzer/v2/TrendAnalysis";
-import { FormulaSheet } from "../components/pyq-analyzer/v2/FormulaSheet";
-import { DefinitionBank } from "../components/pyq-analyzer/v2/DefinitionBank";
 import { StudyPlanner } from "../components/pyq-analyzer/v2/StudyPlanner";
 import { SmartInsights } from "../components/pyq-analyzer/v2/SmartInsights";
 
@@ -27,8 +24,6 @@ const TABS = [
   { id: "predictions", label: "Predictions", icon: Target },
   { id: "paper", label: "Mock Paper", icon: FileText },
   { id: "trends", label: "Trends", icon: TrendingUp },
-  { id: "formulas", label: "Formulas", icon: Sigma },
-  { id: "definitions", label: "Definitions", icon: BookOpen },
   { id: "planner", label: "Study Plan", icon: MoonStar },
   { id: "insights", label: "Insights", icon: Zap },
 ];
@@ -289,13 +284,6 @@ export function PyqAnalyzerPage() {
                     yearwiseAnalysis={analysisResult.yearwiseAnalysis ?? []}
                   />
                 )}
-                {activeTab === "formulas" && (
-                  <div className="space-y-6">
-                    <MarksDistribution marksDistribution={analysisResult.marksDistribution ?? []} />
-                    <FormulaSheet formulas={analysisResult.formulaSheet ?? []} numericals={analysisResult.numericals ?? []} />
-                  </div>
-                )}
-                {activeTab === "definitions" && <DefinitionBank definitions={analysisResult.definitionBank ?? []} />}
                 {activeTab === "planner" && <StudyPlanner studyPlan={analysisResult.studyPlan ?? { totalDays: 7, dailySchedule: [], oneNightStrategy: { fourHours: "", twoHours: "", oneHour: "", thirtyMinutes: "" } }} studyStrategy={analysisResult.studyStrategy ?? []} />}
                 {activeTab === "insights" && <SmartInsights insights={analysisResult.smartInsights ?? []} />}
               </motion.div>

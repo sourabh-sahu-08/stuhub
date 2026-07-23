@@ -178,9 +178,9 @@ TASK: Perform a deep multi-dimensional analysis of ALL provided exam papers agai
 
 CRITICAL RULES — YOU MUST FOLLOW THESE:
 1. UNITS: Identify EVERY unit/chapter in the syllabus. For EACH unit, generate a separate entry in "units" array. Do NOT merge units. Do NOT give only one unit. If the syllabus has 5 units, return 5 unit objects. If it has 6, return 6.
-2. TOP REPEATED TOPICS: List the top 8-10 most frequently repeated topics across ALL units, sorted by frequency.
-3. PREDICTED QUESTIONS: Generate at least 8 predicted questions spread across different units, sorted by probability descending.
-4. PREDICTED PAPER: Generate a realistic full exam paper with 2-3 sections (Short Answer, Long Answer, etc.) with 5-8 questions per section covering multiple units.
+2. TOP REPEATED TOPICS: List the top 12-15 most frequently repeated topics across ALL units, sorted by frequency. Provide deep analysis of their trends.
+3. PREDICTED QUESTIONS: Generate at least 12 predicted questions spread across different units, sorted by probability descending.
+4. PREDICTED PAPER: Generate a realistic full exam paper with 3-4 sections (Short Answer, Long Answer, etc.) with 8-10 questions per section covering multiple units.
 5. YEAR-WISE ANALYSIS: Analyze each uploaded paper separately (use filenames if visible, else "Paper 1", "Paper 2", etc.).
 6. Be data-driven. Count actual frequencies from the provided papers. Do not guess.
 
@@ -293,35 +293,6 @@ Output STRICTLY as a single JSON object (no markdown, no extra text). Replace AL
     "neverAsked": ["Topic in syllabus but never appeared"],
     "recentlyIntroduced": ["New topic in last 1-2 years"]
   },
-  "numericals": [
-    {
-      "topic": "Topic requiring numerical",
-      "unit": "Unit Name",
-      "timesAsked": 3,
-      "difficulty": "Hard",
-      "probability": 75,
-      "formulaHint": "Formula or method to use",
-      "studyTip": "Focus on this type of problem"
-    }
-  ],
-  "formulaSheet": [
-    {
-      "formula": "Formula expression",
-      "meaning": "What this formula calculates",
-      "usage": "When to use it",
-      "unit": "Unit Name",
-      "importance": "Critical"
-    }
-  ],
-  "definitionBank": [
-    {
-      "term": "Term to define",
-      "definition": "The definition",
-      "unit": "Unit Name",
-      "probability": 80,
-      "timesAsked": 2
-    }
-  ],
   "smartInsights": [
     {
       "badge": "High ROI",
