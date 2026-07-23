@@ -178,11 +178,9 @@ TASK: Perform a deep multi-dimensional analysis of ALL provided exam papers agai
 
 CRITICAL RULES — YOU MUST FOLLOW THESE:
 1. UNITS: Identify EVERY unit/chapter in the syllabus. For EACH unit, generate a separate entry in "units" array. Do NOT merge units. Do NOT give only one unit. If the syllabus has 5 units, return 5 unit objects. If it has 6, return 6.
-2. TOP REPEATED TOPICS: List the top 12-15 most frequently repeated topics across ALL units, sorted by frequency. Provide deep analysis of their trends.
-3. PREDICTED QUESTIONS: Generate at least 12 predicted questions spread across different units, sorted by probability descending.
-4. PREDICTED PAPER: Generate a realistic full exam paper with 3-4 sections (Short Answer, Long Answer, etc.) with 8-10 questions per section covering multiple units.
-5. YEAR-WISE ANALYSIS: Analyze each uploaded paper separately (use filenames if visible, else "Paper 1", "Paper 2", etc.).
-6. Be data-driven. Count actual frequencies from the provided papers. Do not guess.
+2. TOP REPEATED TOPICS: List the top 15-20 most frequently repeated topics across ALL units, sorted by frequency. Provide deep analysis of their trends.
+3. PREDICTED QUESTIONS: Generate at least 20 predicted questions spread across different units, sorted by probability descending.
+4. Be data-driven. Count actual frequencies from the provided papers. Do not guess.
 
 Output STRICTLY as a single JSON object (no markdown, no extra text). Replace ALL placeholder values with real data from the analysis:
 {
@@ -257,76 +255,7 @@ Output STRICTLY as a single JSON object (no markdown, no extra text). Replace AL
       "relatedPastQuestions": ["Similar past question 1", "Similar past question 2"]
     }
   ],
-  "predictedPaper": [
-    {
-      "sectionName": "Section A: Short Answer",
-      "instructions": "Attempt all. Each carries 2 marks.",
-      "totalMarks": 20,
-      "questions": [
-        {
-          "qNo": "Q1",
-          "question": "Full question text",
-          "unit": "Unit Name",
-          "marks": 2,
-          "probability": 85,
-          "difficulty": "Easy"
-        }
-      ]
-    }
-  ],
-  "marksDistribution": [
-    { "unit": "Unit Name", "marks": 20, "percentage": 30 }
-  ],
-  "yearwiseAnalysis": [
-    {
-      "year": "2024",
-      "dominantUnit": "Unit Name",
-      "totalQuestions": 15,
-      "difficulty": "Medium",
-      "highlights": ["Key observation about this year's paper"]
-    }
-  ],
-  "trendAnalysis": {
-    "increasing": ["Topic gaining importance"],
-    "stable": ["Consistently asked topic"],
-    "declining": ["Topic appearing less"],
-    "neverAsked": ["Topic in syllabus but never appeared"],
-    "recentlyIntroduced": ["New topic in last 1-2 years"]
-  },
-  "smartInsights": [
-    {
-      "badge": "High ROI",
-      "title": "Insight title",
-      "description": "Actionable insight for the student",
-      "unit": "Unit Name",
-      "icon": "trending-up"
-    }
-  ],
-  "studyPlan": {
-    "totalDays": 7,
-    "dailySchedule": [
-      {
-        "day": 1,
-        "focus": "Unit 1",
-        "hours": 4,
-        "tasks": ["Task 1", "Task 2"],
-        "priority": "High"
-      }
-    ],
-    "oneNightStrategy": {
-      "fourHours": "Focus on Units with highest weightage: prioritize repeated questions and key definitions",
-      "twoHours": "Solve the top 5 most repeated questions from each unit",
-      "oneHour": "Revise formula sheet and definition bank",
-      "thirtyMinutes": "Read AI summary and smart insights one final time"
-    }
-  },
-  "studyStrategy": [
-    {
-      "step": 1,
-      "title": "Strategy Step Title",
-      "description": "Actionable description of this step"
-    }
-  ],
+
   "importantTopics": ["Topic 1", "Topic 2", "Topic 3"]
 }
 `;

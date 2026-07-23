@@ -12,20 +12,14 @@ import { AISummary } from "../components/pyq-analyzer/v2/AISummary";
 import { UnitCards } from "../components/pyq-analyzer/v2/UnitCards";
 import { TopRepeatedTopics } from "../components/pyq-analyzer/v2/TopRepeatedTopics";
 import { PredictedQuestions } from "../components/pyq-analyzer/v2/PredictedQuestions";
-import { PredictedPaper } from "../components/pyq-analyzer/v2/PredictedPaper";
-import { TrendAnalysis } from "../components/pyq-analyzer/v2/TrendAnalysis";
-import { StudyPlanner } from "../components/pyq-analyzer/v2/StudyPlanner";
-import { SmartInsights } from "../components/pyq-analyzer/v2/SmartInsights";
+
 
 const TABS = [
   { id: "overview", label: "Overview", icon: BarChart2 },
   { id: "units", label: "Units", icon: Layers },
   { id: "topics", label: "Top Topics", icon: Trophy },
   { id: "predictions", label: "Predictions", icon: Target },
-  { id: "paper", label: "Mock Paper", icon: FileText },
-  { id: "trends", label: "Trends", icon: TrendingUp },
-  { id: "planner", label: "Study Plan", icon: MoonStar },
-  { id: "insights", label: "Insights", icon: Zap },
+
 ];
 
 export function PyqAnalyzerPage() {
@@ -270,22 +264,7 @@ export function PyqAnalyzerPage() {
                 {activeTab === "units" && <UnitCards units={analysisResult.units ?? []} />}
                 {activeTab === "topics" && <TopRepeatedTopics topics={analysisResult.topRepeatedTopics ?? []} />}
                 {activeTab === "predictions" && <PredictedQuestions questions={analysisResult.predictedQuestions ?? []} />}
-                {activeTab === "paper" && (
-                  <PredictedPaper
-                    sections={analysisResult.predictedPaper ?? []}
-                    subject={analysisResult.meta?.subject ?? validationResult?.subject}
-                    branch={analysisResult.meta?.branch ?? validationResult?.branch}
-                    semester={analysisResult.meta?.semester ?? validationResult?.semester}
-                  />
-                )}
-                {activeTab === "trends" && (
-                  <TrendAnalysis
-                    trendAnalysis={analysisResult.trendAnalysis ?? { increasing: [], stable: [], declining: [], neverAsked: [], recentlyIntroduced: [] }}
-                    yearwiseAnalysis={analysisResult.yearwiseAnalysis ?? []}
-                  />
-                )}
-                {activeTab === "planner" && <StudyPlanner studyPlan={analysisResult.studyPlan ?? { totalDays: 7, dailySchedule: [], oneNightStrategy: { fourHours: "", twoHours: "", oneHour: "", thirtyMinutes: "" } }} studyStrategy={analysisResult.studyStrategy ?? []} />}
-                {activeTab === "insights" && <SmartInsights insights={analysisResult.smartInsights ?? []} />}
+
               </motion.div>
             </AnimatePresence>
           </motion.div>
