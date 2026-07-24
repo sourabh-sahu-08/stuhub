@@ -12,9 +12,14 @@ export interface V4QuestionCard {
   variants: string[];
 }
 
+export interface V4TopicGroup {
+  topic: string;
+  questions: V4QuestionCard[];
+}
+
 export interface V4UnitGroup {
   unit: string;
-  questions: V4QuestionCard[];
+  topics: V4TopicGroup[];
 }
 
 export interface V4HotTopic {

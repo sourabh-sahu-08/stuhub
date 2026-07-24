@@ -93,7 +93,9 @@ export function PyqAnalyzerPage() {
     if (minRepetitions !== "all") {
       const min = parseInt(minRepetitions);
       result.forEach(u => {
-        u.questions = u.questions.filter(q => q.frequency >= min);
+        u.topics.forEach(t => {
+          t.questions = t.questions.filter(q => q.frequency >= min);
+        });
       });
     }
 
@@ -101,31 +103,37 @@ export function PyqAnalyzerPage() {
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       result.forEach(u => {
-        u.questions = u.questions.filter(q => 
-          q.question.toLowerCase().includes(term) || 
-          q.topic.toLowerCase().includes(term) ||
-          q.variants.some(v => v.toLowerCase().includes(term))
-        );
+        u.topics.forEach(t => {
+          t.questions = t.questions.filter(q => 
+            q.question.toLowerCase().includes(term) || 
+            q.topic.toLowerCase().includes(term) ||
+            q.variants.some(v => v.toLowerCase().includes(term))
+          );
+        });
       });
     }
 
-    // 3. Remove empty units
-    result = result.filter(u => u.questions.length > 0);
+    // 3. Remove empty topics and units
+    result.forEach(u => {
+      u.topics = u.topics.filter(t => t.questions.length > 0);
+    });
+    result = result.filter(u => u.topics.length > 0);
 
     // 4. Sort
     result.forEach(u => {
-      u.questions.sort((a, b) => {
-        if (sortBy === "highest") {
-          return b.frequency - a.frequency;
-        } else if (sortBy === "alphabetical") {
-          return a.question.localeCompare(b.question);
-        } else if (sortBy === "recent") {
-          // just taking highest year
-          const maxYearA = Math.max(...a.papers.map(p => Number(p.year) || 0));
-          const maxYearB = Math.max(...b.papers.map(p => Number(p.year) || 0));
-          return maxYearB - maxYearA;
-        }
-        return 0;
+      u.topics.forEach(t => {
+        t.questions.sort((a, b) => {
+          if (sortBy === "highest") {
+            return b.frequency - a.frequency;
+          } else if (sortBy === "alphabetical") {
+            return a.question.localeCompare(b.question);
+          } else if (sortBy === "recent") {
+            const maxYearA = Math.max(...a.papers.map(p => Number(p.year) || 0));
+            const maxYearB = Math.max(...b.papers.map(p => Number(p.year) || 0));
+            return maxYearB - maxYearA;
+          }
+          return 0;
+        });
       });
     });
 

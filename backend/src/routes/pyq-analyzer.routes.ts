@@ -245,14 +245,23 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
         }
 
         const unitName = cluster.unit || "Other";
+        const topicName = cluster.topic || "General";
+
         if (!unitsMap.has(unitName)) {
-          unitsMap.set(unitName, { unit: unitName, questions: [] });
+          unitsMap.set(unitName, { unit: unitName, topics: [] });
           unitCounts.set(unitName, 0);
         }
 
-        unitsMap.get(unitName)!.questions.push({
+        const unitGroup = unitsMap.get(unitName)!;
+        let topicGroup = unitGroup.topics.find(t => t.topic === topicName);
+        if (!topicGroup) {
+          topicGroup = { topic: topicName, questions: [] };
+          unitGroup.topics.push(topicGroup);
+        }
+
+        topicGroup.questions.push({
           question: repQuestion,
-          topic: cluster.topic || "General",
+          topic: topicName,
           frequency: freq,
           confidence,
           papers: uniquePapers,
@@ -261,9 +270,9 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
         
         unitCounts.set(unitName, (unitCounts.get(unitName) || 0) + freq);
         
-        const currentTopic = topicCounts.get(cluster.topic || "General") || { unit: unitName, frequency: 0 };
+        const currentTopic = topicCounts.get(topicName) || { unit: unitName, frequency: 0 };
         currentTopic.frequency += freq;
-        topicCounts.set(cluster.topic || "General", currentTopic);
+        topicCounts.set(topicName, currentTopic);
       }
 
       const mostImportantUnit = Array.from(unitCounts.entries())
@@ -271,7 +280,17 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
 
       const unitsArray = Array.from(unitsMap.values());
       unitsArray.forEach(u => {
-        u.questions.sort((a, b) => b.frequency - a.frequency);
+        // Sort topics by total frequency of questions inside them
+        u.topics.sort((a, b) => {
+          const freqA = a.questions.reduce((sum, q) => sum + q.frequency, 0);
+          const freqB = b.questions.reduce((sum, q) => sum + q.frequency, 0);
+          return freqB - freqA;
+        });
+
+        // Sort questions within each topic by frequency
+        u.topics.forEach(t => {
+          t.questions.sort((a, b) => b.frequency - a.frequency);
+        });
       });
 
       const hotTopics = Array.from(topicCounts.entries())

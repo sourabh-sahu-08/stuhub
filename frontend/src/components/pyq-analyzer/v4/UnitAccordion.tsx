@@ -43,7 +43,7 @@ export const UnitAccordion: React.FC<Props> = ({ units, expandedUnit, setExpande
                     {unitGroup.unit}
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    {unitGroup.questions.length} unique questions detected
+                    {unitGroup.topics.reduce((sum, t) => sum + t.questions.length, 0)} unique questions detected across {unitGroup.topics.length} topics
                   </p>
                 </div>
               </div>
@@ -54,9 +54,23 @@ export const UnitAccordion: React.FC<Props> = ({ units, expandedUnit, setExpande
 
             {isExpanded && (
               <div className="px-5 pb-5 pt-2 border-t border-gray-800/50">
-                <div className="space-y-4 mt-4">
-                  {unitGroup.questions.map((q, idx) => (
-                    <QuestionCard key={idx} question={q} />
+                <div className="space-y-6 mt-4">
+                  {unitGroup.topics.map((topicGroup, tIdx) => (
+                    <div key={tIdx} className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-px bg-gray-700 flex-grow"></div>
+                        <h4 className="text-md font-bold text-gray-300 px-3 py-1 bg-gray-800/50 rounded-md border border-gray-700">
+                          Topic: {topicGroup.topic}
+                        </h4>
+                        <div className="h-px bg-gray-700 flex-grow"></div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {topicGroup.questions.map((q, idx) => (
+                          <QuestionCard key={idx} question={q} />
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
