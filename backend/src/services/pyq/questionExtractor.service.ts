@@ -34,10 +34,10 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
         { role: "system", content: "You output only strictly valid JSON. You never invent data. You extract perfectly." },
         { role: "user", content: prompt }
       ],
-      model: "llama-3.1-8b-instant",
+      model: "gemma2-9b-it",
       response_format: { type: "json_object" },
       temperature: 0.1,
-      max_tokens: 2500,
+      max_tokens: 1200,
     });
 
     const content = completion.choices[0]?.message?.content;

@@ -61,7 +61,7 @@ Return strictly a JSON object with a "clusters" array.
       model: "llama-3.1-8b-instant",
       response_format: { type: "json_object" },
       temperature: 0.2,
-      max_tokens: 3000,
+      max_tokens: 1500,
     });
 
     const content = completion.choices[0]?.message?.content;
