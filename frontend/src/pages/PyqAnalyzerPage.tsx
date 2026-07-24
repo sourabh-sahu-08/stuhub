@@ -9,6 +9,7 @@ import { OverviewCards } from "../components/pyq-analyzer/v4/OverviewCards";
 import { Filters, SortOption, MinRepetitions } from "../components/pyq-analyzer/v4/Filters";
 import { UnitAccordion } from "../components/pyq-analyzer/v4/UnitAccordion";
 import { HotTopics } from "../components/pyq-analyzer/v4/HotTopics";
+import { PyqAnalyzerLoading } from "../components/pyq-analyzer/v4/PyqAnalyzerLoading";
 import { V4DashboardJSON } from "../types/pyq4";
 
 export function PyqAnalyzerPage() {
@@ -143,23 +144,7 @@ export function PyqAnalyzerPage() {
 
   // Loading screen during AI analysis
   if (analyzing) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="relative">
-          <div className="absolute -inset-4 bg-[#F5A524]/20 blur-xl rounded-full animate-pulse"></div>
-          <div className="bg-[#1C1C1C] border border-[#F5A524]/30 p-6 rounded-2xl relative">
-            <Network className="w-12 h-12 text-[#F5A524] animate-spin duration-3000" />
-          </div>
-        </div>
-        <h2 className="mt-8 text-2xl font-bold text-gray-100">AI is Analyzing Papers</h2>
-        <p className="text-gray-400 mt-2 max-w-md text-center">
-          Extracting text, detecting duplicates via semantic matching, mapping to syllabus units, and clustering variants. This may take up to 30 seconds depending on file sizes.
-        </p>
-        <div className="mt-8 w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
-          <div className="h-full bg-[#F5A524] animate-pulse rounded-full w-full"></div>
-        </div>
-      </div>
-    );
+    return <PyqAnalyzerLoading />;
   }
 
   // Dashboard Results
