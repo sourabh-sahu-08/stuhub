@@ -37,7 +37,7 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
       model: "llama-3.1-8b-instant",
       response_format: { type: "json_object" },
       temperature: 0.1,
-      max_tokens: 4000,
+      max_tokens: 2500,
     });
 
     const content = completion.choices[0]?.message?.content;

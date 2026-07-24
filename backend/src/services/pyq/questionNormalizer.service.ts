@@ -59,7 +59,7 @@ Output strictly as a JSON object:
         model: "llama-3.1-8b-instant",
         response_format: { type: "json_object" },
         temperature: 0.1,
-        max_tokens: 8000,
+        max_tokens: 3000,
       });
 
       const content = completion.choices[0]?.message?.content;
