@@ -14,6 +14,7 @@ export interface ClusterOutput {
 export class ClusteringService {
   static async clusterQuestions(
     syllabusText: string,
+    validUnits: string[],
     questions: RawQuestion[]
   ): Promise<ClusterOutput[]> {
     // We map questions to include an ID so the LLM can reference them easily
@@ -35,8 +36,10 @@ ${JSON.stringify(indexedQuestions, null, 2)}
 INSTRUCTIONS:
 1. Group semantically identical or very similar questions together (even if wording differs, e.g., "Explain BCNF" and "What is Boyce Codd Normal Form?").
 2. Do not rely only on keyword matching. Understand the semantic meaning.
-3. For each cluster, select the BEST, cleanest, and most descriptive wording as the "representativeQuestion" (you can synthesize it from the variants or pick the best one).
-4. Map each cluster to the most appropriate Syllabus Unit and Topic based on the SYLLABUS provided.
+3. For each cluster, select the BEST, cleanest, and most descriptive wording as the "representativeQuestion".
+4. Map each cluster to the most appropriate Syllabus Unit and Topic.
+CRITICAL: The "unit" MUST perfectly match ONE of the following valid units. DO NOT invent or hallucinate unit names.
+VALID UNITS: ${JSON.stringify(validUnits)}
 5. Provide the original question IDs that belong to this cluster. Every question ID must be assigned to exactly one cluster.
 
 OUTPUT FORMAT:
@@ -45,7 +48,7 @@ Return strictly a JSON object with a "clusters" array.
   "clusters": [
     {
       "representativeQuestion": "Explain BCNF with suitable example.",
-      "unit": "Unit 3",
+      "unit": "${validUnits.length > 0 ? validUnits[0] : "Unit 1"}",
       "topic": "Normalization",
       "questionIds": [0, 5, 12, 18]
     }

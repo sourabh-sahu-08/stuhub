@@ -9,6 +9,7 @@ import { OverviewCards } from "../components/pyq-analyzer/v4/OverviewCards";
 import { Filters, SortOption, MinRepetitions } from "../components/pyq-analyzer/v4/Filters";
 import { UnitAccordion } from "../components/pyq-analyzer/v4/UnitAccordion";
 import { HotTopics } from "../components/pyq-analyzer/v4/HotTopics";
+import { DeepInsights } from "../components/pyq-analyzer/v4/DeepInsights";
 import { PyqAnalyzerLoading } from "../components/pyq-analyzer/v4/PyqAnalyzerLoading";
 import { V4DashboardJSON } from "../types/pyq4";
 
@@ -181,7 +182,13 @@ export function PyqAnalyzerPage() {
           <OverviewCards data={analysisResult.overview} />
           
           {analysisResult.hotTopics && analysisResult.hotTopics.length > 0 && (
-            <HotTopics hotTopics={analysisResult.hotTopics} />
+            <>
+              {/* Deep Insights & Strategy */}
+              <DeepInsights data={analysisResult} />
+
+              {/* Global Hot Topics */}
+              <HotTopics hotTopics={analysisResult.hotTopics} />
+            </>
           )}
 
           <div className="pt-4">
