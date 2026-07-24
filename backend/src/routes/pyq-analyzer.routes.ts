@@ -199,6 +199,7 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       let highestFreq = 0;
 
       const unitCounts = new Map<string, number>();
+      const topicCounts = new Map<string, { unit: string; frequency: number }>();
 
       for (const cluster of clusters) {
         if (!cluster) continue;
@@ -259,6 +260,10 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
         });
         
         unitCounts.set(unitName, (unitCounts.get(unitName) || 0) + freq);
+        
+        const currentTopic = topicCounts.get(cluster.topic || "General") || { unit: unitName, frequency: 0 };
+        currentTopic.frequency += freq;
+        topicCounts.set(cluster.topic || "General", currentTopic);
       }
 
       const mostImportantUnit = Array.from(unitCounts.entries())
@@ -268,6 +273,11 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       unitsArray.forEach(u => {
         u.questions.sort((a, b) => b.frequency - a.frequency);
       });
+
+      const hotTopics = Array.from(topicCounts.entries())
+        .map(([topic, data]) => ({ topic, unit: data.unit, frequency: data.frequency }))
+        .sort((a, b) => b.frequency - a.frequency)
+        .slice(0, 10);
 
       const dashboardJson: V4DashboardJSON = {
         overview: {
@@ -279,6 +289,7 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
           mostImportantUnit,
         },
         filters: {},
+        hotTopics,
         units: unitsArray
       };
 

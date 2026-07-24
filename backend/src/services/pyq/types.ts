@@ -94,6 +94,12 @@ export interface V4UnitGroup {
   questions: V4QuestionCard[];
 }
 
+export interface V4HotTopic {
+  topic: string;
+  unit: string;
+  frequency: number;
+}
+
 export interface V4DashboardJSON {
   overview: {
     papersAnalyzed: number;
@@ -103,6 +109,7 @@ export interface V4DashboardJSON {
     mostRepeatedQuestion: string;
     mostImportantUnit: string;
   };
-  filters: Record<string, any>;
+  filters: any;
+  hotTopics?: V4HotTopic[];
   units: V4UnitGroup[];
 }

@@ -8,6 +8,7 @@ import { PyqAnalyzerUpload } from "../components/pyq-analyzer/PyqAnalyzerUpload"
 import { OverviewCards } from "../components/pyq-analyzer/v4/OverviewCards";
 import { Filters, SortOption, MinRepetitions } from "../components/pyq-analyzer/v4/Filters";
 import { UnitAccordion } from "../components/pyq-analyzer/v4/UnitAccordion";
+import { HotTopics } from "../components/pyq-analyzer/v4/HotTopics";
 import { V4DashboardJSON } from "../types/pyq4";
 
 export function PyqAnalyzerPage() {
@@ -186,6 +187,10 @@ export function PyqAnalyzerPage() {
         <div className="space-y-8">
           <OverviewCards data={analysisResult.overview} />
           
+          {analysisResult.hotTopics && analysisResult.hotTopics.length > 0 && (
+            <HotTopics hotTopics={analysisResult.hotTopics} />
+          )}
+
           <div className="pt-4">
             <h2 className="text-xl font-bold text-gray-100 mb-6 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-[#F5A524]" />
@@ -314,7 +319,10 @@ export function PyqAnalyzerPage() {
       </div>
 
       <div className="bg-[#1C1C1C] border border-gray-800 rounded-xl p-6 sm:p-8 shadow-xl">
-        <PyqAnalyzerUpload onAnalyze={handleAnalyze} isLoading={loading} error={error} />
+        <PyqAnalyzerUpload 
+          onAnalyze={handleAnalyze}
+          loading={loading}
+        />
       </div>
     </div>
   );
