@@ -201,23 +201,31 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       const unitCounts = new Map<string, number>();
 
       for (const cluster of clusters) {
-        const clusterRawQuestions = cluster.questionIds
+        if (!cluster) continue;
+        const qIds = Array.isArray(cluster.questionIds) ? cluster.questionIds : [];
+        const clusterRawQuestions = qIds
           .map(id => allRawQuestions[id])
           .filter(Boolean); 
 
         if (clusterRawQuestions.length === 0) continue;
 
+        const repQuestion = cluster.representativeQuestion || clusterRawQuestions[0]?.rawQuestion || "Unknown Question";
+
         let confidence = 100;
         if (clusterRawQuestions.length > 1) {
           const rawTexts = clusterRawQuestions.map(q => q.rawQuestion);
-          const matches = stringSimilarity.findBestMatch(cluster.representativeQuestion, rawTexts);
-          const avgRating = matches.ratings.reduce((acc, curr) => acc + curr.rating, 0) / rawTexts.length;
-          confidence = Math.round(avgRating * 100);
-          confidence = Math.max(70, Math.min(100, confidence));
+          try {
+            const matches = stringSimilarity.findBestMatch(repQuestion, rawTexts);
+            const avgRating = matches.ratings.reduce((acc, curr) => acc + curr.rating, 0) / rawTexts.length;
+            confidence = Math.round(avgRating * 100);
+            confidence = Math.max(70, Math.min(100, confidence));
+          } catch(e) {
+            confidence = 85; // Fallback if string similarity crashes
+          }
         }
 
         const allTexts = Array.from(new Set(clusterRawQuestions.map(q => q.rawQuestion)));
-        const variants = allTexts.filter(t => t !== cluster.representativeQuestion);
+        const variants = allTexts.filter(t => t !== repQuestion);
 
         const papersMetadata = clusterRawQuestions.map(q => ({
           year: q.paperYear || "Unknown",
@@ -232,7 +240,7 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
 
         if (freq > highestFreq) {
           highestFreq = freq;
-          mostRepeatedQuestion = cluster.representativeQuestion;
+          mostRepeatedQuestion = repQuestion;
         }
 
         const unitName = cluster.unit || "Other";
@@ -242,8 +250,8 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
         }
 
         unitsMap.get(unitName)!.questions.push({
-          question: cluster.representativeQuestion,
-          topic: cluster.topic,
+          question: repQuestion,
+          topic: cluster.topic || "General",
           frequency: freq,
           confidence,
           papers: uniquePapers,
