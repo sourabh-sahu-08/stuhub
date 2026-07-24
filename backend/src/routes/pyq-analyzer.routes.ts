@@ -190,7 +190,8 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       const allYears = Array.from(allYearsSet);
 
       // 3. Multi-Stage Pipeline: V4 Clustering
-      const clusters = await ClusteringService.clusterQuestions(syllabusText, allRawQuestions);
+      const validUnitNames = parsedSyllabusUnits.map(u => u.name);
+      const clusters = await ClusteringService.clusterQuestions(syllabusText, validUnitNames, allRawQuestions);
 
       let totalUnique = clusters.length;
       const unitsMap = new Map<string, V4UnitGroup>();
