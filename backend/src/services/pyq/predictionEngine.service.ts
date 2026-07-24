@@ -73,7 +73,7 @@ Output strictly as a JSON object:
           { role: "system", content: "You output only strictly valid JSON. You never invent data." },
           { role: "user", content: prompt }
         ],
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant",
         response_format: { type: "json_object" },
         temperature: 0.1,
       });

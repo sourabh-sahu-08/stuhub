@@ -58,7 +58,7 @@ Return strictly a JSON object with a "clusters" array.
         { role: "system", content: "You output only strictly valid JSON. You never invent data. You follow instructions perfectly." },
         { role: "user", content: prompt }
       ],
-      model: "llama-3.3-70b-versatile",
+      model: "llama-3.1-8b-instant",
       response_format: { type: "json_object" },
       temperature: 0.2,
       max_tokens: 8000,
