@@ -27,6 +27,7 @@ export function AppShell() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const [toast, setToast] = useState<{
     title: string;
     body: string;
@@ -303,11 +304,12 @@ export function AppShell() {
                   aria-label="Open profile menu"
                 >
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded bg-[#292929] text-xs font-bold uppercase text-[#F5A524]">
-                    {user?.avatar ? (
+                    {user?.avatar && !avatarError ? (
                       <img
                         src={user.avatar}
                         alt={user?.name ?? "User"}
                         className="h-full w-full object-cover"
+                        onError={() => setAvatarError(true)}
                       />
                     ) : (
                       user?.name?.slice(0, 1) ?? "U"
