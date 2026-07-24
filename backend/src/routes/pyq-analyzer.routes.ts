@@ -7,6 +7,7 @@ import { Groq } from "groq-sdk";
 import { env } from "../config/env.js";
 import { QuestionExtractorService } from "../services/pyq/questionExtractor.service.js";
 import { ClusteringService } from "../services/pyq/clustering.service.js";
+import { SyllabusParserService } from "../services/pyq/syllabusParser.service.js";
 import { RawQuestion, V4DashboardJSON, V4UnitGroup } from "../services/pyq/types.js";
 import stringSimilarity from "string-similarity";
 
@@ -150,6 +151,18 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       const syllabusData = await syllabusParser.getText();
       const syllabusText = syllabusData.text.slice(0, SYLLABUS_LIMIT);
 
+      // --- TEMPORARY DEBUG LOGS (DISABLED) ---
+      // console.log("=== PYQ ANALYZER DEBUG: SYLLABUS TEXT ===");
+      // console.log(syllabusText.substring(0, 500) + "... (truncated)");
+      
+      const parsedSyllabusUnits = SyllabusParserService.parseUnits(syllabusText);
+      const detectedUnitCount = parsedSyllabusUnits.length;
+      
+      // console.log("=== PYQ ANALYZER DEBUG: PARSED UNITS ===");
+      // console.log(`Number of parsed units: ${detectedUnitCount}`);
+      // console.log("Unit names:", parsedSyllabusUnits.map(u => u.name));
+      // --- END TEMPORARY DEBUG LOGS ---
+
       // 2. Multi-Stage Pipeline: Extract Questions from each PYQ
       let allRawQuestions: RawQuestion[] = [];
       const allYearsSet = new Set<string>();
@@ -253,13 +266,18 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
           papersAnalyzed: pyqCount,
           totalQuestions: allRawQuestions.length,
           uniqueQuestions: totalUnique,
-          unitsDetected: unitsMap.size,
+          unitsDetected: detectedUnitCount > 0 ? detectedUnitCount : unitsMap.size,
           mostRepeatedQuestion: mostRepeatedQuestion || "N/A",
           mostImportantUnit,
         },
         filters: {},
         units: unitsArray
       };
+
+      // --- TEMPORARY DEBUG LOGS (DISABLED) ---
+      // console.log("=== PYQ ANALYZER DEBUG: FINAL DASHBOARD JSON ===");
+      // console.log(`Units Detected Value Used: ${dashboardJson.overview.unitsDetected}`);
+      // --- END TEMPORARY DEBUG LOGS ---
 
       return res.status(200).json(dashboardJson);
     } catch (error: any) {
