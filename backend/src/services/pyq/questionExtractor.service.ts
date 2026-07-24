@@ -19,6 +19,7 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
   "questions": [
     {
       "paperYear": "2024", // Extract from text or filename, string, or null
+      "exam": "End Semester", // Extract from text (e.g. End Semester, Mid Semester, Supplementary), string, or null
       "questionNumber": "Q1(a)", // String, or null
       "rawQuestion": "The exact wording of the question", // String, required
       "marks": 5, // Number, or null if not found

@@ -6,13 +6,9 @@ import { PDFParse } from "pdf-parse";
 import { Groq } from "groq-sdk";
 import { env } from "../config/env.js";
 import { QuestionExtractorService } from "../services/pyq/questionExtractor.service.js";
-import { QuestionNormalizerService } from "../services/pyq/questionNormalizer.service.js";
-import { DuplicateDetectorService } from "../services/pyq/duplicateDetector.service.js";
-import { FrequencyAnalyzerService } from "../services/pyq/frequencyAnalyzer.service.js";
-import { UnitAnalyzerService } from "../services/pyq/unitAnalyzer.service.js";
-import { TimelineGeneratorService } from "../services/pyq/timelineGenerator.service.js";
-import { PredictionEngineService } from "../services/pyq/predictionEngine.service.js";
-import { RawQuestion, DashboardJSON } from "../services/pyq/types.js";
+import { ClusteringService } from "../services/pyq/clustering.service.js";
+import { RawQuestion, V4DashboardJSON, V4UnitGroup } from "../services/pyq/types.js";
+import stringSimilarity from "string-similarity";
 
 const groq = new Groq({
   apiKey: env.GROQ_API_KEY || "dummy",
@@ -180,45 +176,89 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       }
       const allYears = Array.from(allYearsSet);
 
-      // 3. Multi-Stage Pipeline: Normalize Questions
-      const normalizedQuestions = await QuestionNormalizerService.normalize(allRawQuestions, syllabusText);
+      // 3. Multi-Stage Pipeline: V4 Clustering
+      const clusters = await ClusteringService.clusterQuestions(syllabusText, allRawQuestions);
 
-      // 4. Multi-Stage Pipeline: Duplicate Detection & Grouping
-      const topicGroups = DuplicateDetectorService.detectAndGroup(normalizedQuestions);
-
-      // 5. Deterministic Analytics
-      const frequentlyAskedTopics = FrequencyAnalyzerService.getTopicsByUnit(topicGroups);
-      const frequentlyAskedQuestions = FrequencyAnalyzerService.getTopQuestions(normalizedQuestions, 6);
-      const unitWeightage = UnitAnalyzerService.calculateWeightage(topicGroups);
-      const questionTimeline = TimelineGeneratorService.generate(topicGroups, allYears, 10);
+      let totalUnique = clusters.length;
+      const unitsMap = new Map<string, V4UnitGroup>();
       
-      // 6. Hybrid Analytics (Algorithm + LLM)
-      const futurePredictions = await PredictionEngineService.predict(topicGroups, allYears, 15);
+      let mostRepeatedQuestion = "";
+      let highestFreq = 0;
 
-      // 7. Calculate Overall Analysis Stats
-      const totalQuestions = allRawQuestions.length;
-      const uniqueQuestions = new Set(normalizedQuestions.map(q => q.normalizedQuestion.toLowerCase().trim())).size;
-      const mostRepeatedTopicObj = topicGroups[0];
-      const mostRepeatedQuestionObj = frequentlyAskedQuestions[0];
-      const mostImportantUnitObj = unitWeightage[0];
+      const unitCounts = new Map<string, number>();
 
-      // 8. Assemble Dashboard JSON
-      const dashboardJson: DashboardJSON = {
-        overallAnalysis: {
-          totalPapers: pyqCount,
-          totalQuestions,
-          uniqueQuestions,
-          repeatedQuestions: totalQuestions - uniqueQuestions,
-          mostRepeatedQuestion: mostRepeatedQuestionObj ? mostRepeatedQuestionObj.question : "N/A",
-          mostRepeatedTopic: mostRepeatedTopicObj ? mostRepeatedTopicObj.topic : "N/A",
-          mostImportantUnit: mostImportantUnitObj ? mostImportantUnitObj.unit : "N/A",
+      for (const cluster of clusters) {
+        const clusterRawQuestions = cluster.questionIds
+          .map(id => allRawQuestions[id])
+          .filter(Boolean); 
+
+        if (clusterRawQuestions.length === 0) continue;
+
+        let confidence = 100;
+        if (clusterRawQuestions.length > 1) {
+          const rawTexts = clusterRawQuestions.map(q => q.rawQuestion);
+          const matches = stringSimilarity.findBestMatch(cluster.representativeQuestion, rawTexts);
+          const avgRating = matches.ratings.reduce((acc, curr) => acc + curr.rating, 0) / rawTexts.length;
+          confidence = Math.round(avgRating * 100);
+          confidence = Math.max(70, Math.min(100, confidence));
+        }
+
+        const allTexts = Array.from(new Set(clusterRawQuestions.map(q => q.rawQuestion)));
+        const variants = allTexts.filter(t => t !== cluster.representativeQuestion);
+
+        const papersMetadata = clusterRawQuestions.map(q => ({
+          year: q.paperYear || "Unknown",
+          exam: q.exam || "Unknown"
+        }));
+
+        const uniquePapers = Array.from(new Map(
+          papersMetadata.map(p => [`${p.year}-${p.exam}`, p])
+        ).values());
+
+        const freq = clusterRawQuestions.length;
+
+        if (freq > highestFreq) {
+          highestFreq = freq;
+          mostRepeatedQuestion = cluster.representativeQuestion;
+        }
+
+        const unitName = cluster.unit || "Other";
+        if (!unitsMap.has(unitName)) {
+          unitsMap.set(unitName, { unit: unitName, questions: [] });
+          unitCounts.set(unitName, 0);
+        }
+
+        unitsMap.get(unitName)!.questions.push({
+          question: cluster.representativeQuestion,
+          topic: cluster.topic,
+          frequency: freq,
+          confidence,
+          papers: uniquePapers,
+          variants
+        });
+        
+        unitCounts.set(unitName, (unitCounts.get(unitName) || 0) + freq);
+      }
+
+      const mostImportantUnit = Array.from(unitCounts.entries())
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || "Unknown";
+
+      const unitsArray = Array.from(unitsMap.values());
+      unitsArray.forEach(u => {
+        u.questions.sort((a, b) => b.frequency - a.frequency);
+      });
+
+      const dashboardJson: V4DashboardJSON = {
+        overview: {
+          papersAnalyzed: pyqCount,
+          totalQuestions: allRawQuestions.length,
+          uniqueQuestions: totalUnique,
+          unitsDetected: unitsMap.size,
+          mostRepeatedQuestion: mostRepeatedQuestion || "N/A",
+          mostImportantUnit,
         },
-        unitWeightage,
-        frequentlyAskedTopics,
-        frequentlyAskedQuestions,
-        questionTimeline,
-        futurePredictions,
-        allQuestions: normalizedQuestions
+        filters: {},
+        units: unitsArray
       };
 
       return res.status(200).json(dashboardJson);

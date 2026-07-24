@@ -1,18 +1,14 @@
-import React, { useState } from "react";
-import { ArrowLeft, RefreshCw, ShieldAlert, Network, Sparkles, BarChart2, BookOpen, Target, Brain, Layers, Clock, Sigma, MoonStar, Zap, TrendingUp, Trophy, FileText } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { ArrowLeft, RefreshCw, ShieldAlert, Network, Sparkles, BookOpen, Brain, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { PyqAnalyzerUpload } from "../components/pyq-analyzer/PyqAnalyzerUpload";
-import { motion, AnimatePresence } from "framer-motion";
 
-// V3 Components
-import { OverallAnalysis } from "../components/pyq-analyzer/v3/OverallAnalysis";
-import { UnitWeightage } from "../components/pyq-analyzer/v3/UnitWeightage";
-import { FrequentlyAskedTopics } from "../components/pyq-analyzer/v3/FrequentlyAskedTopics";
-import { FrequentlyAskedQuestions } from "../components/pyq-analyzer/v3/FrequentlyAskedQuestions";
-import { QuestionTimeline } from "../components/pyq-analyzer/v3/QuestionTimeline";
-import { FuturePredictions } from "../components/pyq-analyzer/v3/FuturePredictions";
-import { SearchAndFilter } from "../components/pyq-analyzer/v3/SearchAndFilter";
+// V4 Components
+import { OverviewCards } from "../components/pyq-analyzer/v4/OverviewCards";
+import { Filters, SortOption, MinRepetitions } from "../components/pyq-analyzer/v4/Filters";
+import { UnitAccordion } from "../components/pyq-analyzer/v4/UnitAccordion";
+import { V4DashboardJSON } from "../types/pyq4";
 
 export function PyqAnalyzerPage() {
   const [loading, setLoading] = useState(false);
@@ -21,27 +17,15 @@ export function PyqAnalyzerPage() {
   const [currentFormData, setCurrentFormData] = useState<FormData | null>(null);
 
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<V4DashboardJSON | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [generatedAt, setGeneratedAt] = useState("");
-  const [activeTab, setActiveTab] = useState("overview");
 
-  // Health-check
-  const [healthStatus, setHealthStatus] = useState<string | null>(null);
-  const [checkingHealth, setCheckingHealth] = useState(false);
-
-  const checkDevHealth = async () => {
-    setCheckingHealth(true);
-    setHealthStatus(null);
-    try {
-      const response = await api.get("/pyq-analyzer/health");
-      setHealthStatus(`SUCCESS: ${response.data.message}`);
-    } catch (err: any) {
-      setHealthStatus(`FAILED: ${err.response?.data?.message || "Could not reach endpoint."}`);
-    } finally {
-      setCheckingHealth(false);
-    }
-  };
+  // V4 States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [minRepetitions, setMinRepetitions] = useState<MinRepetitions>("all");
+  const [sortBy, setSortBy] = useState<SortOption>("highest");
+  const [expandedUnit, setExpandedUnit] = useState<string | null>(null);
 
   const handleAnalyze = async (data: { subject: string; branch: string; semester: number; syllabus: File; pyqs: File[] }) => {
     setLoading(true);
@@ -79,7 +63,6 @@ export function PyqAnalyzerPage() {
       });
       setAnalysisResult(response.data);
       setGeneratedAt(new Date().toLocaleTimeString());
-      setActiveTab("overview");
     } catch (err: any) {
       setAnalysisError(err.response?.data?.message || "AI Analysis failed. Please try again.");
     } finally {
@@ -93,145 +76,246 @@ export function PyqAnalyzerPage() {
     setCurrentFormData(null);
     setAnalysisResult(null);
     setAnalysisError(null);
-    setActiveTab("overview");
+    setSearchTerm("");
+    setMinRepetitions("all");
+    setSortBy("highest");
+    setExpandedUnit(null);
   };
+
+  // V4 Filter Logic
+  const filteredUnits = useMemo(() => {
+    if (!analysisResult) return [];
+
+    let result = JSON.parse(JSON.stringify(analysisResult.units)) as V4DashboardJSON["units"];
+
+    // 1. Min Repetitions
+    if (minRepetitions !== "all") {
+      const min = parseInt(minRepetitions);
+      result.forEach(u => {
+        u.questions = u.questions.filter(q => q.frequency >= min);
+      });
+    }
+
+    // 2. Search Term
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result.forEach(u => {
+        u.questions = u.questions.filter(q => 
+          q.question.toLowerCase().includes(term) || 
+          q.topic.toLowerCase().includes(term) ||
+          q.variants.some(v => v.toLowerCase().includes(term))
+        );
+      });
+    }
+
+    // 3. Remove empty units
+    result = result.filter(u => u.questions.length > 0);
+
+    // 4. Sort
+    result.forEach(u => {
+      u.questions.sort((a, b) => {
+        if (sortBy === "highest") {
+          return b.frequency - a.frequency;
+        } else if (sortBy === "alphabetical") {
+          return a.question.localeCompare(b.question);
+        } else if (sortBy === "recent") {
+          // just taking highest year
+          const maxYearA = Math.max(...a.papers.map(p => Number(p.year) || 0));
+          const maxYearB = Math.max(...b.papers.map(p => Number(p.year) || 0));
+          return maxYearB - maxYearA;
+        }
+        return 0;
+      });
+    });
+
+    return result;
+  }, [analysisResult, searchTerm, minRepetitions, sortBy]);
+
 
   // Loading screen during AI analysis
   if (analyzing) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center min-h-[60vh]">
         <div className="relative">
-          <div className="w-20 h-20 rounded-full border-4 border-[#FF9000]/20 border-t-[#FF9000] animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Brain size={24} className="text-[#FF9000]" />
+          <div className="absolute -inset-4 bg-[#F5A524]/20 blur-xl rounded-full animate-pulse"></div>
+          <div className="bg-[#1C1C1C] border border-[#F5A524]/30 p-6 rounded-2xl relative">
+            <Network className="w-12 h-12 text-[#F5A524] animate-spin duration-3000" />
           </div>
         </div>
-        <div className="text-center space-y-2">
-          <h3 className="text-lg font-bold text-white">AI Exam Intelligence Engine Running</h3>
-          <p className="text-sm text-zinc-500 max-w-xs text-center">Extracting every question, computing patterns, predicting the next paper… This may take 20–40 seconds.</p>
-        </div>
-        <div className="flex flex-col gap-2 w-64">
-          {["Reading past papers", "Identifying question patterns", "Computing unit weightages", "Detecting repeated questions", "Predicting exam questions", "Generating study plan"].map((step, i) => (
-            <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.8 }} className="flex items-center gap-2 text-xs text-zinc-600 font-mono">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: i * 0.8 + 0.3 }}
-                className="w-1.5 h-1.5 rounded-full bg-[#FF9000]"
-              />
-              {step}
-            </motion.div>
-          ))}
+        <h2 className="mt-8 text-2xl font-bold text-gray-100">AI is Analyzing Papers</h2>
+        <p className="text-gray-400 mt-2 max-w-md text-center">
+          Extracting text, detecting duplicates via semantic matching, mapping to syllabus units, and clustering variants. This may take up to 30 seconds depending on file sizes.
+        </p>
+        <div className="mt-8 w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-full bg-[#F5A524] animate-pulse rounded-full w-full"></div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Top bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-zinc-600 hover:text-white transition-colors font-mono">
-          <ArrowLeft size={14} /> BACK TO DASHBOARD
-        </Link>
-        <div className="flex items-center gap-3">
-          {healthStatus && (
-            <span className={`text-[10px] font-mono px-2.5 py-1 rounded border ${healthStatus.startsWith("SUCCESS") ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400"}`}>
-              {healthStatus}
-            </span>
-          )}
-          <button onClick={checkDevHealth} disabled={checkingHealth} className="flex items-center gap-1.5 rounded border border-white/10 bg-white/4 px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-white transition-all cursor-pointer font-mono">
-            <Network size={12} className={checkingHealth ? "animate-spin text-[#FF9000]" : ""} />
-            {checkingHealth ? "CHECKING..." : "TEST API"}
+  // Dashboard Results
+  if (analysisResult) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <Link to="/tools" className="p-2 hover:bg-[#292929] rounded-lg transition-colors text-gray-400">
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <h1 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-[#F5A524]" />
+                PYQ Analysis Dashboard
+              </h1>
+            </div>
+            <p className="text-sm text-gray-500 mt-2 ml-12">
+              Generated at {generatedAt} • Deterministic Semantic Pipeline
+            </p>
+          </div>
+          <button
+            onClick={handleReset}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg transition-colors font-medium border border-gray-700"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Analyze Another Set
           </button>
-          {analysisResult && (
-            <button onClick={handleReset} className="flex items-center gap-1.5 rounded border border-white/10 bg-white/4 px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-white transition-all cursor-pointer font-mono">
-              <RefreshCw size={12} /> NEW ANALYSIS
-            </button>
-          )}
+        </div>
+
+        {/* Dashboard Content */}
+        <div className="space-y-8">
+          <OverviewCards data={analysisResult.overview} />
+          
+          <div className="pt-4">
+            <h2 className="text-xl font-bold text-gray-100 mb-6 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-[#F5A524]" />
+              Unit Wise Analysis
+            </h2>
+            
+            <Filters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              minRepetitions={minRepetitions}
+              setMinRepetitions={setMinRepetitions}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+            />
+
+            <UnitAccordion
+              units={filteredUnits}
+              expandedUnit={expandedUnit}
+              setExpandedUnit={setExpandedUnit}
+            />
+          </div>
         </div>
       </div>
+    );
+  }
 
-      <AnimatePresence mode="wait">
-        {/* Phase 1: Upload */}
-        {!validationResult ? (
-          <motion.div key="uploader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            {error && (
-              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs flex items-start gap-2 max-w-3xl mx-auto">
-                <ShieldAlert size={16} className="shrink-0 mt-0.5" />
-                <div><h4 className="font-bold">Validation Error</h4><p className="mt-1">{error}</p></div>
-              </div>
-            )}
-            <div className="rounded-2xl border border-white/8 bg-[#0a0a0f] p-6 md:p-10">
-              <PyqAnalyzerUpload onAnalyze={handleAnalyze} loading={loading} />
+  // Validation Preview
+  if (validationResult) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-[#1C1C1C] border border-[#F5A524]/30 rounded-2xl p-8 relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#F5A524]/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+          
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
+              <ShieldAlert className="w-6 h-6 text-emerald-400" />
             </div>
-          </motion.div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-100">Files Validated Successfully</h2>
+              <p className="text-gray-400 mt-1">Ready for AI processing</p>
+            </div>
+          </div>
 
-        ) : !analysisResult ? (
-          /* Phase 2: Confirmed - start analysis */
-          <motion.div key="confirmed" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="max-w-2xl mx-auto space-y-6">
-            <div className="rounded-2xl border border-white/8 bg-[#0a0a0f] p-8 space-y-6">
-              <div className="text-center space-y-3">
-                <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <Sparkles size={28} className="text-emerald-400" />
-                </div>
-                <h3 className="text-xl font-extrabold text-white">Files Validated ✓</h3>
-                <p className="text-xs text-zinc-500">{validationResult?.pyqs?.length} papers ready for AI Exam Intelligence Analysis</p>
+          <div className="space-y-6 bg-[#141414] rounded-xl p-6 border border-gray-800">
+            <div className="grid grid-cols-2 gap-4 pb-6 border-b border-gray-800">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Subject</p>
+                <p className="font-medium text-gray-200">{validationResult.subject}</p>
               </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Branch / Sem</p>
+                <p className="font-medium text-gray-200">{validationResult.branch} - Sem {validationResult.semester}</p>
+              </div>
+            </div>
 
-              <div className="grid grid-cols-3 gap-3 text-center">
-                {[["Subject", validationResult?.subject], ["Branch", validationResult?.branch], ["Semester", `Sem ${validationResult?.semester}`]].map(([k, v]) => (
-                  <div key={k} className="bg-white/4 border border-white/8 rounded-xl p-3">
-                    <div className="text-[9px] text-zinc-600 font-mono uppercase">{k}</div>
-                    <div className="text-sm font-bold text-white mt-0.5 truncate">{v}</div>
+            <div>
+              <p className="text-sm text-gray-500 mb-3 flex items-center gap-2">
+                <BookOpen className="w-4 h-4" /> Syllabus PDF
+              </p>
+              <div className="bg-[#1C1C1C] p-3 rounded border border-gray-800 flex justify-between items-center text-sm">
+                <span className="text-gray-300 font-medium">{validationResult.syllabus.fileName}</span>
+                <span className="text-gray-500">{(validationResult.syllabus.fileSize / 1024).toFixed(0)} KB</span>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500 mb-3 flex items-center gap-2">
+                <Layers className="w-4 h-4" /> PYQ PDFs ({validationResult.pyqs.length})
+              </p>
+              <div className="space-y-2">
+                {validationResult.pyqs.map((f: any, i: number) => (
+                  <div key={i} className="bg-[#1C1C1C] p-3 rounded border border-gray-800 flex justify-between items-center text-sm">
+                    <span className="text-gray-300 truncate pr-4">{f.fileName}</span>
+                    <span className="text-gray-500 shrink-0">{(f.fileSize / 1024).toFixed(0)} KB</span>
                   </div>
                 ))}
               </div>
-
-              {analysisError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs">{analysisError}</div>
-              )}
-
-              <div className="flex gap-3 justify-center pt-2">
-                <button onClick={handleReset} className="flex items-center gap-2 rounded-xl border border-white/10 px-5 h-11 text-xs font-bold text-zinc-400 hover:text-white transition-all cursor-pointer">
-                  <RefreshCw size={14} /> Start Over
-                </button>
-                <button onClick={startAnalysis} className="flex items-center gap-2 rounded-xl bg-[#FF9000] text-black px-6 h-11 text-xs font-black hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-[#FF9000]/20">
-                  <Brain size={16} /> Run AI Analysis
-                </button>
-              </div>
             </div>
-          </motion.div>
+          </div>
 
-        ) : (
-          /* Phase 3: Full V3 Linear Dashboard */
-          <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 max-w-5xl mx-auto pb-20">
-            {/* Header info */}
-            <div className="flex justify-between items-center bg-[#111] p-6 rounded-xl border border-gray-800">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-100">{validationResult?.subject}</h2>
-                <p className="text-gray-400 mt-1">{validationResult?.branch} • Semester {validationResult?.semester}</p>
-              </div>
-              <div className="text-right">
-                <span className="text-sm bg-[#FF9000]/10 text-[#FF9000] px-3 py-1.5 rounded-lg border border-[#FF9000]/20 font-mono">
-                  {validationResult?.pyqs?.length} Papers Analyzed
-                </span>
-              </div>
+          {analysisError && (
+            <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-red-400 font-medium text-sm flex items-start gap-2">
+                <ShieldAlert className="w-5 h-5 shrink-0" />
+                {analysisError}
+              </p>
             </div>
+          )}
 
-            {/* 7-Section Architecture */}
-            <OverallAnalysis data={analysisResult.overallAnalysis} />
-            <UnitWeightage data={analysisResult.unitWeightage} />
-            <FrequentlyAskedTopics data={analysisResult.frequentlyAskedTopics} />
-            <FrequentlyAskedQuestions data={analysisResult.frequentlyAskedQuestions} />
-            <QuestionTimeline data={analysisResult.questionTimeline} />
-            <FuturePredictions data={analysisResult.futurePredictions} />
-            <SearchAndFilter data={analysisResult.allQuestions} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div className="mt-8 flex gap-4">
+            <button
+              onClick={handleReset}
+              className="flex-1 py-3 px-4 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={startAnalysis}
+              className="flex-[2] py-3 px-4 bg-[#F5A524] hover:bg-[#d98f1d] text-[#141414] rounded-lg transition-colors font-bold flex items-center justify-center gap-2"
+            >
+              <Brain className="w-5 h-5" />
+              Begin AI Analysis
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default Upload Screen
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mb-8 flex items-center gap-4">
+        <Link to="/tools" className="p-2 hover:bg-[#292929] rounded-lg transition-colors text-gray-400">
+          <ArrowLeft className="w-6 h-6" />
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-100 flex items-center gap-2">
+            <Sparkles className="w-8 h-8 text-[#F5A524]" />
+            PYQ Analyzer
+          </h1>
+          <p className="text-gray-400 mt-2 max-w-2xl">
+            Upload your syllabus and 3-10 previous year papers. Our AI will group semantically identical questions and present them in a clean unit-wise accordion.
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-[#1C1C1C] border border-gray-800 rounded-xl p-6 sm:p-8 shadow-xl">
+        <PyqAnalyzerUpload onAnalyze={handleAnalyze} isLoading={loading} error={error} />
+      </div>
     </div>
   );
 }
-
-export default PyqAnalyzerPage;
