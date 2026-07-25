@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { api } from "../../lib/api";
+import { Eye, Download, Trash2, Plus, X, FileText, BookOpen, Clock, CheckCircle } from "lucide-react";
 
 interface Note { _id: string; title: string; subject: string; branch: string; semester: number; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; }
 interface Pyq  { _id: string; paperName: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; }
@@ -23,7 +24,6 @@ export function AdminContent() {
 
   const [formData, setFormData] = useState({
     title: "",
-    unitNo: "",
     subject: "",
     semester: "1",
     syllabus: "new",
@@ -58,8 +58,7 @@ export function AdminContent() {
     e.preventDefault();
     setUploadLoading(true);
     try {
-      const prefix = uploadType === "ct-pyq" ? "CT" : "Unit";
-      const finalTitle = formData.unitNo.trim() ? `${prefix} ${formData.unitNo.trim()} - ${formData.title.trim()}` : formData.title.trim();
+      const finalTitle = formData.title.trim();
 
       if (uploadMethod === "link") {
         if (uploadType === "note") {
@@ -120,7 +119,7 @@ export function AdminContent() {
       }
       
       setShowUpload(false);
-      setFormData({ title: "", unitNo: "", subject: "", semester: "1", syllabus: "new", branch: "CSE", driveUrl: "" });
+      setFormData({ title: "", subject: "", semester: "1", syllabus: "new", branch: "CSE", driveUrl: "" });
       setFile(null);
       loadContent();
     } catch (error) {
@@ -190,63 +189,83 @@ export function AdminContent() {
   }
 
   const renderTable = (items: any[], type: "notes"|"pyqs"|"ct-pyqs"|"assignments") => (
-    <table className="w-full text-left text-sm text-zinc-400">
-      <thead className="bg-[#0f0f0f] text-xs uppercase border-b border-[#1f1f1f]">
-        <tr>
-          <th className="px-4 py-3 font-medium">Title</th>
-          <th className="px-4 py-3 font-medium">Subject</th>
-          <th className="px-4 py-3 font-medium">Semester</th>
-          <th className="px-4 py-3 font-medium">Uploader</th>
-          <th className="px-4 py-3 font-medium text-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-[#1a1a1a]">
-        {items.map(item => (
-          <tr key={item._id} className="hover:bg-[#0f0f0f] transition-colors">
-            <td className="px-4 py-3 font-medium text-white">{item.title || item.paperName}</td>
-            <td className="px-4 py-3">{item.subject}</td>
-            <td className="px-4 py-3">Sem {item.semester}</td>
-            <td className="px-4 py-3">{item.user?.name || item.uploadedBy?.name || "Unknown"}</td>
-            <td className="px-4 py-3 text-right">
-              <div className="flex justify-end gap-2">
-                <button onClick={() => handleView(item, type)} className="text-zinc-400 hover:text-[#FF9000] p-1.5 rounded transition-colors" title="View">
-                  <span className="material-symbols-outlined text-[18px]">visibility</span>
-                </button>
-                <button onClick={() => handleDownload(item, type)} className="text-zinc-400 hover:text-[#FF9000] p-1.5 rounded transition-colors" title="Download">
-                  <span className="material-symbols-outlined text-[18px]">download</span>
-                </button>
-                <button onClick={() => deleteItem(item._id, type, item.title || item.paperName)} className="text-zinc-400 hover:text-red-500 hover:bg-red-500/10 p-1.5 rounded transition-colors" title="Delete">
-                  <span className="material-symbols-outlined text-[18px]">delete</span>
-                </button>
-              </div>
-            </td>
+    <div className="overflow-x-auto">
+      <table className="w-full text-left text-sm text-zinc-400 border-collapse">
+        <thead className="bg-[#111] text-xs uppercase border-b border-[#222]">
+          <tr>
+            <th className="px-5 py-4 font-semibold text-zinc-300">Title</th>
+            <th className="px-5 py-4 font-semibold text-zinc-300">Subject</th>
+            <th className="px-5 py-4 font-semibold text-zinc-300">Semester</th>
+            <th className="px-5 py-4 font-semibold text-zinc-300">Uploader</th>
+            <th className="px-5 py-4 font-semibold text-zinc-300 text-right">Actions</th>
           </tr>
-        ))}
-        {items.length === 0 && (
-          <tr><td colSpan={5} className="px-4 py-8 text-center text-zinc-500">No {type.replace("-", " ")} found.</td></tr>
-        )}
-      </tbody>
-    </table>
+        </thead>
+        <tbody className="divide-y divide-[#222]">
+          {items.map(item => (
+            <tr key={item._id} className="hover:bg-[#111] transition-colors group">
+              <td className="px-5 py-4 font-medium text-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#FF9000]/10 flex items-center justify-center text-[#FF9000] shrink-0">
+                    <FileText size={14} />
+                  </div>
+                  {item.title || item.paperName}
+                </div>
+              </td>
+              <td className="px-5 py-4 text-zinc-400">{item.subject}</td>
+              <td className="px-5 py-4">
+                <span className="bg-[#222] text-zinc-300 px-2.5 py-1 rounded-md text-xs font-medium border border-[#333]">
+                  Sem {item.semester}
+                </span>
+              </td>
+              <td className="px-5 py-4 text-zinc-400">{item.user?.name || item.uploadedBy?.name || "Unknown"}</td>
+              <td className="px-5 py-4 text-right">
+                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => handleView(item, type)} className="text-zinc-500 hover:text-white p-2 rounded-lg hover:bg-[#222] transition-colors" title="View">
+                    <Eye size={16} />
+                  </button>
+                  <button onClick={() => handleDownload(item, type)} className="text-zinc-500 hover:text-[#FF9000] p-2 rounded-lg hover:bg-[#FF9000]/10 transition-colors" title="Download">
+                    <Download size={16} />
+                  </button>
+                  <button onClick={() => deleteItem(item._id, type, item.title || item.paperName)} className="text-zinc-500 hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition-colors" title="Delete">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+          {items.length === 0 && (
+            <tr>
+              <td colSpan={5} className="px-5 py-12 text-center">
+                <div className="flex flex-col items-center justify-center text-zinc-500">
+                  <FileText size={32} className="mb-3 opacity-20" />
+                  <p>No {type === 'assignments' ? 'assignment solutions' : type.replace("-", " ")} found.</p>
+                </div>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Content Management</h1>
-          <p className="text-zinc-400 mt-1">Manage notes, previous year questions, and CT papers uploaded by users.</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Content Management</h1>
+          <p className="text-zinc-400 mt-1">Manage notes, previous year questions, and assignment solutions.</p>
         </div>
         
         <button
           onClick={() => { setUploadType(tab === "notes" ? "note" : tab === "pyqs" ? "pyq" : "ct-pyq"); setShowUpload(true); }}
-          className="bg-[#FF9000] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#E58100] transition-colors flex items-center gap-2"
+          className="bg-[#FF9000] text-black px-4 py-2.5 rounded-lg font-bold text-sm hover:bg-[#E58100] transition-colors flex items-center gap-2 shadow-lg shadow-[#FF9000]/20"
         >
-          <span className="material-symbols-outlined text-[18px]">add</span>
+          <Plus size={18} strokeWidth={3} />
           Add Content
         </button>
       </div>
 
-      <div className="flex items-center gap-1 border-b border-[#1f1f1f]">
+      <div className="flex items-center gap-2 border-b border-[#222]">
         <button
           onClick={() => setTab("notes")}
           className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
@@ -273,15 +292,15 @@ export function AdminContent() {
         </button>
         <button
           onClick={() => setTab("assignments")}
-          className={`flex-1 sm:flex-none px-6 py-3 font-semibold text-sm border-b-2 transition-colors ${
+          className={`flex-1 sm:flex-none px-5 py-3 font-semibold text-sm border-b-2 transition-colors ${
             tab === "assignments" ? "border-[#FF9000] text-[#FF9000]" : "border-transparent text-zinc-500 hover:text-white"
           }`}
         >
-          Assignments
+          Assignment Solutions
         </button>
       </div>
 
-      <div className="rounded-xl border border-[#1f1f1f] overflow-hidden">
+      <div className="rounded-xl border border-[#222] bg-[#0A0A0A] shadow-xl overflow-hidden">
         {tab === "notes" && renderTable(notes, "notes")}
         {tab === "pyqs" && renderTable(pyqs, "pyqs")}
         {tab === "ct-pyqs" && renderTable(ctPyqs, "ct-pyqs")}
@@ -289,121 +308,114 @@ export function AdminContent() {
       </div>
 
       {showUpload && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-2xl w-full max-w-md overflow-hidden">
-            <div className="p-4 border-b border-[#1f1f1f] flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white">
-                Upload {uploadType === "note" ? "Note" : uploadType === "pyq" ? "PYQ" : uploadType === "ct-pyq" ? "CT PYQ" : "Assignment"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-5 border-b border-[#222] flex items-center justify-between">
+              <h2 className="text-lg font-bold text-white tracking-tight">
+                Upload {uploadType === "note" ? "Note" : uploadType === "pyq" ? "PYQ" : uploadType === "ct-pyq" ? "CT PYQ" : "Assignment Solution"}
               </h2>
-              <button onClick={() => setShowUpload(false)} className="text-zinc-500 hover:text-white transition-colors">
-                <span className="material-symbols-outlined">close</span>
+              <button onClick={() => setShowUpload(false)} className="text-zinc-500 hover:text-white transition-colors bg-[#111] p-1.5 rounded-lg hover:bg-[#222]">
+                <X size={18} />
               </button>
             </div>
             
-            <form onSubmit={handleUploadSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleUploadSubmit} className="p-6 space-y-5">
               {/* Type Selection */}
-              <div className="flex bg-[#1a1a1a] rounded-lg p-1 gap-1">
+              <div className="flex bg-[#111] rounded-lg p-1 gap-1 border border-[#222]">
                 <button
                   type="button"
                   onClick={() => setUploadType("note")}
-                  className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${uploadType === "note" ? "bg-[#2a2a2a] text-white" : "text-zinc-500 hover:text-white"}`}
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${uploadType === "note" ? "bg-[#222] text-[#FF9000] shadow" : "text-zinc-500 hover:text-white hover:bg-[#1A1A1A]"}`}
                 >
                   Note
                 </button>
                 <button
                   type="button"
                   onClick={() => setUploadType("pyq")}
-                  className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${uploadType === "pyq" ? "bg-[#2a2a2a] text-white" : "text-zinc-500 hover:text-white"}`}
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${uploadType === "pyq" ? "bg-[#222] text-[#FF9000] shadow" : "text-zinc-500 hover:text-white hover:bg-[#1A1A1A]"}`}
                 >
                   PYQ
                 </button>
                 <button
                   type="button"
                   onClick={() => setUploadType("ct-pyq")}
-                  className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${uploadType === "ct-pyq" ? "bg-[#2a2a2a] text-white" : "text-zinc-500 hover:text-white"}`}
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${uploadType === "ct-pyq" ? "bg-[#222] text-[#FF9000] shadow" : "text-zinc-500 hover:text-white hover:bg-[#1A1A1A]"}`}
                 >
                   CT PYQ
                 </button>
                 <button
                   type="button"
                   onClick={() => setUploadType("assignment")}
-                  className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${uploadType === "assignment" ? "bg-[#2a2a2a] text-white" : "text-zinc-500 hover:text-white"}`}
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${uploadType === "assignment" ? "bg-[#222] text-[#FF9000] shadow" : "text-zinc-500 hover:text-white hover:bg-[#1A1A1A]"}`}
                 >
-                  Assignment
+                  Solution
                 </button>
               </div>
 
-              {/* Upload Method */}
               <div className="flex gap-4 mb-2">
-                <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
-                  <input type="radio" checked={uploadMethod === "link"} onChange={() => setUploadMethod("link")} className="accent-[#FF9000]" />
+                <label className="flex items-center gap-2 text-sm font-medium text-zinc-300 cursor-pointer">
+                  <input type="radio" checked={uploadMethod === "link"} onChange={() => setUploadMethod("link")} className="accent-[#FF9000] w-4 h-4" />
                   Drive Link
                 </label>
-                <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
-                  <input type="radio" checked={uploadMethod === "file"} onChange={() => setUploadMethod("file")} className="accent-[#FF9000]" />
+                <label className="flex items-center gap-2 text-sm font-medium text-zinc-300 cursor-pointer">
+                  <input type="radio" checked={uploadMethod === "file"} onChange={() => setUploadMethod("file")} className="accent-[#FF9000] w-4 h-4" />
                   File Upload
                 </label>
               </div>
 
-              <div className="grid grid-cols-4 gap-4">
-                <div className="col-span-1">
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Unit / CT No</label>
-                  <input type="text" value={formData.unitNo} onChange={e => setFormData({...formData, unitNo: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]" placeholder="e.g. 1" />
-                </div>
-                <div className="col-span-3">
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Title / Paper Name</label>
-                  <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]" placeholder="e.g. Operating Systems" />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Title / Paper Name</label>
+                <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. Operating Systems" />
               </div>
 
               {uploadMethod === "link" ? (
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Google Drive Link</label>
-                  <input required type="url" value={formData.driveUrl} onChange={e => setFormData({...formData, driveUrl: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]" placeholder="https://drive.google.com/..." />
+                  <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Google Drive Link</label>
+                  <input required type="url" value={formData.driveUrl} onChange={e => setFormData({...formData, driveUrl: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="https://drive.google.com/..." />
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Select File (PDF)</label>
+                  <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Select File (PDF)</label>
                   <input 
                     required 
                     type="file" 
                     accept="application/pdf"
                     ref={fileInputRef}
                     onChange={e => setFile(e.target.files?.[0] || null)} 
-                    className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000] file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#FF9000] file:text-black hover:file:bg-[#E58100]" 
+                    className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-[#FF9000] file:text-black hover:file:bg-[#E58100]" 
                   />
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Subject</label>
-                  <input required type="text" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]" placeholder="e.g. Operating Systems" />
+                  <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Subject</label>
+                  <input required type="text" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. Operating Systems" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Branch</label>
-                  <input required type="text" value={formData.branch} onChange={e => setFormData({...formData, branch: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]" placeholder="e.g. IT" />
+                  <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Branch</label>
+                  <input required type="text" value={formData.branch} onChange={e => setFormData({...formData, branch: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. IT" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Semester</label>
-                  <select required value={formData.semester} onChange={e => setFormData({...formData, semester: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]">
+                  <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Semester</label>
+                  <select required value={formData.semester} onChange={e => setFormData({...formData, semester: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors appearance-none">
                     {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Syllabus</label>
-                  <select required value={formData.syllabus} onChange={e => setFormData({...formData, syllabus: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#FF9000]">
+                  <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Syllabus</label>
+                  <select required value={formData.syllabus} onChange={e => setFormData({...formData, syllabus: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors appearance-none">
                     <option value="new">New</option>
                     <option value="old">Old</option>
                   </select>
                 </div>
               </div>
 
-              <button disabled={uploadLoading} type="submit" className="w-full bg-[#FF9000] text-black font-bold py-3 rounded-lg mt-6 hover:bg-[#E58100] transition-colors disabled:opacity-50 flex justify-center items-center gap-2">
-                {uploadLoading && <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>}
+              <button disabled={uploadLoading} type="submit" className="w-full bg-[#FF9000] text-black font-bold py-3 rounded-lg mt-6 hover:bg-[#E58100] transition-colors disabled:opacity-50 flex justify-center items-center gap-2 shadow-lg shadow-[#FF9000]/20">
+                {uploadLoading ? <Clock size={18} className="animate-spin" /> : <CheckCircle size={18} />}
                 {uploadLoading ? "Uploading..." : "Save Content"}
               </button>
             </form>
