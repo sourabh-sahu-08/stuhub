@@ -52,7 +52,7 @@ const BRANCHES = [
   { code: "ELECTRONICS AND TELECOMMUNICATION", name: "Electronics and Telecommunication" }
 ];
 
-export function PyqPage() {
+export function CtPyqPage() {
   const { user } = useAuth();
 
   // Navigation State
@@ -402,9 +402,9 @@ export function PyqPage() {
             ) : subjectOptions.length === 0 && papers.length === 0 ? (
               <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-outline bg-surface p-6 text-center">
                 <AlertCircle size={28} className="text-zinc-500" />
-                <h3 className="mt-3 text-sm font-bold text-zinc-200">No subjects or PYQs found</h3>
+                <h3 className="mt-3 text-sm font-bold text-zinc-200">No subjects or papers found</h3>
                 <p className="mt-1 max-w-xs text-xs text-zinc-500">
-                  No subjects are configured for this semester, and no PYQs are uploaded.
+                  No subjects are configured for this semester, and no past papers are available.
                 </p>
               </div>
             ) : (
@@ -426,7 +426,7 @@ export function PyqPage() {
                       
                       {subjectPapers.length === 0 ? (
                         <div className="rounded-lg border border-dashed border-[#27272D] p-6 text-center text-zinc-500">
-                          <p className="text-sm">No PYQs uploaded for {subject.name} yet.</p>
+                          <p className="text-sm">No past papers available for {subject.name} yet.</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -485,16 +485,14 @@ export function PyqPage() {
                                   >
                                     <Eye size={12} /> View
                                   </button>
-                                  {!paper.driveUrl && (
-                                    <button
-                                      onClick={() =>
-                                        handleDownload(paper._id, paper.fileName, paper.mimeType, paper.driveUrl)
-                                      }
-                                      className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
-                                    >
-                                      <Download size={12} /> Download
-                                    </button>
-                                  )}
+                                  <button
+                                    onClick={() =>
+                                      handleDownload(paper._id, paper.fileName, paper.mimeType, paper.driveUrl)
+                                    }
+                                    className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
+                                  >
+                                    <Download size={12} /> Download
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -570,16 +568,14 @@ export function PyqPage() {
                               >
                                 <Eye size={12} /> View
                               </button>
-                              {!paper.driveUrl && (
-                                <button
-                                  onClick={() =>
-                                    handleDownload(paper._id, paper.fileName, paper.mimeType, paper.driveUrl)
-                                  }
-                                  className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
-                                >
-                                  <Download size={12} /> Download
-                                </button>
-                              )}
+                              <button
+                                onClick={() =>
+                                  handleDownload(paper._id, paper.fileName, paper.mimeType, paper.driveUrl)
+                                }
+                                className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
+                              >
+                                <Download size={12} /> Download
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -596,4 +592,4 @@ export function PyqPage() {
   );
 }
 
-export default PyqPage;
+export default CtPyqPage;

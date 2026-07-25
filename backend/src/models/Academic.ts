@@ -35,7 +35,8 @@ export const Subject = mongoose.model(
       course: { type: Schema.Types.ObjectId, ref: "Course" },
       department: { type: Schema.Types.ObjectId, ref: "Department" },
       credits: Number,
-      semester: Number
+      semester: Number,
+      syllabus: { type: String, enum: ["new", "old"], default: "new" }
     },
     { timestamps: true }
   )

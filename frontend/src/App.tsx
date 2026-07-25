@@ -4,6 +4,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { AttendancePage } from "./pages/AttendancePage";
 import { ModulePage } from "./pages/ModulePage";
 import { PyqPage } from "./pages/PyqPage";
+import { CtPyqPage } from "./pages/CtPyqPage";
 import { PyqAnalyzerPage } from "./pages/PyqAnalyzerPage";
 import { NotesPage } from "./pages/NotesPage";
 import { AssignmentsPage } from "./pages/AssignmentsPage";
@@ -11,6 +12,7 @@ import { AppShell } from "./components/layout/AppShell";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { AdminOverview } from "./pages/admin/AdminOverview";
 import { AdminUsers } from "./pages/admin/AdminUsers";
+import { AdminSubjects } from "./pages/admin/AdminSubjects";
 import { AdminContent } from "./pages/admin/AdminContent";
 import { AdminFeedback } from "./pages/admin/AdminFeedback";
 import { useAuth } from "./context/AuthContext";
@@ -37,6 +39,7 @@ export function App() {
           <Route path="attendance" element={<AttendancePage />} />
           <Route path="assignments" element={<AssignmentsPage />} />
           <Route path="pyq" element={<PyqPage />} />
+          <Route path="ct-pyq" element={<CtPyqPage />} />
           <Route path="pyq-analyzer" element={<PyqAnalyzerPage />} />
           <Route path="library" element={<NotesPage />} />
           <Route path=":module" element={<ModulePage />} />
@@ -46,6 +49,7 @@ export function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminOverview />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="subjects" element={<AdminSubjects />} />
           <Route path="content" element={<AdminContent />} />
           <Route path="feedback" element={<AdminFeedback />} />
         </Route>

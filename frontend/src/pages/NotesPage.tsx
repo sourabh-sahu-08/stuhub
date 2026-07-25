@@ -12,7 +12,8 @@ import {
   User,
   UploadCloud,
   X,
-  AlertCircle
+  AlertCircle,
+  BookOpen
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
@@ -88,9 +89,9 @@ export function NotesPage() {
   };
 
   // Fetch subject suggestions based on branch and semester
-  const fetchSubjectOptions = async (branch: string, sem: number) => {
+  const fetchSubjectOptions = async (branch: string, sem: number, syllabus: string) => {
     try {
-      const response = await api.get(`/notes/subjects/${branch}/${sem}`);
+      const response = await api.get(`/notes/subjects/${branch}/${sem}?syllabus=${syllabus}`);
       setSubjectOptions(response.data);
     } catch (err) {
       console.error("Failed to fetch subject options:", err);
@@ -100,7 +101,7 @@ export function NotesPage() {
   useEffect(() => {
     if (selectedBranch !== null && selectedSemester !== null) {
       fetchNotes(selectedBranch, selectedSemester, searchQuery, activeSyllabusTab);
-      fetchSubjectOptions(selectedBranch, selectedSemester);
+      fetchSubjectOptions(selectedBranch, selectedSemester, activeSyllabusTab);
     }
   }, [selectedBranch, selectedSemester]);
 
@@ -117,6 +118,7 @@ export function NotesPage() {
     setActiveSyllabusTab(tab);
     if (selectedBranch && selectedSemester) {
       fetchNotes(selectedBranch, selectedSemester, searchQuery, tab);
+      fetchSubjectOptions(selectedBranch, selectedSemester, tab);
     }
   };
 
@@ -390,85 +392,194 @@ export function NotesPage() {
                   RETRIEVING FILES...
                 </span>
               </div>
-            ) : notes.length === 0 ? (
+            ) : subjectOptions.length === 0 && notes.length === 0 ? (
               <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-outline bg-surface p-6 text-center">
                 <AlertCircle size={28} className="text-zinc-500" />
-                <h3 className="mt-3 text-sm font-bold text-zinc-200">No notes found</h3>
+                <h3 className="mt-3 text-sm font-bold text-zinc-200">No subjects or notes found</h3>
                 <p className="mt-1 max-w-xs text-xs text-zinc-500">
-                  No study materials uploaded for this selection yet.
+                  No subjects are configured for this semester, and no notes are uploaded.
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {notes.map((note) => (
-                  <div
-                    key={note._id}
-                    className="flex flex-col justify-between rounded-lg border border-outline bg-surface p-4 transition-colors hover:border-[#3F3F46]"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-start gap-3 min-w-0">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-surface-container text-zinc-500">
-                          <FileText size={18} />
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="truncate text-sm font-bold text-zinc-200">
-                            {note.title}
-                          </h4>
-                          <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
-                            <span className="rounded bg-[#F5A524]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#F5A524]">
-                              {note.subject}
-                            </span>
-                            <span className="rounded bg-[#27272D] px-2 py-0.5 text-[9px] font-mono text-zinc-400 uppercase">
-                              {note.syllabus} Syllabus
-                            </span>
-                          </div>
-                        </div>
+              <div className="flex flex-col space-y-8">
+                {subjectOptions.map(subject => {
+                  const subjectNotes = notes.filter(n => 
+                    n.subject?.toLowerCase() === subject.name.toLowerCase() || 
+                    n.subject?.toLowerCase() === subject.code.toLowerCase()
+                  );
+                  
+                  return (
+                    <div key={subject.code} className="flex flex-col space-y-3">
+                      <div className="flex items-center gap-2 border-b border-[#27272D] pb-2">
+                        <BookOpen size={18} className="text-[#F5A524]" />
+                        <h2 className="text-lg font-bold text-white">
+                          {subject.name} <span className="text-zinc-500 text-sm font-normal ml-2">({subject.code})</span>
+                        </h2>
                       </div>
-
-                      {user?.id === note.user?._id && (
-                        <button
-                          onClick={() => handleDelete(note._id)}
-                          className="shrink-0 p-1.5 rounded text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                          title="Delete Notes"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                      
+                      {subjectNotes.length === 0 ? (
+                        <div className="rounded-lg border border-dashed border-[#27272D] p-6 text-center text-zinc-500">
+                          <p className="text-sm">No notes uploaded for {subject.name} yet.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          {subjectNotes.map(note => (
+                            <div
+                              key={note._id}
+                              className="flex flex-col justify-between rounded-lg border border-outline bg-surface p-4 transition-colors hover:border-[#3F3F46]"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start gap-3 min-w-0">
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-surface-container text-zinc-500">
+                                    <FileText size={18} />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <h4 className="truncate text-sm font-bold text-zinc-200">
+                                      {note.title}
+                                    </h4>
+                                    <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
+                                      <span className="rounded bg-[#F5A524]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#F5A524]">
+                                        {note.subject}
+                                      </span>
+                                      <span className="rounded bg-[#27272D] px-2 py-0.5 text-[9px] font-mono text-zinc-400 uppercase">
+                                        {note.syllabus} Syllabus
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+          
+                                {user?.id === note.user?._id && (
+                                  <button
+                                    onClick={() => handleDelete(note._id)}
+                                    className="shrink-0 p-1.5 rounded text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                                    title="Delete Notes"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                )}
+                              </div>
+          
+                              <div className="mt-6 flex flex-col gap-3 border-t border-outline pt-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[9px] text-zinc-500">
+                                  <span className="flex items-center gap-1">
+                                    <Calendar size={10} />
+                                    {new Date(note.createdAt).toLocaleDateString()}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <User size={10} />
+                                    {note.user?.name ?? "Anonymous"}
+                                  </span>
+                                </div>
+          
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => handleView(note)}
+                                    className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
+                                  >
+                                    <Eye size={12} /> View
+                                  </button>
+                                  {!note.driveUrl && (
+                                    <button
+                                      onClick={() =>
+                                        handleDownload(note._id, note.fileName, note.mimeType)
+                                      }
+                                      className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
+                                    >
+                                      <Download size={12} /> Download
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
+                  );
+                })}
 
-                    <div className="mt-6 flex flex-col gap-3 border-t border-outline pt-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[9px] text-zinc-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={10} />
-                          {new Date(note.createdAt).toLocaleDateString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <User size={10} />
-                          {note.user?.name ?? "Anonymous"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleView(note)}
-                          className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
+                {/* Other/Uncategorized Notes */}
+                {notes.filter(n => !subjectOptions.some(s => s.name.toLowerCase() === n.subject?.toLowerCase() || s.code.toLowerCase() === n.subject?.toLowerCase())).length > 0 && (
+                  <div className="flex flex-col space-y-3">
+                    <div className="flex items-center gap-2 border-b border-[#27272D] pb-2">
+                      <BookOpen size={18} className="text-zinc-500" />
+                      <h2 className="text-lg font-bold text-white">
+                        Other Subjects
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {notes.filter(n => !subjectOptions.some(s => s.name.toLowerCase() === n.subject?.toLowerCase() || s.code.toLowerCase() === n.subject?.toLowerCase())).map(note => (
+                        <div
+                          key={note._id}
+                          className="flex flex-col justify-between rounded-lg border border-outline bg-surface p-4 transition-colors hover:border-[#3F3F46]"
                         >
-                          <Eye size={12} /> View
-                        </button>
-                        {!note.driveUrl && (
-                          <button
-                            onClick={() =>
-                              handleDownload(note._id, note.fileName, note.mimeType)
-                            }
-                            className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
-                          >
-                            <Download size={12} /> Download
-                          </button>
-                        )}
-                      </div>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3 min-w-0">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-surface-container text-zinc-500">
+                                <FileText size={18} />
+                              </div>
+                              <div className="min-w-0">
+                                <h4 className="truncate text-sm font-bold text-zinc-200">
+                                  {note.title}
+                                </h4>
+                                <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
+                                  <span className="rounded bg-[#F5A524]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#F5A524]">
+                                    {note.subject}
+                                  </span>
+                                  <span className="rounded bg-[#27272D] px-2 py-0.5 text-[9px] font-mono text-zinc-400 uppercase">
+                                    {note.syllabus} Syllabus
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+      
+                            {user?.id === note.user?._id && (
+                              <button
+                                onClick={() => handleDelete(note._id)}
+                                className="shrink-0 p-1.5 rounded text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                                title="Delete Notes"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+      
+                          <div className="mt-6 flex flex-col gap-3 border-t border-outline pt-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[9px] text-zinc-500">
+                              <span className="flex items-center gap-1">
+                                <Calendar size={10} />
+                                {new Date(note.createdAt).toLocaleDateString()}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <User size={10} />
+                                {note.user?.name ?? "Anonymous"}
+                              </span>
+                            </div>
+      
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleView(note)}
+                                className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
+                              >
+                                <Eye size={12} /> View
+                              </button>
+                              {!note.driveUrl && (
+                                <button
+                                  onClick={() =>
+                                    handleDownload(note._id, note.fileName, note.mimeType)
+                                  }
+                                  className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
+                                >
+                                  <Download size={12} /> Download
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </motion.div>

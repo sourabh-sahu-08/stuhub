@@ -167,7 +167,13 @@ notesRouter.get("/subjects/:branch/:semester", requireAuth, async (req: AuthRequ
       return res.json([]);
     }
 
-    const subjects = await Subject.find({ semester: semNum, department: dept._id }).select("name code");
+    const { syllabus } = req.query;
+    let query: any = { semester: semNum, department: dept._id };
+    if (syllabus === "new" || syllabus === "old") {
+      query.syllabus = syllabus;
+    }
+
+    const subjects = await Subject.find(query).select("name code");
     res.json(subjects);
   } catch (error) {
     next(error);

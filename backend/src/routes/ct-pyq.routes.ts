@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
-import { Pyq } from "../models/Pyq.js";
+import { CtPyq } from "../models/CtPyq.js";
 import { Subject, Department } from "../models/Academic.js";
 import type { AuthRequest } from "../types.js";
 
@@ -10,10 +10,10 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-export const pyqRouter = Router();
+export const ctPyqRouter = Router();
 
 // 1. Upload PYQ
-pyqRouter.post("/upload", requireAuth, upload.single("file"), async (req: AuthRequest, res: Response, next) => {
+ctPyqRouter.post("/upload", requireAuth, upload.single("file"), async (req: AuthRequest, res: Response, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No question paper file was uploaded." });
@@ -44,7 +44,7 @@ pyqRouter.post("/upload", requireAuth, upload.single("file"), async (req: AuthRe
 
     const base64Data = req.file.buffer.toString("base64");
 
-    const newPyq = await Pyq.create({
+    const newPyq = await CtPyq.create({
       user: req.user?.id,
       fileName: req.file.originalname,
       paperName: paperName.trim(),
@@ -66,7 +66,7 @@ pyqRouter.post("/upload", requireAuth, upload.single("file"), async (req: AuthRe
 });
 
 // 2. Fetch PYQs for a branch and semester
-pyqRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest, res: Response, next) => {
+ctPyqRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
     const semNum = parseInt(req.params.semester);
     if (isNaN(semNum) || semNum < 1 || semNum > 8) {
@@ -91,7 +91,7 @@ pyqRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest, r
       ];
     }
 
-    const papers = await Pyq.find(query)
+    const papers = await CtPyq.find(query)
       .select("-fileData")
       .populate("user", "name role")
       .sort({ createdAt: -1 });
@@ -103,9 +103,9 @@ pyqRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest, r
 });
 
 // 3. Download/Stream PYQ File
-pyqRouter.get("/download/:id", requireAuth, async (req: AuthRequest, res: Response, next) => {
+ctPyqRouter.get("/download/:id", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
-    const pyq = await Pyq.findById(req.params.id);
+    const pyq = await CtPyq.findById(req.params.id);
     if (!pyq) {
       return res.status(404).json({ message: "PYQ not found." });
     }
@@ -124,9 +124,9 @@ pyqRouter.get("/download/:id", requireAuth, async (req: AuthRequest, res: Respon
 });
 
 // 4. Delete PYQ
-pyqRouter.delete("/:id", requireAuth, async (req: AuthRequest, res: Response, next) => {
+ctPyqRouter.delete("/:id", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
-    const pyq = await Pyq.findById(req.params.id);
+    const pyq = await CtPyq.findById(req.params.id);
     if (!pyq) {
       return res.status(404).json({ message: "PYQ not found." });
     }
@@ -135,7 +135,7 @@ pyqRouter.delete("/:id", requireAuth, async (req: AuthRequest, res: Response, ne
       return res.status(403).json({ message: "You are not authorized to delete this PYQ." });
     }
 
-    await Pyq.findByIdAndDelete(req.params.id);
+    await CtPyq.findByIdAndDelete(req.params.id);
     res.json({ message: "PYQ deleted successfully." });
   } catch (error) {
     next(error);
@@ -143,7 +143,7 @@ pyqRouter.delete("/:id", requireAuth, async (req: AuthRequest, res: Response, ne
 });
 
 // 5. Get Subject options filtered by department/branch
-pyqRouter.get("/subjects/:branch/:semester", requireAuth, async (req: AuthRequest, res: Response, next) => {
+ctPyqRouter.get("/subjects/:branch/:semester", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
     const semNum = parseInt(req.params.semester);
     if (isNaN(semNum) || semNum < 1 || semNum > 8) {

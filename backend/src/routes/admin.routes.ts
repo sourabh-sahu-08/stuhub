@@ -4,6 +4,7 @@ import { Note } from "../models/Note.js";
 import { Pyq } from "../models/Pyq.js";
 import { Assignment } from "../models/Assignment.js";
 import { Feedback } from "../models/Feedback.js";
+import { Subject, Department } from "../models/Academic.js";
 import { requireAuth, allowRoles } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
 
@@ -191,6 +192,49 @@ router.put("/feedback/:id/status", async (req, res, next) => {
     const updated = await Feedback.findByIdAndUpdate(req.params.id, { status }, { new: true });
     if (!updated) return res.status(404).json({ message: "Feedback not found" });
     res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── Subjects (Admin) ───────────────────────────────────────────────────────
+router.get("/subjects", async (_req, res, next) => {
+  try {
+    const subjects = await Subject.find().populate("department", "name code");
+    res.json(subjects);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/subjects", async (req, res, next) => {
+  try {
+    const { name, code, departmentCode, semester, syllabus } = req.body;
+    const dept = await Department.findOne({ code: departmentCode.toUpperCase() });
+    if (!dept) {
+      return res.status(404).json({ message: "Department not found" });
+    }
+    
+    const subject = await Subject.create({
+      name,
+      code,
+      department: dept._id,
+      semester: parseInt(semester),
+      syllabus
+    });
+    
+    const populated = await subject.populate("department", "name code");
+    res.status(201).json(populated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/subjects/:id", async (req, res, next) => {
+  try {
+    const subject = await Subject.findByIdAndDelete(req.params.id);
+    if (!subject) return res.status(404).json({ message: "Subject not found" });
+    res.json({ message: "Subject deleted" });
   } catch (error) {
     next(error);
   }
