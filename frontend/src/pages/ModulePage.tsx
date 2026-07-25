@@ -34,6 +34,7 @@ import {
   Laptop
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useWorkspace } from "../context/WorkspaceContext";
 import { navItems } from "../components/layout/navigation";
 import { api } from "../lib/api";
 
@@ -47,6 +48,7 @@ const DEFAULT_SUBJECTS = [
 export function ModulePage() {
   const { module } = useParams();
   const { user } = useAuth();
+  const { bookmarks, toggleBookmark } = useWorkspace();
 
   // Local storage loaded states
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -71,6 +73,12 @@ export function ModulePage() {
 
   // Local state for event registration clicks
   const [registeredEvents, setRegisteredEvents] = useState<string[]>([]);
+
+  // Local state for Edit Profile Modal
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [editProfileForm, setEditProfileForm] = useState({ name: "", rollNumber: "", branch: "", semester: "" });
+  const [editProfileLoading, setEditProfileLoading] = useState(false);
+  const { updateProfile } = useAuth();
 
   useEffect(() => {
     // Load local storage values
@@ -420,9 +428,29 @@ export function ModulePage() {
         return (
           <div className="space-y-6 max-w-3xl">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Bookmarked Resources</h3>
-            <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
-              No saved bookmarks. (Saved Resources API Offline)
-            </div>
+            {bookmarks && bookmarks.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {bookmarks.map((b) => (
+                  <div key={b.id} className="bg-surface-container border border-outline p-4 rounded flex items-center justify-between group hover:border-primary/50 transition-colors">
+                    <div>
+                      <h4 className="text-sm font-bold text-white line-clamp-1">{b.title}</h4>
+                      <p className="text-xs text-on-surface-variant font-mono mt-1 capitalize">{b.type} • {b.subject || "General"}</p>
+                    </div>
+                    <button 
+                      onClick={() => toggleBookmark(b)} 
+                      className="text-primary hover:bg-primary/10 p-2 rounded transition-colors"
+                      title="Remove Bookmark"
+                    >
+                      <Bookmark size={18} fill="currentColor" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 border border-dashed border-outline rounded text-center text-on-surface-variant text-xs">
+                No saved bookmarks yet. Browse the library and click the bookmark icon to save resources here.
+              </div>
+            )}
           </div>
         );
 
@@ -430,16 +458,32 @@ export function ModulePage() {
         return (
           <div className="space-y-8">
             {/* Profile Overview Card */}
-            <div className="panel p-6 flex items-center gap-4 relative overflow-hidden">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
-                <User size={28} />
+            <div className="panel p-6 flex items-center justify-between relative overflow-hidden">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
+                  <User size={28} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-white">{user?.name}</h2>
+                  <p className="text-xs text-on-surface-variant font-mono uppercase mt-0.5">
+                    {user?.role || "Student"} Workspace
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-extrabold text-white">{user?.name}</h2>
-                <p className="text-xs text-on-surface-variant font-mono uppercase mt-0.5">
-                  {user?.role || "Student"} Workspace
-                </p>
-              </div>
+              <button 
+                onClick={() => {
+                  setEditProfileForm({
+                    name: user?.name || "",
+                    rollNumber: user?.rollNumber || "",
+                    branch: user?.branch || "",
+                    semester: user?.semester ? String(user.semester) : ""
+                  });
+                  setIsEditProfileOpen(true);
+                }}
+                className="px-4 py-2 bg-[#1A1A1A] hover:bg-[#222] border border-[#333] hover:border-primary/50 text-white text-sm font-semibold rounded transition-colors"
+              >
+                Edit Profile
+              </button>
             </div>
 
             {/* Academic & Stats Panel */}
@@ -689,6 +733,100 @@ export function ModulePage() {
       <div className="print-full-width">
         {renderContent()}
       </div>
+
+      {/* Edit Profile Modal */}
+      <AnimatePresence>
+        {isEditProfileOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md select-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-md bg-surface border border-outline rounded-lg p-6 shadow-xl"
+            >
+              <h3 className="text-xl font-bold text-white mb-4">Edit Profile</h3>
+              <form 
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setEditProfileLoading(true);
+                  try {
+                    await updateProfile({
+                      name: editProfileForm.name,
+                      rollNumber: editProfileForm.rollNumber,
+                      branch: editProfileForm.branch,
+                      semester: editProfileForm.semester ? Number(editProfileForm.semester) : undefined
+                    });
+                    setIsEditProfileOpen(false);
+                  } catch (err) {
+                    alert("Failed to update profile");
+                  } finally {
+                    setEditProfileLoading(false);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Full Name</label>
+                  <input
+                    type="text"
+                    value={editProfileForm.name}
+                    onChange={(e) => setEditProfileForm({...editProfileForm, name: e.target.value})}
+                    className="w-full bg-[#111] border border-[#333] rounded h-10 px-3 text-white text-sm focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Roll Number</label>
+                  <input
+                    type="text"
+                    value={editProfileForm.rollNumber}
+                    onChange={(e) => setEditProfileForm({...editProfileForm, rollNumber: e.target.value})}
+                    className="w-full bg-[#111] border border-[#333] rounded h-10 px-3 text-white text-sm focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Branch</label>
+                    <input
+                      type="text"
+                      value={editProfileForm.branch}
+                      onChange={(e) => setEditProfileForm({...editProfileForm, branch: e.target.value})}
+                      className="w-full bg-[#111] border border-[#333] rounded h-10 px-3 text-white text-sm focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Semester</label>
+                    <input
+                      type="number"
+                      value={editProfileForm.semester}
+                      onChange={(e) => setEditProfileForm({...editProfileForm, semester: e.target.value})}
+                      className="w-full bg-[#111] border border-[#333] rounded h-10 px-3 text-white text-sm focus:outline-none focus:border-primary transition-colors"
+                      min="1" max="8"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#222] mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditProfileOpen(false)}
+                    className="px-4 py-2 text-sm font-semibold text-zinc-400 hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={editProfileLoading}
+                    className="px-4 py-2 bg-primary hover:bg-[#e68200] disabled:opacity-50 text-black text-sm font-bold rounded transition-colors"
+                  >
+                    {editProfileLoading ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -11,19 +11,16 @@ dashboardRouter.get("/metrics", requireAuth, async (req, res, next) => {
     const userId = (req as any).user?.id;
 
     // We can run these counts in parallel
-    const [notesCount, pyqsCount, assignments] = await Promise.all([
+    const [notesCount, pyqsCount] = await Promise.all([
       Note.countDocuments({ user: userId }),
-      Pyq.countDocuments({ user: userId }),
-      Assignment.find({ userId }).select("status dueDate")
+      Pyq.countDocuments({ user: userId })
     ]);
-
-    const pendingAssignments = assignments.filter(a => a.status !== "Submitted").length;
 
     res.json({
       metrics: {
         notesUploaded: notesCount,
         pyqsUploaded: pyqsCount,
-        pendingAssignments
+        pendingAssignments: 0
       }
     });
   } catch (error) {

@@ -9,7 +9,8 @@ import {
   User,
   Settings,
   Sparkles,
-  ClipboardList
+  ClipboardList,
+  BookCheck
 } from "lucide-react";
 
 export interface NavItem {
@@ -33,6 +34,7 @@ export const navGroups: NavGroup[] = [
       { label: "Assignments", path: "/dashboard/assignments", icon: ClipboardList, materialIcon: "assignment" },
       { label: "Notes", path: "/dashboard/library", icon: BookOpen, materialIcon: "folder" },
       { label: "PYQs", path: "/dashboard/pyq", icon: Brain, materialIcon: "psychology" },
+      { label: "CT PYQs", path: "/dashboard/ct-pyq", icon: BookCheck, materialIcon: "fact_check" },
       { label: "AI PYQ Analyzer", path: "/dashboard/pyq-analyzer", icon: Sparkles, materialIcon: "psychology_alt" }
     ]
   },

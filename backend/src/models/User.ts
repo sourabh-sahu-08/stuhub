@@ -10,6 +10,9 @@ const userSchema = new Schema(
     role: { type: String, enum: ["student", "admin"], default: "student", required: true },
     avatar: String,
     department: { type: Schema.Types.ObjectId, ref: "Department" },
+    branch: { type: String },
+    semester: { type: Number },
+    rollNumber: { type: String },
     isProfileComplete: { type: Boolean, default: true },
     isActive: { type: Boolean, default: true },
     lastLoginAt: Date

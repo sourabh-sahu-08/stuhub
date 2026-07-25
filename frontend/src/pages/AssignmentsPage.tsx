@@ -1,217 +1,566 @@
-import { useState, useEffect } from "react";
-import { Plus, Clock, Calendar as CalendarIcon, CheckCircle2, Circle, ArrowRight, Trash2, Edit2 } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Folder,
+  FileText,
+  Search,
+  Plus,
+  ArrowLeft,
+  Download,
+  Eye,
+  Trash2,
+  Calendar,
+  User,
+  UploadCloud,
+  X,
+  AlertCircle,
+  BookOpen,
+  Bookmark
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
-import { AssignmentModal } from "../components/assignments/AssignmentModal";
+import { useAuth } from "../context/AuthContext";
+import { useWorkspace } from "../context/WorkspaceContext";
 
-export interface Assignment {
-  _id: string;
-  title: string;
-  course?: string;
-  description?: string;
-  status: "Not Started" | "In Progress" | "Submitted";
-  givenDate: string;
-  dueDate: string;
-  reminderTime?: string;
+interface SubjectOption {
+  name: string;
+  code: string;
 }
 
-export function AssignmentsPage() {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+interface AssignmentFile {
+  _id: string;
+  fileName: string;
+  title: string;
+  subject: string;
+  semester: number;
+  syllabus: "new" | "old";
+  branch: string;
+  user: {
+    _id: string;
+    name: string;
+    role: string;
+  };
+  mimeType?: string;
+  driveUrl?: string;
+  createdAt: string;
+}
 
-  const fetchAssignments = async () => {
+const BRANCHES = [
+  { code: "IT", name: "Information Technology" },
+  { code: "CSE", name: "Computer Science and Engineering" },
+  { code: "MECHNICAL", name: "Mechanical Engineering" },
+  { code: "CIVIL", name: "Civil Engineering" },
+  { code: "MINING", name: "Mining Engineering" },
+  { code: "ELEC", name: "Electrical Engineering" },
+  { code: "ELECTRONICS AND TELECOMMUNICATION", name: "Electronics and Telecommunication" }
+];
+
+export function AssignmentsPage() {
+  const { user } = useAuth();
+  const { isBookmarked, toggleBookmark } = useWorkspace();
+
+  // Navigation State
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
+
+  // Files & Filtering State
+  const [Assignments, setAssignments] = useState<AssignmentFile[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSyllabusTab, setActiveSyllabusTab] = useState<"new" | "old">("new");
+
+  // Autocomplete suggestions
+  const [subjectOptions, setSubjectOptions] = useState<SubjectOption[]>([]);
+  const [subjectDropdownOpen, setSubjectDropdownOpen] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch Assignments for the selected path
+  const fetchAssignments = async (branch: string, sem: number, search = "", syllabus = "all") => {
+    setLoading(true);
     try {
-      const { data } = await api.get("/assignments");
-      setAssignments(data);
+      let url = `/Assignments/list/${branch}/${sem}?q=${encodeURIComponent(search)}`;
+      if (syllabus !== "all") {
+        url += `&syllabus=${syllabus}`;
+      }
+      const response = await api.get(url);
+      setAssignments(response.data);
     } catch (err) {
-      console.error("Failed to fetch assignments", err);
+      console.error("Failed to fetch Assignments:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch subject suggestions based on branch and semester
+  const fetchSubjectOptions = async (branch: string, sem: number, syllabus: string) => {
+    try {
+      const response = await api.get(`/Assignments/subjects/${branch}/${sem}?syllabus=${syllabus}`);
+      setSubjectOptions(response.data);
+    } catch (err) {
+      console.error("Failed to fetch subject options:", err);
+    }
+  };
+
   useEffect(() => {
-    fetchAssignments();
+    if (selectedBranch !== null && selectedSemester !== null) {
+      fetchAssignments(selectedBranch, selectedSemester, searchQuery, activeSyllabusTab);
+      fetchSubjectOptions(selectedBranch, selectedSemester, activeSyllabusTab);
+    }
+  }, [selectedBranch, selectedSemester]);
+
+  // Handle Search & Tab filters
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (selectedBranch && selectedSemester) {
+      fetchAssignments(selectedBranch, selectedSemester, value, activeSyllabusTab);
+    }
+  };
+
+  const handleSyllabusTabChange = (tab: "new" | "old") => {
+    setActiveSyllabusTab(tab);
+    if (selectedBranch && selectedSemester) {
+      fetchAssignments(selectedBranch, selectedSemester, searchQuery, tab);
+      fetchSubjectOptions(selectedBranch, selectedSemester, tab);
+    }
+  };
+
+  // Handle Dropdown selection click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setSubjectDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // View Assignment inline
+  const handleView = async (Assignment: AssignmentFile) => {
+    if (Assignment.driveUrl) {
+      window.open(Assignment.driveUrl, "_blank");
+      return;
+    }
+    try {
+      const response = await api.get(`/Assignments/download/${Assignment._id}`, {
+        responseType: "blob"
+      });
+      const blob = new Blob([response.data], { type: Assignment.mimeType });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (err) {
+      console.error("Failed to view file:", err);
+      alert("Failed to load preview.");
+    }
+  };
+
+  // Download Assignment file
+  const handleDownload = async (id: string, fileName: string, mimeType?: string) => {
+    try {
+      const response = await api.get(`/Assignments/download/${id}`, {
+        responseType: "blob"
+      });
+      const blob = new Blob([response.data], { type: mimeType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to download file:", err);
+      alert("Failed to download file.");
+    }
+  };
+
+  // Delete Assignment
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this assignment?")) return;
+    if (!confirm("Are you sure you want to permanently delete these Assignments?")) return;
     try {
-      await api.delete(`/assignments/${id}`);
-      setAssignments(prev => prev.filter(a => a._id !== id));
+      await api.delete(`/Assignments/${id}`);
+      setAssignments((prev) => prev.filter((n) => n._id !== id));
     } catch (err) {
-      console.error("Failed to delete assignment", err);
+      console.error("Failed to delete Assignments:", err);
+      alert("Failed to delete Assignments.");
     }
   };
 
-  const handleStatusChange = async (id: string, newStatus: Assignment["status"]) => {
-    try {
-      setAssignments(prev => prev.map(a => a._id === id ? { ...a, status: newStatus } : a));
-      await api.put(`/assignments/${id}`, { status: newStatus });
-    } catch (err) {
-      console.error("Failed to update status", err);
-      fetchAssignments(); // Revert on failure
-    }
-  };
+  const semesters = Array.from({ length: 8 }, (_, i) => i + 1);
 
-  const openEditModal = (assignment: Assignment) => {
-    setEditingAssignment(assignment);
-    setIsModalOpen(true);
+  const getBranchName = (code: string) => {
+    return BRANCHES.find((b) => b.code === code)?.name ?? code;
   };
-
-  const openNewModal = () => {
-    setEditingAssignment(null);
-    setIsModalOpen(true);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Submitted": return "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
-      case "In Progress": return "text-amber-500 bg-amber-500/10 border-amber-500/20";
-      default: return "text-zinc-400 bg-zinc-500/10 border-zinc-500/20";
-    }
-  };
-
-  const completedCount = assignments.filter(a => a.status === "Submitted").length;
-  const progressPercent = assignments.length > 0 ? Math.round((completedCount / assignments.length) * 100) : 0;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      
-      {/* Header section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-semibold text-white tracking-tight">Assignments</h1>
-          <p className="text-sm text-zinc-400">Track deadlines, manage submissions, and set reminders.</p>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          {/* Quick Progress */}
-          <div className="flex items-center gap-3 px-4 py-2 bg-black border border-[#222] rounded-lg">
-            <span className="text-xs font-medium text-zinc-400">Progress</span>
-            <div className="w-24 h-1.5 bg-[#111] rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                className="h-full bg-[#FF9000]"
-              />
-            </div>
-            <span className="text-xs font-bold text-white">{progressPercent}%</span>
-          </div>
-          
-          <button 
-            onClick={openNewModal}
-            className="flex items-center gap-2 bg-[#FF9000] text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#ff9d22] transition-colors"
-          >
-            <Plus size={16} />
-            New Assignment
-          </button>
-        </div>
+    <div className="min-h-[calc(100vh-110px)] text-white">
+      {/* ================= BREADCRUMBS ================= */}
+      <div className="mb-6 flex flex-wrap items-center gap-1.5 font-mono text-[10px] text-zinc-500 no-print">
+        <button
+          onClick={() => {
+            setSelectedBranch(null);
+            setSelectedSemester(null);
+          }}
+          className={`hover:text-[#F5A524] transition-colors ${
+            selectedBranch === null ? "text-[#F5A524] font-bold" : ""
+          }`}
+        >
+          Assignments
+        </button>
+        {selectedBranch !== null && (
+          <>
+            <span>/</span>
+            <button
+              onClick={() => {
+                setSelectedSemester(null);
+              }}
+              className={`hover:text-[#F5A524] transition-colors ${
+                selectedSemester === null ? "text-[#F5A524] font-bold" : ""
+              }`}
+            >
+              {selectedBranch}
+            </button>
+          </>
+        )}
+        {selectedSemester !== null && (
+          <>
+            <span>/</span>
+            <span className="text-[#F5A524] font-bold">SEMESTER {selectedSemester}</span>
+          </>
+        )}
       </div>
 
-      {/* Main Grid */}
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#FF9000]" />
-        </div>
-      ) : assignments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-32 bg-black border border-[#222] rounded-xl border-dashed">
-          <div className="w-16 h-16 rounded-2xl bg-[#111] flex items-center justify-center mb-4 text-zinc-500">
-            <CheckCircle2 size={32} />
-          </div>
-          <h3 className="text-lg font-medium text-white mb-2">No active assignments</h3>
-          <p className="text-sm text-zinc-500 mb-6 text-center max-w-sm">
-            You're all caught up! Create a new assignment to start tracking your coursework deadlines.
-          </p>
-          <button 
-            onClick={openNewModal}
-            className="text-sm font-medium text-[#FF9000] hover:text-[#ff9d22]"
+      <AnimatePresence mode="wait">
+        {selectedBranch === null ? (
+          /* ================= LEVEL 1: BRANCHES ================= */
+          <motion.div
+            key="branches"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col space-y-6"
           >
-            + Create Assignment
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <AnimatePresence>
-            {assignments.map(assignment => (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                key={assignment._id}
-                className="bg-[#0A0A0A] border border-[#222] rounded-xl p-5 hover:border-[#333] hover:-translate-y-1 hover:shadow-lg transition-all duration-200 flex flex-col group"
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                Assignments Library
+              </h1>
+              <p className="mt-2 text-sm text-zinc-400">
+                Select your engineering branch to browse and share lecture Assignments, books, and study materials.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {BRANCHES.map((b) => (
+                <button
+                  key={b.code}
+                  onClick={() => setSelectedBranch(b.code)}
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-outline bg-surface p-5 text-left transition-all hover:border-[#F5A524] hover:shadow-[0_0_15px_rgba(245,165,36,0.05)] focus:outline-none focus:ring-2 focus:ring-[#F5A524]"
+                >
+                  <div className="absolute -right-3 -top-3 h-14 w-14 rounded-full bg-[#F5A524]/5 transition-transform group-hover:scale-125" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#F5A524]/10 text-[#F5A524] transition-colors group-hover:bg-[#F5A524] group-hover:text-black">
+                    <Folder size={18} fill="currentColor" className="opacity-80" />
+                  </div>
+                  <div className="mt-6">
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+                      Branch: {b.code}
+                    </span>
+                    <h3 className="mt-0.5 text-sm font-bold text-zinc-200 group-hover:text-white line-clamp-1">
+                      {b.name}
+                    </h3>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        ) : selectedSemester === null ? (
+          /* ================= LEVEL 2: SEMESTERS ================= */
+          <motion.div
+            key="semesters"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col space-y-6"
+          >
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedBranch(null)}
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-outline bg-surface-container text-zinc-400 transition-colors hover:bg-[#27272D] hover:text-white"
+                aria-label="Back to branches"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div className={`px-2.5 py-1 rounded-md border text-[10px] font-bold uppercase tracking-wider ${getStatusColor(assignment.status)}`}>
-                    {assignment.status}
-                  </div>
-                  
-                  {/* Actions Dropdown / Buttons */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <button onClick={() => openEditModal(assignment)} className="p-1.5 text-zinc-500 hover:text-white rounded hover:bg-[#222] transition-colors">
-                      <Edit2 size={14} />
-                    </button>
-                    <button onClick={() => handleDelete(assignment._id)} className="p-1.5 text-zinc-500 hover:text-red-400 rounded hover:bg-[#222] transition-colors">
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
+                <ArrowLeft size={16} />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-white sm:text-2xl">
+                  {getBranchName(selectedBranch)}
+                </h1>
+                <p className="text-xs text-zinc-400">Select your academic semester</p>
+              </div>
+            </div>
 
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white mb-1 leading-tight">{assignment.title}</h3>
-                  {assignment.course && <p className="text-xs text-brand-500 font-medium mb-3">{assignment.course}</p>}
-                  {assignment.description && <p className="text-sm text-zinc-400 line-clamp-2 mb-4 leading-relaxed">{assignment.description}</p>}
-                </div>
-
-                <div className="pt-4 mt-2 border-t border-[#1a1a1a] space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-zinc-400">
-                    <CalendarIcon size={14} className="text-zinc-500" />
-                    <span>Due: <span className="text-zinc-200 font-medium">{new Date(assignment.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span></span>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              {semesters.map((sem) => (
+                <button
+                  key={sem}
+                  onClick={() => setSelectedSemester(sem)}
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-outline bg-surface p-5 text-left transition-all hover:border-[#F5A524] hover:shadow-[0_0_15px_rgba(245,165,36,0.05)] focus:outline-none"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded bg-[#F5A524]/10 text-[#F5A524] transition-colors group-hover:bg-[#F5A524] group-hover:text-black">
+                    <Folder size={16} fill="currentColor" />
                   </div>
-                  {assignment.reminderTime && (
-                    <div className="flex items-center gap-2 text-xs text-zinc-400">
-                      <Clock size={14} className="text-[#FF9000]" />
-                      <span>Reminder: {new Date(assignment.reminderTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                  )}
+                  <div className="mt-8">
+                    <h3 className="text-xs font-bold text-zinc-200 group-hover:text-white">
+                      Semester {sem}
+                    </h3>
+                    <p className="text-[10px] text-zinc-500">Assignments repository</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        ) : (
+          /* ================= LEVEL 3: Assignments FILES LIST ================= */
+          <motion.div
+            key="files"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col space-y-6"
+          >
+            {/* Header */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setSelectedSemester(null);
+                    setSearchQuery("");
+                  }}
+                  className="flex h-9 w-9 items-center justify-center rounded-md border border-outline bg-surface-container text-zinc-400 transition-colors hover:bg-[#27272D] hover:text-white"
+                  aria-label="Back to semesters"
+                >
+                  <ArrowLeft size={16} />
+                </button>
+                <div>
+                  <h1 className="text-xl font-bold text-white sm:text-2xl">
+                    Semester {selectedSemester} Assignments
+                  </h1>
+                  <p className="text-xs text-zinc-400">
+                    {getBranchName(selectedBranch)} ({selectedBranch})
+                  </p>
                 </div>
+              </div>
+            </div>
 
-                {/* Quick Status Toggle */}
-                <div className="mt-5 grid grid-cols-3 gap-1 p-1 bg-[#111] rounded-lg border border-[#222]">
-                  {["Not Started", "In Progress", "Submitted"].map(status => {
-                    const isSelected = assignment.status === status;
+            {/* Filter and search bar */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              {/* Syllabus Tabs */}
+              <div className="flex items-center gap-6 border-b border-outline pb-0">
+                {(["new", "old"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => handleSyllabusTabChange(tab)}
+                    className={`cursor-pointer pb-2 px-0 text-xs font-bold uppercase transition-colors relative border-b-2 -mb-[2px] ${
+                      activeSyllabusTab === tab
+                        ? "border-[#F5A524] text-[#F5A524]"
+                        : "border-transparent text-zinc-500 hover:text-white"
+                    }`}
+                  >
+                    {tab} syllabus
+                  </button>
+                ))}
+              </div>
+
+              {/* Search */}
+              <div className="relative w-full max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-base text-zinc-500" size={16} />
+                <input
+                  type="text"
+                  placeholder="Search Assignments title or subject..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="w-full rounded-md border border-outline bg-surface py-2.5 pl-10 pr-4 text-xs text-zinc-200 outline-none transition-colors placeholder:text-zinc-500 focus:border-[#F5A524]"
+                />
+              </div>
+            </div>
+
+            {/* Assignments List */}
+            {loading ? (
+              <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-outline bg-surface">
+                <span className="h-6 w-6 animate-spin rounded-full border-2 border-[#F5A524] border-t-transparent" />
+                <span className="mt-2 text-xs font-mono text-zinc-500">
+                  RETRIEVING FILES...
+                </span>
+              </div>
+            ) : subjectOptions.length === 0 && Assignments.length === 0 ? (
+              <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-outline bg-surface p-6 text-center">
+                <AlertCircle size={28} className="text-zinc-500" />
+                <h3 className="mt-3 text-sm font-bold text-zinc-200">No subjects or Assignments found</h3>
+                <p className="mt-1 max-w-xs text-xs text-zinc-500">
+                  No subjects are configured for this semester, and no Assignments are uploaded.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {subjectOptions.map(subject => {
+                    const subjectAssignments = Assignments.filter(n => 
+                      n.subject?.toLowerCase() === subject.name.toLowerCase() || 
+                      n.subject?.toLowerCase() === subject.code.toLowerCase()
+                    );
+                    
                     return (
-                      <button
-                        key={status}
-                        onClick={() => handleStatusChange(assignment._id, status as any)}
-                        className={`text-[10px] py-1.5 rounded-md font-medium transition-all ${
-                          isSelected 
-                            ? "bg-[#222] text-white shadow-sm" 
-                            : "text-zinc-500 hover:text-zinc-300 hover:bg-[#1a1a1a]"
-                        }`}
+                      <div
+                        key={subject.code}
+                        onClick={() => {
+                          if (subjectAssignments.length > 0) {
+                            const AssignmentToOpen = subjectAssignments.find(n => n.driveUrl) || subjectAssignments[0];
+                            if (AssignmentToOpen.driveUrl) {
+                              window.open(AssignmentToOpen.driveUrl, "_blank");
+                            } else {
+                              handleView(AssignmentToOpen);
+                            }
+                          } else {
+                            alert(`No Assignments uploaded for ${subject.name} yet.`);
+                          }
+                        }}
+                        className="group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-xl border border-outline bg-surface p-6 transition-all hover:border-[#F5A524] hover:bg-surface-container"
                       >
-                        {status === "Not Started" ? "To Do" : status === "In Progress" ? "Doing" : "Done"}
-                      </button>
-                    )
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F5A524]/10 text-[#F5A524] transition-colors group-hover:bg-[#F5A524] group-hover:text-black">
+                            <BookOpen size={24} />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-zinc-200 group-hover:text-white">{subject.name}</h3>
+                            <p className="text-xs text-zinc-500 font-mono mt-1">{subject.code}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between border-t border-outline pt-4">
+                          <span className="text-xs text-zinc-500 font-medium">
+                            {subjectAssignments.length} {subjectAssignments.length === 1 ? 'Resource' : 'Resources'}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const assignmentToOpen = subjectAssignments.find(a => a.driveUrl) || subjectAssignments[0];
+                                toggleBookmark({
+                                  id: `assignment-subject-${subject.code}`,
+                                  title: subject.name,
+                                  type: 'assignment',
+                                  subject: subject.code,
+                                  url: assignmentToOpen?.driveUrl
+                                });
+                              }}
+                              className={`p-1.5 rounded transition-colors ${
+                                isBookmarked(`assignment-subject-${subject.code}`) ? "text-[#F5A524] bg-[#F5A524]/10" : "text-zinc-500 hover:text-white hover:bg-[#27272D]"
+                              }`}
+                              title="Bookmark Subject"
+                            >
+                              <Bookmark size={14} fill={isBookmarked(`assignment-subject-${subject.code}`) ? "currentColor" : "none"} />
+                            </button>
+                            {subjectAssignments.length > 0 && (
+                              <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
                   })}
                 </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      )}
 
-      {isModalOpen && (
-        <AssignmentModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
-          onSaved={fetchAssignments}
-          assignment={editingAssignment}
-        />
-      )}
+                {/* Other/Uncategorized Assignments */}
+                {Assignments.filter(n => !subjectOptions.some(s => s.name.toLowerCase() === n.subject?.toLowerCase() || s.code.toLowerCase() === n.subject?.toLowerCase())).length > 0 && (
+                  <div className="flex flex-col space-y-3">
+                    <div className="flex items-center gap-2 border-b border-[#27272D] pb-2">
+                      <BookOpen size={18} className="text-zinc-500" />
+                      <h2 className="text-lg font-bold text-white">
+                        Other Subjects
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {Assignments.filter(n => !subjectOptions.some(s => s.name.toLowerCase() === n.subject?.toLowerCase() || s.code.toLowerCase() === n.subject?.toLowerCase())).map(Assignment => (
+                        <div
+                          key={Assignment._id}
+                          className="flex flex-col justify-between rounded-lg border border-outline bg-surface p-4 transition-colors hover:border-[#3F3F46]"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3 min-w-0">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-surface-container text-zinc-500">
+                                <FileText size={18} />
+                              </div>
+                              <div className="min-w-0">
+                                <h4 className="truncate text-sm font-bold text-zinc-200">
+                                  {Assignment.title}
+                                </h4>
+                                <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
+                                  <span className="rounded bg-[#F5A524]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#F5A524]">
+                                    {Assignment.subject}
+                                  </span>
+                                  <span className="rounded bg-[#27272D] px-2 py-0.5 text-[9px] font-mono text-zinc-400 uppercase">
+                                    {Assignment.syllabus} Syllabus
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+      
+                            {user?.id === Assignment.user?._id && (
+                              <button
+                                onClick={() => handleDelete(Assignment._id)}
+                                className="shrink-0 p-1.5 rounded text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                                title="Delete Assignments"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+      
+                          <div className="mt-6 flex flex-col gap-3 border-t border-outline pt-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[9px] text-zinc-500">
+                              <span className="flex items-center gap-1">
+                                <Calendar size={10} />
+                                {new Date(Assignment.createdAt).toLocaleDateString()}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <User size={10} />
+                                {Assignment.user?.name ?? "Anonymous"}
+                              </span>
+                            </div>
+      
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleView(Assignment)}
+                                className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
+                              >
+                                <Eye size={12} /> View
+                              </button>
+                              {!Assignment.driveUrl && (
+                                <button
+                                  onClick={() =>
+                                    handleDownload(Assignment._id, Assignment.fileName, Assignment.mimeType)
+                                  }
+                                  className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
+                                >
+                                  <Download size={12} /> Download
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+export default AssignmentsPage;

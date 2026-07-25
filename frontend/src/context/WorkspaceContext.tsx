@@ -9,13 +9,25 @@ export interface WorkspaceMetrics {
   attendancePercentage: number;
 }
 
+export interface Bookmark {
+  id: string;
+  title: string;
+  type: 'note' | 'pyq' | 'assignment' | 'resource';
+  subject?: string;
+  url?: string;
+  createdAt: string;
+}
+
 interface WorkspaceContextType {
   metrics: WorkspaceMetrics;
   assignments: any[];
   recentNotes: any[];
+  bookmarks: Bookmark[];
   loading: boolean;
   refreshMetrics: () => Promise<void>;
   updateLocalAttendance: () => void;
+  toggleBookmark: (item: Omit<Bookmark, 'createdAt'>) => void;
+  isBookmarked: (id: string) => boolean;
 }
 
 const defaultMetrics: WorkspaceMetrics = {
@@ -32,7 +44,38 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [metrics, setMetrics] = useState<WorkspaceMetrics>(defaultMetrics);
   const [assignments, setAssignments] = useState<any[]>([]);
   const [recentNotes, setRecentNotes] = useState<any[]>([]);
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Load bookmarks on mount
+  useEffect(() => {
+    const savedBookmarks = localStorage.getItem("stuhub-bookmarks");
+    if (savedBookmarks) {
+      try {
+        setBookmarks(JSON.parse(savedBookmarks));
+      } catch (e) {
+        setBookmarks([]);
+      }
+    }
+  }, []);
+
+  const toggleBookmark = (item: Omit<Bookmark, 'createdAt'>) => {
+    setBookmarks(prev => {
+      const exists = prev.find(b => b.id === item.id);
+      let newBookmarks;
+      if (exists) {
+        newBookmarks = prev.filter(b => b.id !== item.id);
+      } else {
+        newBookmarks = [{ ...item, createdAt: new Date().toISOString() }, ...prev];
+      }
+      localStorage.setItem("stuhub-bookmarks", JSON.stringify(newBookmarks));
+      return newBookmarks;
+    });
+  };
+
+  const isBookmarked = (id: string) => {
+    return bookmarks.some(b => b.id === id);
+  };
 
   // Helper to read attendance from localStorage to ensure immediate global sync
   const getLocalAttendance = () => {
@@ -72,8 +115,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     try {
       const [metricsRes, assignmentsRes, notesRes] = await Promise.all([
         api.get("/dashboard/metrics").catch(() => ({ data: { metrics: defaultMetrics } })),
-        api.get("/assignments").catch(() => ({ data: [] })),
-        api.get("/notes/recent").catch(() => ({ data: [] })),
+        api.get("/assignments/recent").catch(() => ({ data: [] })),
+        api.get("/notes/recent").catch(() => ({ data: [] }))
       ]);
 
       setAssignments(assignmentsRes.data);
@@ -82,7 +125,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setMetrics({
         ...metricsRes.data.metrics,
         attendancePercentage: getLocalAttendance(),
-        pendingAssignments: assignmentsRes.data.filter((a: any) => a.status !== "Submitted").length
+        pendingAssignments: 0
       });
     } catch (err) {
       console.error("Failed to fetch workspace metrics", err);
@@ -103,7 +146,19 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   return (
-    <WorkspaceContext.Provider value={{ metrics, assignments, recentNotes, loading, refreshMetrics, updateLocalAttendance }}>
+    <WorkspaceContext.Provider
+      value={{
+        metrics,
+        assignments,
+        recentNotes,
+        bookmarks,
+        loading,
+        refreshMetrics,
+        updateLocalAttendance,
+        toggleBookmark,
+        isBookmarked
+      }}
+    >
       {children}
     </WorkspaceContext.Provider>
   );

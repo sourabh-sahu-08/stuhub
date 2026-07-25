@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface IAssignment extends Document {
+export interface ICtPyq extends Document {
   user: mongoose.Types.ObjectId;
-  title: string;
+  paperName: string;
   subject: string;
   semester: number; // 1 to 8
   syllabus: "new" | "old";
@@ -10,15 +10,15 @@ export interface IAssignment extends Document {
   fileName?: string;
   fileData?: string; // Base64 representation of file
   mimeType?: string; // File mime type
-  driveUrl?: string; // Drive link for the note
+  driveUrl?: string; // Drive link for the PYQ
   createdAt: Date;
   updatedAt: Date;
 }
 
-const assignmentSchema = new Schema<IAssignment>(
+const ctPyqSchema = new Schema<ICtPyq>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    title: { type: String, required: true },
+    paperName: { type: String, required: true },
     subject: { type: String, required: true },
     semester: { type: Number, required: true, min: 1, max: 8 },
     syllabus: { type: String, enum: ["new", "old"], required: true },
@@ -31,4 +31,4 @@ const assignmentSchema = new Schema<IAssignment>(
   { timestamps: true }
 );
 
-export const Assignment = mongoose.model<IAssignment>("Assignment", assignmentSchema);
+export const CtPyq = mongoose.model<ICtPyq>("CtPyq", ctPyqSchema);

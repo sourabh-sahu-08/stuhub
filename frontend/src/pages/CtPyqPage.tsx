@@ -13,13 +13,11 @@ import {
   UploadCloud,
   X,
   AlertCircle,
-  BookOpen,
-  Bookmark
+  BookOpen
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
-import { useWorkspace } from "../context/WorkspaceContext";
 
 interface SubjectOption {
   name: string;
@@ -54,9 +52,8 @@ const BRANCHES = [
   { code: "ELECTRONICS AND TELECOMMUNICATION", name: "Electronics and Telecommunication" }
 ];
 
-export function PyqPage() {
+export function CtPyqPage() {
   const { user } = useAuth();
-  const { isBookmarked, toggleBookmark } = useWorkspace();
 
   // Navigation State
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -405,9 +402,9 @@ export function PyqPage() {
             ) : subjectOptions.length === 0 && papers.length === 0 ? (
               <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-outline bg-surface p-6 text-center">
                 <AlertCircle size={28} className="text-zinc-500" />
-                <h3 className="mt-3 text-sm font-bold text-zinc-200">No subjects or PYQs found</h3>
+                <h3 className="mt-3 text-sm font-bold text-zinc-200">No subjects or papers found</h3>
                 <p className="mt-1 max-w-xs text-xs text-zinc-500">
-                  No subjects are configured for this semester, and no PYQs are uploaded.
+                  No subjects are configured for this semester, and no past papers are available.
                 </p>
               </div>
             ) : (
@@ -431,7 +428,7 @@ export function PyqPage() {
                               handleView(paperToOpen);
                             }
                           } else {
-                            alert(`No PYQs uploaded for ${subject.name} yet.`);
+                            alert(`No past papers uploaded for ${subject.name} yet.`);
                           }
                         }}
                         className="group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-xl border border-outline bg-surface p-6 transition-all hover:border-[#F5A524] hover:bg-surface-container"
@@ -449,30 +446,9 @@ export function PyqPage() {
                           <span className="text-xs text-zinc-500 font-medium">
                             {subjectPapers.length} {subjectPapers.length === 1 ? 'Resource' : 'Resources'}
                           </span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const paperToOpen = subjectPapers.find(p => p.driveUrl) || subjectPapers[0];
-                                toggleBookmark({
-                                  id: `pyq-subject-${subject.code}`,
-                                  title: subject.name,
-                                  type: 'pyq',
-                                  subject: subject.code,
-                                  url: paperToOpen?.driveUrl
-                                });
-                              }}
-                              className={`p-1.5 rounded transition-colors ${
-                                isBookmarked(`pyq-subject-${subject.code}`) ? "text-[#F5A524] bg-[#F5A524]/10" : "text-zinc-500 hover:text-white hover:bg-[#27272D]"
-                              }`}
-                              title="Bookmark Subject"
-                            >
-                              <Bookmark size={14} fill={isBookmarked(`pyq-subject-${subject.code}`) ? "currentColor" : "none"} />
-                            </button>
-                            {subjectPapers.length > 0 && (
-                              <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
-                            )}
-                          </div>
+                          {subjectPapers.length > 0 && (
+                            <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
+                          )}
                         </div>
                       </div>
                     );
@@ -544,25 +520,13 @@ export function PyqPage() {
                               >
                                 <Eye size={12} /> View
                               </button>
-                              {!paper.driveUrl && (
-                                <button
-                                  onClick={() =>
-                                    handleDownload(paper._id, paper.fileName, paper.mimeType, paper.driveUrl)
-                                  }
-                                  className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
-                                >
-                                  <Download size={12} /> Download
-                                </button>
-                              )}
                               <button
-                                onClick={() => toggleBookmark({ id: paper._id, title: paper.paperName, type: 'pyq', subject: paper.subject, url: paper.driveUrl })}
-                                className={`flex items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-bold transition-colors ${
-                                  isBookmarked(paper._id) ? "bg-[#F5A524]/20 text-[#F5A524]" : "bg-surface-container text-zinc-200 hover:bg-[#27272D]"
-                                }`}
-                                title="Bookmark PYQ"
+                                onClick={() =>
+                                  handleDownload(paper._id, paper.fileName, paper.mimeType, paper.driveUrl)
+                                }
+                                className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
                               >
-                                <Bookmark size={12} fill={isBookmarked(paper._id) ? "currentColor" : "none"} /> 
-                                {isBookmarked(paper._id) ? "Saved" : "Save"}
+                                <Download size={12} /> Download
                               </button>
                             </div>
                           </div>
@@ -580,4 +544,4 @@ export function PyqPage() {
   );
 }
 
-export default PyqPage;
+export default CtPyqPage;

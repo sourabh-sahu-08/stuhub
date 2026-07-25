@@ -2,8 +2,10 @@ import { Router, Response, NextFunction } from "express";
 import { User } from "../models/User.js";
 import { Note } from "../models/Note.js";
 import { Pyq } from "../models/Pyq.js";
+import { CtPyq } from "../models/CtPyq.js";
 import { Assignment } from "../models/Assignment.js";
 import { Feedback } from "../models/Feedback.js";
+import { Subject, Department } from "../models/Academic.js";
 import { requireAuth, allowRoles } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
 
@@ -110,7 +112,7 @@ router.get("/pyqs", async (_req, res, next) => {
   try {
     const pyqs = await Pyq.find()
       .select("-fileData")
-      .populate("uploadedBy", "name email")
+      .populate("user", "name email")
       .sort({ createdAt: -1 });
     res.json(pyqs);
   } catch (error) {
@@ -150,13 +152,81 @@ router.delete("/pyqs/:id", async (req, res, next) => {
   }
 });
 
+// ── CT-PYQs (Admin: all papers) ───────────────────────────────────────────────
+router.get("/ct-pyqs", async (_req, res, next) => {
+  try {
+    const ctPyqs = await CtPyq.find()
+      .select("-fileData")
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+    res.json(ctPyqs);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/ct-pyqs/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { paperName, subject, semester, syllabus, branch, driveUrl } = req.body;
+    if (!paperName || !subject || !semester || !syllabus || !branch || !driveUrl) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const ctPyq = await CtPyq.create({
+      user: req.user?.id,
+      paperName,
+      subject,
+      semester: parseInt(semester),
+      syllabus,
+      branch,
+      driveUrl
+    });
+    res.status(201).json(ctPyq);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/ct-pyqs/:id", async (req, res, next) => {
+  try {
+    const ctPyq = await CtPyq.findByIdAndDelete(req.params.id);
+    if (!ctPyq) return res.status(404).json({ message: "CT-PYQ not found" });
+    res.json({ message: "CT-PYQ deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // ── Assignments (Admin: all assignments) ──────────────────────────────────
 router.get("/assignments", async (_req, res, next) => {
   try {
     const assignments = await Assignment.find()
-      .populate("userId", "name email")
-      .sort({ dueDate: 1 });
+      .select("-fileData")
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
     res.json(assignments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/assignments/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { title, subject, semester, syllabus, branch, driveUrl } = req.body;
+    if (!title || !subject || !semester || !syllabus || !branch || !driveUrl) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const assignment = await Assignment.create({
+      user: req.user?.id,
+      title,
+      subject,
+      semester: parseInt(semester),
+      syllabus,
+      branch,
+      driveUrl
+    });
+    res.status(201).json(assignment);
   } catch (error) {
     next(error);
   }
@@ -191,6 +261,72 @@ router.put("/feedback/:id/status", async (req, res, next) => {
     const updated = await Feedback.findByIdAndUpdate(req.params.id, { status }, { new: true });
     if (!updated) return res.status(404).json({ message: "Feedback not found" });
     res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── Subjects (Admin) ───────────────────────────────────────────────────────
+router.get("/subjects", async (_req, res, next) => {
+  try {
+    const subjects = await Subject.find().populate("department", "name code");
+    res.json(subjects);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/subjects", async (req, res, next) => {
+  try {
+    const { name, code, departmentCode, semester, syllabus } = req.body;
+    const dept = await Department.findOne({ code: departmentCode.toUpperCase() });
+    if (!dept) {
+      return res.status(404).json({ message: "Department not found" });
+    }
+    
+    const subject = await Subject.create({
+      name,
+      code,
+      department: dept._id,
+      semester: parseInt(semester),
+      syllabus
+    });
+    
+    const populated = await subject.populate("department", "name code");
+    res.status(201).json(populated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put("/subjects/:id", async (req, res, next) => {
+  try {
+    const { name, code, departmentCode, semester, syllabus } = req.body;
+    let updateData: any = { name, code, semester: parseInt(semester), syllabus };
+    
+    if (departmentCode) {
+      const dept = await Department.findOne({ code: departmentCode.toUpperCase() });
+      if (!dept) {
+        return res.status(404).json({ message: "Department not found" });
+      }
+      updateData.department = dept._id;
+    }
+
+    const subject = await Subject.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!subject) return res.status(404).json({ message: "Subject not found" });
+    
+    const populated = await subject.populate("department", "name code");
+    res.json(populated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/subjects/:id", async (req, res, next) => {
+  try {
+    const subject = await Subject.findByIdAndDelete(req.params.id);
+    if (!subject) return res.status(404).json({ message: "Subject not found" });
+    res.json({ message: "Subject deleted" });
   } catch (error) {
     next(error);
   }

@@ -62,7 +62,7 @@ export function AdminFeedback() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2 tracking-tight">
             <MessageSquare className="text-[#FF9000]" />
             User Feedback
           </h1>
@@ -112,7 +112,7 @@ export function AdminFeedback() {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filteredFeedbacks.map(fb => (
-            <div key={fb._id} className="bg-[#0A0A0A] border border-[#222] rounded-xl p-5 hover:border-[#333] transition-colors">
+            <div key={fb._id} className="bg-[#0A0A0A] border border-[#222] rounded-2xl p-6 hover:border-[#333] transition-colors shadow-lg">
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                 <div>
                   <div className="flex items-center gap-3 mb-1">

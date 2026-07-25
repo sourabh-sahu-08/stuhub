@@ -9,6 +9,7 @@ import morgan from "morgan";
 import { env } from "./config/env.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { pyqRouter } from "./routes/pyq.routes.js";
+import { ctPyqRouter } from "./routes/ct-pyq.routes.js";
 import { pyqAnalyzerRouter } from "./routes/pyq-analyzer.routes.js";
 import { notesRouter } from "./routes/notes.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
@@ -35,6 +36,7 @@ export function createApp() {
   app.use("/api/auth", authRouter);
   app.use("/api/admin", adminRouter);
   app.use("/api/pyq", pyqRouter);
+  app.use("/api/ct-pyq", ctPyqRouter);
   app.use("/api/pyq-analyzer", pyqAnalyzerRouter);
   app.use("/api/notes", notesRouter);
   app.use("/api/assignments", assignmentsRouter);
