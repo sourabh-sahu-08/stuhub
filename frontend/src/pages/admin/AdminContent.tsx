@@ -252,8 +252,8 @@ export function AdminContent() {
   );
 
   const uniqueSubjects = Array.from(new Set(subjects.map(s => s.name)));
-  const uniqueBranches = Array.from(new Set(subjects.map(s => s.department?.code || s.departmentCode || s.branch).filter(Boolean)));
-  if (uniqueBranches.length === 0) uniqueBranches.push("CSE", "IT", "ECE", "EEE", "MECH", "CIVIL"); // Fallback
+  const existingBranches = Array.from(new Set(subjects.map(s => s.department?.code || s.departmentCode || s.branch).filter(Boolean)));
+  const uniqueBranches = Array.from(new Set([...existingBranches, "CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "AIDS", "AIML"]));
 
   return (
     <div className="space-y-6">
@@ -397,7 +397,10 @@ export function AdminContent() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Subject</label>
-                  <input required type="text" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. Operating Systems" />
+                  <input required list="subject-options" type="text" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. Operating Systems" />
+                  <datalist id="subject-options">
+                    {uniqueSubjects.map(sub => <option key={sub as string} value={sub as string} />)}
+                  </datalist>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Branch</label>
