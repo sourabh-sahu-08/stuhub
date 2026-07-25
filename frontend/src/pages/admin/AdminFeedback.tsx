@@ -69,7 +69,7 @@ export function AdminFeedback() {
           <p className="text-zinc-400 text-sm mt-1">Review issues and suggestions submitted from the landing page.</p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <div className="flex bg-[#0A0A0A] border border-[#222] rounded-lg p-1">
             {(['all', 'issue', 'suggestion'] as const).map(t => (
               <button
