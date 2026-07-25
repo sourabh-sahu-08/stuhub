@@ -83,7 +83,7 @@ export function AdminOverview() {
       {/* System Settings */}
       <div>
         <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">System Settings</h2>
-        <div className="rounded-2xl border border-[#222] overflow-hidden bg-[#111] p-5 flex items-center justify-between shadow-lg">
+        <div className="rounded-2xl border border-[#222] overflow-hidden bg-[#111] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF9000] to-[#E58100] flex items-center justify-center text-black shadow-lg shadow-[#FF9000]/20">
               <Bot size={24} strokeWidth={2.5} />
@@ -107,7 +107,7 @@ export function AdminOverview() {
         <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Recent Signups</h2>
         <div className="rounded-2xl border border-[#222] overflow-hidden shadow-lg bg-[#111]">
           {users.slice(0, 5).map((u, i) => (
-            <div key={u._id} className={`flex items-center justify-between px-5 py-4 ${i !== 0 ? "border-t border-[#222]" : ""}`}>
+            <div key={u._id} className={`flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 ${i !== 0 ? "border-t border-[#222]" : ""}`}>
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-[#FF9000]/10 flex items-center justify-center text-[#FF9000] font-bold text-sm shadow-inner">
                   {u.name[0].toUpperCase()}

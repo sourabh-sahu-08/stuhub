@@ -1223,7 +1223,7 @@ export function LoginPage() {
                           type="text"
                           value={rollNumber}
                           onChange={(e) => setRollNumber(e.target.value)}
-                          placeholder="e.g. CSE-24-001"
+                          placeholder="Enter your roll no"
                           className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                         />
                       </div>
