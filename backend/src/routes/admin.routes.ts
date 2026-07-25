@@ -2,6 +2,7 @@ import { Router, Response, NextFunction } from "express";
 import { User } from "../models/User.js";
 import { Note } from "../models/Note.js";
 import { Pyq } from "../models/Pyq.js";
+import { CtPyq } from "../models/CtPyq.js";
 import { Assignment } from "../models/Assignment.js";
 import { Feedback } from "../models/Feedback.js";
 import { Subject, Department } from "../models/Academic.js";
@@ -111,7 +112,7 @@ router.get("/pyqs", async (_req, res, next) => {
   try {
     const pyqs = await Pyq.find()
       .select("-fileData")
-      .populate("uploadedBy", "name email")
+      .populate("user", "name email")
       .sort({ createdAt: -1 });
     res.json(pyqs);
   } catch (error) {
@@ -146,6 +147,51 @@ router.delete("/pyqs/:id", async (req, res, next) => {
     const pyq = await Pyq.findByIdAndDelete(req.params.id);
     if (!pyq) return res.status(404).json({ message: "PYQ not found" });
     res.json({ message: "PYQ deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── CT-PYQs (Admin: all papers) ───────────────────────────────────────────────
+router.get("/ct-pyqs", async (_req, res, next) => {
+  try {
+    const ctPyqs = await CtPyq.find()
+      .select("-fileData")
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+    res.json(ctPyqs);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/ct-pyqs/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { paperName, subject, semester, syllabus, branch, driveUrl } = req.body;
+    if (!paperName || !subject || !semester || !syllabus || !branch || !driveUrl) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const ctPyq = await CtPyq.create({
+      user: req.user?.id,
+      paperName,
+      subject,
+      semester: parseInt(semester),
+      syllabus,
+      branch,
+      driveUrl
+    });
+    res.status(201).json(ctPyq);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/ct-pyqs/:id", async (req, res, next) => {
+  try {
+    const ctPyq = await CtPyq.findByIdAndDelete(req.params.id);
+    if (!ctPyq) return res.status(404).json({ message: "CT-PYQ not found" });
+    res.json({ message: "CT-PYQ deleted" });
   } catch (error) {
     next(error);
   }
