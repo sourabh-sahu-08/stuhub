@@ -9,7 +9,7 @@ export interface V4QuestionCard {
   frequency: number;
   confidence: number;
   papers: V4PaperMetadata[];
-  variants: string[];
+  variants: { text: string; year: string }[];
 }
 
 export interface V4TopicGroup {

@@ -190,7 +190,10 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       const allYears = Array.from(allYearsSet);
 
       // 3. Multi-Stage Pipeline: V4 Clustering
-      const validUnitNames = parsedSyllabusUnits.map(u => u.name);
+      let validUnitNames = parsedSyllabusUnits.map(u => u.name);
+      if (validUnitNames.length === 0) {
+        validUnitNames = ["Unit 1", "Unit 2", "Unit 3", "Unit 4", "Unit 5"];
+      }
       const clusters = await ClusteringService.clusterQuestions(syllabusText, validUnitNames, allRawQuestions);
 
       let totalUnique = clusters.length;
@@ -226,8 +229,16 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
           }
         }
 
-        const allTexts = Array.from(new Set(clusterRawQuestions.map(q => q.rawQuestion)));
-        const variants = allTexts.filter(t => t !== repQuestion);
+        const allTextsMap = new Map<string, string>(); // maps exact question text to its year
+        clusterRawQuestions.forEach(q => {
+          if (!allTextsMap.has(q.rawQuestion)) {
+            allTextsMap.set(q.rawQuestion, q.paperYear || "Unknown");
+          }
+        });
+
+        const variants = Array.from(allTextsMap.entries())
+          .filter(([t]) => t !== repQuestion)
+          .map(([text, year]) => ({ text, year }));
 
         const papersMetadata = clusterRawQuestions.map(q => ({
           year: q.paperYear || "Unknown",

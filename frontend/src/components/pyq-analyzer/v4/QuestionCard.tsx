@@ -54,9 +54,14 @@ export const QuestionCard: React.FC<Props> = ({ question }) => {
           {variantsExpanded && (
             <div className="mt-4 space-y-3 pl-4 border-l-2 border-gray-700">
               {question.variants.map((v, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <FileText className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
-                  <p className="text-sm text-gray-300">{v}</p>
+                <div key={i} className="flex items-start gap-3 justify-between bg-gray-800/30 p-2 rounded">
+                  <div className="flex items-start gap-3">
+                    <FileText className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+                    <p className="text-sm text-gray-300">{v.text}</p>
+                  </div>
+                  <span className="text-xs font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded shrink-0">
+                    {v.year}
+                  </span>
                 </div>
               ))}
             </div>

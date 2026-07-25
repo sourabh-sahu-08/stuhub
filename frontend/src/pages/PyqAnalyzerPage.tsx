@@ -103,13 +103,13 @@ export function PyqAnalyzerPage() {
 
     // 2. Search Term
     if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
+      const qLower = searchTerm.toLowerCase();
       result.forEach(u => {
         u.topics.forEach(t => {
           t.questions = t.questions.filter(q => 
-            q.question.toLowerCase().includes(term) || 
-            q.topic.toLowerCase().includes(term) ||
-            q.variants.some(v => v.toLowerCase().includes(term))
+            t.topic.toLowerCase().includes(qLower) ||
+            q.question.toLowerCase().includes(qLower) ||
+            q.variants.some(v => v.text.toLowerCase().includes(qLower))
           );
         });
       });
