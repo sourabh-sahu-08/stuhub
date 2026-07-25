@@ -401,102 +401,52 @@ export function NotesPage() {
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col space-y-8">
-                {subjectOptions.map(subject => {
-                  const subjectNotes = notes.filter(n => 
-                    n.subject?.toLowerCase() === subject.name.toLowerCase() || 
-                    n.subject?.toLowerCase() === subject.code.toLowerCase()
-                  );
-                  
-                  return (
-                    <div key={subject.code} className="flex flex-col space-y-3">
-                      <div className="flex items-center gap-2 border-b border-[#27272D] pb-2">
-                        <BookOpen size={18} className="text-[#F5A524]" />
-                        <h2 className="text-lg font-bold text-white">
-                          {subject.name} <span className="text-zinc-500 text-sm font-normal ml-2">({subject.code})</span>
-                        </h2>
+              <>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {subjectOptions.map(subject => {
+                    const subjectNotes = notes.filter(n => 
+                      n.subject?.toLowerCase() === subject.name.toLowerCase() || 
+                      n.subject?.toLowerCase() === subject.code.toLowerCase()
+                    );
+                    
+                    return (
+                      <div
+                        key={subject.code}
+                        onClick={() => {
+                          if (subjectNotes.length > 0) {
+                            const noteToOpen = subjectNotes.find(n => n.driveUrl) || subjectNotes[0];
+                            if (noteToOpen.driveUrl) {
+                              window.open(noteToOpen.driveUrl, "_blank");
+                            } else {
+                              handleView(noteToOpen);
+                            }
+                          } else {
+                            alert(`No notes uploaded for ${subject.name} yet.`);
+                          }
+                        }}
+                        className="group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-xl border border-outline bg-surface p-6 transition-all hover:border-[#F5A524] hover:bg-surface-container"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F5A524]/10 text-[#F5A524] transition-colors group-hover:bg-[#F5A524] group-hover:text-black">
+                            <BookOpen size={24} />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-zinc-200 group-hover:text-white">{subject.name}</h3>
+                            <p className="text-xs text-zinc-500 font-mono mt-1">{subject.code}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between border-t border-outline pt-4">
+                          <span className="text-xs text-zinc-500 font-medium">
+                            {subjectNotes.length} {subjectNotes.length === 1 ? 'Resource' : 'Resources'}
+                          </span>
+                          {subjectNotes.length > 0 && (
+                            <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
+                          )}
+                        </div>
                       </div>
-                      
-                      {subjectNotes.length === 0 ? (
-                        <div className="rounded-lg border border-dashed border-[#27272D] p-6 text-center text-zinc-500">
-                          <p className="text-sm">No notes uploaded for {subject.name} yet.</p>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          {subjectNotes.map(note => (
-                            <div
-                              key={note._id}
-                              className="flex flex-col justify-between rounded-lg border border-outline bg-surface p-4 transition-colors hover:border-[#3F3F46]"
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex items-start gap-3 min-w-0">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-surface-container text-zinc-500">
-                                    <FileText size={18} />
-                                  </div>
-                                  <div className="min-w-0">
-                                    <h4 className="truncate text-sm font-bold text-zinc-200">
-                                      {note.title}
-                                    </h4>
-                                    <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
-                                      <span className="rounded bg-[#F5A524]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#F5A524]">
-                                        {note.subject}
-                                      </span>
-                                      <span className="rounded bg-[#27272D] px-2 py-0.5 text-[9px] font-mono text-zinc-400 uppercase">
-                                        {note.syllabus} Syllabus
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-          
-                                {user?.id === note.user?._id && (
-                                  <button
-                                    onClick={() => handleDelete(note._id)}
-                                    className="shrink-0 p-1.5 rounded text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                                    title="Delete Notes"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                )}
-                              </div>
-          
-                              <div className="mt-6 flex flex-col gap-3 border-t border-outline pt-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[9px] text-zinc-500">
-                                  <span className="flex items-center gap-1">
-                                    <Calendar size={10} />
-                                    {new Date(note.createdAt).toLocaleDateString()}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <User size={10} />
-                                    {note.user?.name ?? "Anonymous"}
-                                  </span>
-                                </div>
-          
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => handleView(note)}
-                                    className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
-                                  >
-                                    <Eye size={12} /> View
-                                  </button>
-                                  {!note.driveUrl && (
-                                    <button
-                                      onClick={() =>
-                                        handleDownload(note._id, note.fileName, note.mimeType)
-                                      }
-                                      className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
-                                    >
-                                      <Download size={12} /> Download
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
 
                 {/* Other/Uncategorized Notes */}
                 {notes.filter(n => !subjectOptions.some(s => s.name.toLowerCase() === n.subject?.toLowerCase() || s.code.toLowerCase() === n.subject?.toLowerCase())).length > 0 && (
@@ -580,7 +530,7 @@ export function NotesPage() {
                     </div>
                   </div>
                 )}
-              </div>
+              </>
             )}
           </motion.div>
         )}

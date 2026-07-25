@@ -408,102 +408,52 @@ export function PyqPage() {
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col space-y-8">
-                {subjectOptions.map(subject => {
-                  const subjectPapers = papers.filter(p => 
-                    p.subject?.toLowerCase() === subject.name.toLowerCase() || 
-                    p.subject?.toLowerCase() === subject.code.toLowerCase()
-                  );
-                  
-                  return (
-                    <div key={subject.code} className="flex flex-col space-y-3">
-                      <div className="flex items-center gap-2 border-b border-[#27272D] pb-2">
-                        <BookOpen size={18} className="text-[#F5A524]" />
-                        <h2 className="text-lg font-bold text-white">
-                          {subject.name} <span className="text-zinc-500 text-sm font-normal ml-2">({subject.code})</span>
-                        </h2>
+              <>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {subjectOptions.map(subject => {
+                    const subjectPapers = papers.filter(p => 
+                      p.subject?.toLowerCase() === subject.name.toLowerCase() || 
+                      p.subject?.toLowerCase() === subject.code.toLowerCase()
+                    );
+                    
+                    return (
+                      <div
+                        key={subject.code}
+                        onClick={() => {
+                          if (subjectPapers.length > 0) {
+                            const paperToOpen = subjectPapers.find(p => p.driveUrl) || subjectPapers[0];
+                            if (paperToOpen.driveUrl) {
+                              window.open(paperToOpen.driveUrl, "_blank");
+                            } else {
+                              handleView(paperToOpen);
+                            }
+                          } else {
+                            alert(`No PYQs uploaded for ${subject.name} yet.`);
+                          }
+                        }}
+                        className="group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-xl border border-outline bg-surface p-6 transition-all hover:border-[#F5A524] hover:bg-surface-container"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F5A524]/10 text-[#F5A524] transition-colors group-hover:bg-[#F5A524] group-hover:text-black">
+                            <BookOpen size={24} />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-zinc-200 group-hover:text-white">{subject.name}</h3>
+                            <p className="text-xs text-zinc-500 font-mono mt-1">{subject.code}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between border-t border-outline pt-4">
+                          <span className="text-xs text-zinc-500 font-medium">
+                            {subjectPapers.length} {subjectPapers.length === 1 ? 'Resource' : 'Resources'}
+                          </span>
+                          {subjectPapers.length > 0 && (
+                            <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
+                          )}
+                        </div>
                       </div>
-                      
-                      {subjectPapers.length === 0 ? (
-                        <div className="rounded-lg border border-dashed border-[#27272D] p-6 text-center text-zinc-500">
-                          <p className="text-sm">No PYQs uploaded for {subject.name} yet.</p>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          {subjectPapers.map(paper => (
-                            <div
-                              key={paper._id}
-                              className="flex flex-col justify-between rounded-lg border border-outline bg-surface p-4 transition-colors hover:border-[#3F3F46]"
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex items-start gap-3 min-w-0">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-surface-container text-zinc-500">
-                                    <FileText size={18} />
-                                  </div>
-                                  <div className="min-w-0">
-                                    <h4 className="truncate text-sm font-bold text-zinc-200">
-                                      {paper.paperName}
-                                    </h4>
-                                    <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
-                                      <span className="rounded bg-[#F5A524]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#F5A524]">
-                                        {paper.subject}
-                                      </span>
-                                      <span className="rounded bg-[#27272D] px-2 py-0.5 text-[9px] font-mono text-zinc-400 uppercase">
-                                        {paper.syllabus} Syllabus
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-          
-                                {user?.id === paper.user?._id && (
-                                  <button
-                                    onClick={() => handleDelete(paper._id)}
-                                    className="shrink-0 p-1.5 rounded text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                                    title="Delete Paper"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                )}
-                              </div>
-          
-                              <div className="mt-6 flex flex-col gap-3 border-t border-outline pt-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[9px] text-zinc-500">
-                                  <span className="flex items-center gap-1">
-                                    <Calendar size={10} />
-                                    {new Date(paper.createdAt).toLocaleDateString()}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <User size={10} />
-                                    {paper.user?.name ?? "Anonymous"}
-                                  </span>
-                                </div>
-          
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => handleView(paper)}
-                                    className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
-                                  >
-                                    <Eye size={12} /> View
-                                  </button>
-                                  {!paper.driveUrl && (
-                                    <button
-                                      onClick={() =>
-                                        handleDownload(paper._id, paper.fileName, paper.mimeType, paper.driveUrl)
-                                      }
-                                      className="flex items-center gap-1.5 rounded bg-surface-container px-2.5 py-1.5 text-[10px] font-bold text-zinc-200 hover:bg-[#27272D] transition-colors"
-                                    >
-                                      <Download size={12} /> Download
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
 
                 {/* Other/Uncategorized PYQs */}
                 {papers.filter(p => !subjectOptions.some(s => s.name.toLowerCase() === p.subject?.toLowerCase() || s.code.toLowerCase() === p.subject?.toLowerCase())).length > 0 && (
@@ -587,7 +537,7 @@ export function PyqPage() {
                     </div>
                   </div>
                 )}
-              </div>
+              </>
             )}
           </motion.div>
         )}
