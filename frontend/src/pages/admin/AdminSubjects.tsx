@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { Plus, Trash2, BookOpen } from "lucide-react";
+import { Plus, Trash2, BookOpen, Edit2 } from "lucide-react";
 
 interface Department {
   _id: string;
@@ -22,6 +22,7 @@ export function AdminSubjects() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -53,16 +54,35 @@ export function AdminSubjects() {
     e.preventDefault();
     try {
       setFormLoading(true);
-      const res = await api.post("/admin/subjects", formData);
-      setSubjects(prev => [...prev, res.data]);
+      if (editingId) {
+        const res = await api.put(`/admin/subjects/${editingId}`, formData);
+        setSubjects(prev => prev.map(s => s._id === editingId ? res.data : s));
+        setEditingId(null);
+      } else {
+        const res = await api.post("/admin/subjects", formData);
+        setSubjects(prev => [...prev, res.data]);
+      }
       setShowForm(false);
       setFormData({ name: "", code: "", departmentCode: "IT", semester: "4", syllabus: "old" });
     } catch (e) {
-      console.error("Failed to create subject", e);
-      alert("Failed to create subject. Please check the department code.");
+      console.error("Failed to save subject", e);
+      alert("Failed to save subject. Please check the branch code.");
     } finally {
       setFormLoading(false);
     }
+  };
+
+  const handleEdit = (subject: Subject) => {
+    setFormData({
+      name: subject.name,
+      code: subject.code,
+      departmentCode: subject.department?.code || "IT",
+      semester: subject.semester.toString(),
+      syllabus: subject.syllabus
+    });
+    setEditingId(subject._id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id: string) => {
@@ -87,7 +107,15 @@ export function AdminSubjects() {
           <p className="text-zinc-400">Add or remove subjects dynamically across any branch and semester.</p>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            if (showForm) {
+              setShowForm(false);
+              setEditingId(null);
+              setFormData({ name: "", code: "", departmentCode: "IT", semester: "4", syllabus: "old" });
+            } else {
+              setShowForm(true);
+            }
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-[#FF9000] text-black font-semibold rounded-lg hover:bg-[#FF9000]/90 transition-colors"
         >
           {showForm ? "Cancel" : <><Plus size={18} /> Add Subject</>}
@@ -96,7 +124,9 @@ export function AdminSubjects() {
 
       {showForm && (
         <div className="bg-[#0A0A0A] border border-[#222] p-6 rounded-2xl shadow-xl">
-          <h2 className="text-xl font-bold text-white mb-6 tracking-tight">Add New Subject</h2>
+          <h2 className="text-xl font-bold text-white mb-6 tracking-tight">
+            {editingId ? "Edit Subject" : "Add New Subject"}
+          </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
             <div>
               <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Subject Name</label>
@@ -162,7 +192,7 @@ export function AdminSubjects() {
                 disabled={formLoading}
                 className="px-6 py-2.5 bg-[#FF9000] text-black font-bold rounded-lg hover:bg-[#E58100] transition-colors disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-[#FF9000]/20"
               >
-                {formLoading ? "Adding..." : <><Plus size={18} strokeWidth={3} /> Add Subject</>}
+                {formLoading ? "Saving..." : editingId ? "Update Subject" : <><Plus size={18} strokeWidth={3} /> Add Subject</>}
               </button>
             </div>
           </form>
@@ -217,13 +247,22 @@ export function AdminSubjects() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleDelete(subject._id)}
-                        className="p-2 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                        title="Delete Subject"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleEdit(subject)}
+                          className="p-2 text-zinc-500 hover:text-[#FF9000] hover:bg-[#FF9000]/10 rounded-lg transition-colors"
+                          title="Edit Subject"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(subject._id)}
+                          className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                          title="Delete Subject"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

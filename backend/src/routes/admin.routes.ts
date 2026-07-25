@@ -299,6 +299,29 @@ router.post("/subjects", async (req, res, next) => {
   }
 });
 
+router.put("/subjects/:id", async (req, res, next) => {
+  try {
+    const { name, code, departmentCode, semester, syllabus } = req.body;
+    let updateData: any = { name, code, semester: parseInt(semester), syllabus };
+    
+    if (departmentCode) {
+      const dept = await Department.findOne({ code: departmentCode.toUpperCase() });
+      if (!dept) {
+        return res.status(404).json({ message: "Department not found" });
+      }
+      updateData.department = dept._id;
+    }
+
+    const subject = await Subject.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!subject) return res.status(404).json({ message: "Subject not found" });
+    
+    const populated = await subject.populate("department", "name code");
+    res.json(populated);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.delete("/subjects/:id", async (req, res, next) => {
   try {
     const subject = await Subject.findByIdAndDelete(req.params.id);
