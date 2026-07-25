@@ -12,6 +12,7 @@ export function AdminContent() {
   const [pyqs, setPyqs] = useState<Pyq[]>([]);
   const [ctPyqs, setCtPyqs] = useState<CtPyq[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Upload state
@@ -37,16 +38,18 @@ export function AdminContent() {
 
   const loadContent = async () => {
     try {
-      const [n, p, c, a] = await Promise.all([
+      const [n, p, c, a, s] = await Promise.all([
         api.get("/admin/notes"),
         api.get("/admin/pyqs"),
         api.get("/admin/ct-pyqs"),
         api.get("/admin/assignments"),
+        api.get("/admin/subjects"),
       ]);
       setNotes(Array.isArray(n.data) ? n.data : []);
       setPyqs(Array.isArray(p.data) ? p.data : []);
       setCtPyqs(Array.isArray(c.data) ? c.data : []);
       setAssignments(Array.isArray(a.data) ? a.data : []);
+      setSubjects(Array.isArray(s.data) ? s.data : []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -248,6 +251,10 @@ export function AdminContent() {
     </div>
   );
 
+  const uniqueSubjects = Array.from(new Set(subjects.map(s => s.name)));
+  const uniqueBranches = Array.from(new Set(subjects.map(s => s.department?.code || s.departmentCode || s.branch).filter(Boolean)));
+  if (uniqueBranches.length === 0) uniqueBranches.push("CSE", "IT", "ECE", "EEE", "MECH", "CIVIL"); // Fallback
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -390,11 +397,17 @@ export function AdminContent() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Subject</label>
-                  <input required type="text" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. Operating Systems" />
+                  <select required value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors appearance-none">
+                    <option value="" disabled>Select Subject</option>
+                    {uniqueSubjects.map(sub => <option key={sub as string} value={sub as string}>{sub as string}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Branch</label>
-                  <input required type="text" value={formData.branch} onChange={e => setFormData({...formData, branch: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. IT" />
+                  <select required value={formData.branch} onChange={e => setFormData({...formData, branch: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors appearance-none">
+                    <option value="" disabled>Select Branch</option>
+                    {uniqueBranches.map(b => <option key={b as string} value={b as string}>{b as string}</option>)}
+                  </select>
                 </div>
               </div>
 
@@ -402,12 +415,14 @@ export function AdminContent() {
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Semester</label>
                   <select required value={formData.semester} onChange={e => setFormData({...formData, semester: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors appearance-none">
+                    <option value="" disabled>Select Sem</option>
                     {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Syllabus</label>
                   <select required value={formData.syllabus} onChange={e => setFormData({...formData, syllabus: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors appearance-none">
+                    <option value="" disabled>Select</option>
                     <option value="new">New</option>
                     <option value="old">Old</option>
                   </select>
