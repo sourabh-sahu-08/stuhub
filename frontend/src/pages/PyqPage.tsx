@@ -449,9 +449,30 @@ export function PyqPage() {
                           <span className="text-xs text-zinc-500 font-medium">
                             {subjectPapers.length} {subjectPapers.length === 1 ? 'Resource' : 'Resources'}
                           </span>
-                          {subjectPapers.length > 0 && (
-                            <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const paperToOpen = subjectPapers.find(p => p.driveUrl) || subjectPapers[0];
+                                toggleBookmark({
+                                  id: `pyq-subject-${subject.code}`,
+                                  title: subject.name,
+                                  type: 'pyq',
+                                  subject: subject.code,
+                                  url: paperToOpen?.driveUrl
+                                });
+                              }}
+                              className={`p-1.5 rounded transition-colors ${
+                                isBookmarked(`pyq-subject-${subject.code}`) ? "text-[#F5A524] bg-[#F5A524]/10" : "text-zinc-500 hover:text-white hover:bg-[#27272D]"
+                              }`}
+                              title="Bookmark Subject"
+                            >
+                              <Bookmark size={14} fill={isBookmarked(`pyq-subject-${subject.code}`) ? "currentColor" : "none"} />
+                            </button>
+                            {subjectPapers.length > 0 && (
+                              <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

@@ -13,11 +13,13 @@ import {
   UploadCloud,
   X,
   AlertCircle,
-  BookOpen
+  BookOpen,
+  Bookmark
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { useWorkspace } from "../context/WorkspaceContext";
 
 interface SubjectOption {
   name: string;
@@ -54,6 +56,7 @@ const BRANCHES = [
 
 export function AssignmentsPage() {
   const { user } = useAuth();
+  const { isBookmarked, toggleBookmark } = useWorkspace();
 
   // Navigation State
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -439,9 +442,30 @@ export function AssignmentsPage() {
                           <span className="text-xs text-zinc-500 font-medium">
                             {subjectAssignments.length} {subjectAssignments.length === 1 ? 'Resource' : 'Resources'}
                           </span>
-                          {subjectAssignments.length > 0 && (
-                            <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const assignmentToOpen = subjectAssignments.find(a => a.driveUrl) || subjectAssignments[0];
+                                toggleBookmark({
+                                  id: `assignment-subject-${subject.code}`,
+                                  title: subject.name,
+                                  type: 'assignment',
+                                  subject: subject.code,
+                                  url: assignmentToOpen?.driveUrl
+                                });
+                              }}
+                              className={`p-1.5 rounded transition-colors ${
+                                isBookmarked(`assignment-subject-${subject.code}`) ? "text-[#F5A524] bg-[#F5A524]/10" : "text-zinc-500 hover:text-white hover:bg-[#27272D]"
+                              }`}
+                              title="Bookmark Subject"
+                            >
+                              <Bookmark size={14} fill={isBookmarked(`assignment-subject-${subject.code}`) ? "currentColor" : "none"} />
+                            </button>
+                            {subjectAssignments.length > 0 && (
+                              <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

@@ -442,9 +442,30 @@ export function NotesPage() {
                           <span className="text-xs text-zinc-500 font-medium">
                             {subjectNotes.length} {subjectNotes.length === 1 ? 'Resource' : 'Resources'}
                           </span>
-                          {subjectNotes.length > 0 && (
-                            <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const noteToOpen = subjectNotes.find(n => n.driveUrl) || subjectNotes[0];
+                                toggleBookmark({
+                                  id: `note-subject-${subject.code}`,
+                                  title: subject.name,
+                                  type: 'note',
+                                  subject: subject.code,
+                                  url: noteToOpen?.driveUrl
+                                });
+                              }}
+                              className={`p-1.5 rounded transition-colors ${
+                                isBookmarked(`note-subject-${subject.code}`) ? "text-[#F5A524] bg-[#F5A524]/10" : "text-zinc-500 hover:text-white hover:bg-[#27272D]"
+                              }`}
+                              title="Bookmark Subject"
+                            >
+                              <Bookmark size={14} fill={isBookmarked(`note-subject-${subject.code}`) ? "currentColor" : "none"} />
+                            </button>
+                            {subjectNotes.length > 0 && (
+                              <span className="material-symbols-outlined text-sm text-[#F5A524]">open_in_new</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
