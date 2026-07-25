@@ -73,22 +73,22 @@ const features = [
     }
   },
   {
-    title: "Digital Library",
-    shortTitle: "Library",
-    description: "Upload, store, and organize course materials. Find uploaded notes, slides, and syllabus documents with instant text search.",
+    title: "Academic Repositories",
+    shortTitle: "Library & PYQs",
+    description: "Access an organized repository of Notes, University PYQs, and Class Test (CT) PYQs. All grouped neatly by semester and subject.",
     icon: Library,
     color: "from-emerald-500 to-teal-500",
     bullets: [
-      "Category tagging (Notes, Labs, Papers)",
-      "Multi-format file attachments",
-      "Quick search index"
+      "Notes, PYQs, and CT PYQs",
+      "Organized by Subject Cards",
+      "Direct Google Drive integration"
     ],
     mockup: {
       type: "library",
       files: [
-        { name: "DBMS_Syllabus_2026.pdf", size: "1.2 MB", tag: "Syllabus" },
-        { name: "OS_Lecture_5.pdf", size: "4.8 MB", tag: "Lecture Notes" },
-        { name: "AI_Search_Algorithms.png", size: "850 KB", tag: "Diagram" }
+        { title: "Operating Systems", subject: "OS", branch: "CSE", sem: 4 },
+        { title: "Database Mgmt", subject: "DBMS", branch: "CSE", sem: 4 },
+        { title: "Computer Networks", subject: "CN", branch: "CSE", sem: 6 }
       ]
     }
   },
@@ -866,16 +866,14 @@ export function LoginPage() {
                         {filteredFiles.map((file: any, idx: number) => (
                           <div
                             key={idx}
-                            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-[#111111] transition-colors text-left group"
+                            className="flex items-center gap-3 p-3 rounded-lg border border-[#222222] bg-[#111111] hover:border-[#FF9000] transition-colors cursor-pointer group mb-2"
                           >
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded bg-[#111111] flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
-                                <FileText size={14} />
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors line-clamp-1">{file.name || file.title}</p>
-                                <p className="text-xs text-zinc-500 mt-0.5">{file.tag || file.module?.name} • {file.size || "PDF"}</p>
-                              </div>
+                            <div className="w-10 h-10 rounded-lg bg-[#FF9000]/10 text-[#FF9000] flex items-center justify-center group-hover:bg-[#FF9000] group-hover:text-black transition-colors">
+                              <BookOpen size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">{file.name || file.title}</p>
+                              <p className="text-xs text-zinc-500 mt-0.5 font-mono">{file.subject || file.tag || "Subject"} • {file.branch || "CSE"}</p>
                             </div>
                           </div>
                         ))}
