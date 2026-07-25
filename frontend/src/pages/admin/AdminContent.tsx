@@ -397,10 +397,7 @@ export function AdminContent() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Subject</label>
-                  <select required value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors appearance-none">
-                    <option value="" disabled>Select Subject</option>
-                    {uniqueSubjects.map(sub => <option key={sub as string} value={sub as string}>{sub as string}</option>)}
-                  </select>
+                  <input required type="text" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. Operating Systems" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Branch</label>
