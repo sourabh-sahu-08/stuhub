@@ -35,22 +35,22 @@ import { api } from "../lib/api";
 
 const features = [
   {
-    title: "Assignments Tracker",
+    title: "Assignment Solutions",
     shortTitle: "Assignments",
-    description: "Centralize your coursework. Monitor deadlines, track submission status, and record scores in a structured student workflow.",
+    description: "Centralize your coursework. Access and download comprehensive assignment solutions and study guides.",
     icon: ClipboardList,
     color: "from-blue-500 to-indigo-500",
     bullets: [
-      "Deadlines alert & notification bubble",
-      "Status badges (Not Started, In Progress, Submitted)",
-      "Credit and score weighting calculations"
+      "Branch & semester specific solutions",
+      "Direct Google Drive integration",
+      "Downloadable PDF guides"
     ],
     mockup: {
       type: "assignments",
       data: [
-        { title: "DBMS Assignment 3", due: "Tomorrow", status: "In Progress", weight: "10%" },
-        { title: "OS Kernel Lab", due: "July 8", status: "Not Started", weight: "15%" },
-        { title: "Applied AI Midterm Project", due: "Completed", status: "Submitted", weight: "20%" }
+        { title: "DBMS Assignment 3", subject: "DBMS", branch: "CSE", sem: "4" },
+        { title: "OS Kernel Lab", subject: "OS", branch: "CSE", sem: "4" },
+        { title: "Applied AI Midterm Project", subject: "AI", branch: "CSE", sem: "6" }
       ]
     }
   },
@@ -770,55 +770,21 @@ export function LoginPage() {
                   <div className="bg-[#0A0A0A] rounded-xl border border-[#222222] shadow-xl overflow-hidden relative">
                     {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase z-10">Preview</div>}
                     <div className="border-b border-[#222222] bg-[#111111] px-5 py-4 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-white">Tasks</span>
-                      <span className="text-xs font-medium px-2 py-1 bg-white text-black rounded">{user ? `${metrics.pendingAssignments} Active` : '3 Active'}</span>
+                      <span className="text-sm font-semibold text-white">Solutions</span>
+                      <span className="text-xs font-medium px-2 py-1 bg-[#FF9000]/10 text-[#FF9000] rounded">CSE | Sem 4</span>
                     </div>
-                    <div className="p-2 space-y-1 h-[300px] overflow-y-auto">
-                      {user ? (
-                        assignments.map((item: any) => (
-                          <div
-                            key={item._id}
-                            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-[#111111] transition-colors text-left group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                                item.status === 'Submitted' ? 'bg-[#FF9000] border-[#FF9000]' : 'border-[#444444] group-hover:border-[#666666]'
-                              }`}>
-                                {item.status === 'Submitted' && <CheckCircle size={10} className="text-white" />}
-                              </div>
-                              <div>
-                                <p className={`text-sm font-medium transition-colors ${item.status === 'Submitted' ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
-                                  {item.title}
-                                </p>
-                                <p className="text-xs text-zinc-500 mt-0.5">{item.module?.name || item.module}</p>
-                              </div>
-                            </div>
-                            <span className="text-xs text-zinc-500">{new Date(item.dueDate).toLocaleDateString()}</span>
+                    <div className="p-4 grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto">
+                      {(features[activeFeature].mockup.data as any[]).map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-3 rounded-lg border border-[#222222] bg-[#111111] hover:border-[#FF9000] transition-colors cursor-pointer group">
+                          <div className="w-10 h-10 rounded-lg bg-[#FF9000]/10 text-[#FF9000] flex items-center justify-center group-hover:bg-[#FF9000] group-hover:text-black transition-colors">
+                            <BookOpen size={18} />
                           </div>
-                        ))
-                      ) : (
-                        mockAssignments.map((item) => (
-                          <div
-                            key={item.id}
-                            className="w-full flex items-center justify-between p-3 rounded-lg bg-[#111111] transition-colors text-left group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                                item.status === 'Submitted' ? 'bg-[#FF9000] border-[#FF9000]' : 'border-[#444444]'
-                              }`}>
-                                {item.status === 'Submitted' && <CheckCircle size={10} className="text-white" />}
-                              </div>
-                              <div>
-                                <p className={`text-sm font-medium transition-colors ${item.status === 'Submitted' ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
-                                  {item.title}
-                                </p>
-                                <p className="text-xs text-zinc-500 mt-0.5">{item.weight} of final grade</p>
-                              </div>
-                            </div>
-                            <span className="text-xs text-zinc-500">{item.due}</span>
+                          <div>
+                            <p className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors">{item.title}</p>
+                            <p className="text-xs text-zinc-500 font-mono mt-0.5">{item.subject}</p>
                           </div>
-                        ))
-                      )}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

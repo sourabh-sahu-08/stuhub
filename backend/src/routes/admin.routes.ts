@@ -201,9 +201,32 @@ router.delete("/ct-pyqs/:id", async (req, res, next) => {
 router.get("/assignments", async (_req, res, next) => {
   try {
     const assignments = await Assignment.find()
-      .populate("userId", "name email")
-      .sort({ dueDate: 1 });
+      .select("-fileData")
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
     res.json(assignments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/assignments/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { title, subject, semester, syllabus, branch, driveUrl } = req.body;
+    if (!title || !subject || !semester || !syllabus || !branch || !driveUrl) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const assignment = await Assignment.create({
+      user: req.user?.id,
+      title,
+      subject,
+      semester: parseInt(semester),
+      syllabus,
+      branch,
+      driveUrl
+    });
+    res.status(201).json(assignment);
   } catch (error) {
     next(error);
   }

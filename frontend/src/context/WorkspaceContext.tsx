@@ -72,8 +72,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     try {
       const [metricsRes, assignmentsRes, notesRes] = await Promise.all([
         api.get("/dashboard/metrics").catch(() => ({ data: { metrics: defaultMetrics } })),
-        api.get("/assignments").catch(() => ({ data: [] })),
-        api.get("/notes/recent").catch(() => ({ data: [] })),
+        api.get("/assignments/recent").catch(() => ({ data: [] })),
+        api.get("/notes/recent").catch(() => ({ data: [] }))
       ]);
 
       setAssignments(assignmentsRes.data);
@@ -82,7 +82,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setMetrics({
         ...metricsRes.data.metrics,
         attendancePercentage: getLocalAttendance(),
-        pendingAssignments: assignmentsRes.data.filter((a: any) => a.status !== "Submitted").length
+        pendingAssignments: 0
       });
     } catch (err) {
       console.error("Failed to fetch workspace metrics", err);

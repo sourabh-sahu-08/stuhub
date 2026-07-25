@@ -1,34 +1,32 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IAssignment extends Document {
-  userId: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
   title: string;
-  course?: string;
-  description?: string;
-  status: "Not Started" | "In Progress" | "Submitted";
-  givenDate: Date;
-  dueDate: Date;
-  reminderTime?: Date;
-  weight?: string;
+  subject: string;
+  semester: number; // 1 to 8
+  syllabus: "new" | "old";
+  branch: string; // IT, CSE, MECHNICAL, etc.
+  fileName?: string;
+  fileData?: string; // Base64 representation of file
+  mimeType?: string; // File mime type
+  driveUrl?: string; // Drive link for the note
   createdAt: Date;
   updatedAt: Date;
 }
 
 const assignmentSchema = new Schema<IAssignment>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     title: { type: String, required: true },
-    course: { type: String },
-    description: { type: String },
-    status: {
-      type: String,
-      enum: ["Not Started", "In Progress", "Submitted"],
-      default: "Not Started",
-    },
-    givenDate: { type: Date, default: Date.now },
-    dueDate: { type: Date, required: true },
-    reminderTime: { type: Date },
-    weight: { type: String },
+    subject: { type: String, required: true },
+    semester: { type: Number, required: true, min: 1, max: 8 },
+    syllabus: { type: String, enum: ["new", "old"], required: true },
+    branch: { type: String, required: true },
+    fileName: { type: String },
+    fileData: { type: String },
+    mimeType: { type: String },
+    driveUrl: { type: String }
   },
   { timestamps: true }
 );

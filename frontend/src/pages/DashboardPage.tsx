@@ -6,14 +6,14 @@ import { api } from "../lib/api";
 
 const QUICK_LINKS = [
   { label: "Attendance", icon: "calendar_month", to: "/dashboard/attendance", desc: "Track your class attendance" },
-  { label: "Assignments", icon: "assignment", to: "/dashboard/assignments", desc: "Manage your coursework" },
+  { label: "Assignments", icon: "assignment", to: "/dashboard/assignments", desc: "Assignment solutions & guides" },
   { label: "Notes", icon: "folder_open", to: "/dashboard/library", desc: "Access your study notes" },
   { label: "PYQs", icon: "description", to: "/dashboard/pyq", desc: "Browse past exam papers" },
 ];
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const { metrics, recentNotes, loading } = useWorkspace();
+  const { metrics, recentNotes, assignments, loading } = useWorkspace();
 
   const overallAttendance = metrics.attendancePercentage;
   const attendanceOk = overallAttendance >= 75;
@@ -49,15 +49,15 @@ export function DashboardPage() {
           </p>
         </div>
 
-        {/* Deadlines */}
+        {/* Assignments */}
         <div className="p-5 rounded-xl border border-[#333] bg-[#111]">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs text-zinc-400 font-medium">Upcoming Tasks</p>
-            <span className="material-symbols-outlined text-[18px] text-[#FF9000]">timer</span>
+            <p className="text-xs text-zinc-400 font-medium">Assignment Solutions</p>
+            <span className="material-symbols-outlined text-[18px] text-[#FF9000]">assignment</span>
           </div>
-          <p className="text-3xl font-extrabold text-white">{metrics.pendingAssignments}</p>
+          <p className="text-3xl font-extrabold text-white">{assignments.length > 0 ? assignments.length : "—"}</p>
           <p className="text-[11px] mt-1 text-zinc-500">
-            {metrics.pendingAssignments === 0 ? "Nothing due — you're all set" : "pending assignments"}
+            {assignments.length > 0 ? "recently added" : "No assignments yet"}
           </p>
         </div>
 

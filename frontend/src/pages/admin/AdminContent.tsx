@@ -6,15 +6,16 @@ interface Pyq  { _id: string; paperName: string; subject: string; semester: numb
 interface CtPyq { _id: string; paperName: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; }
 
 export function AdminContent() {
-  const [tab, setTab] = useState<"notes" | "pyqs" | "ct-pyqs">("notes");
+  const [tab, setTab] = useState<"notes" | "pyqs" | "ct-pyqs" | "assignments">("notes");
   const [notes, setNotes] = useState<Note[]>([]);
   const [pyqs, setPyqs] = useState<Pyq[]>([]);
   const [ctPyqs, setCtPyqs] = useState<CtPyq[]>([]);
+  const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Upload state
   const [showUpload, setShowUpload] = useState(false);
-  const [uploadType, setUploadType] = useState<"note"|"pyq"|"ct-pyq">("note");
+  const [uploadType, setUploadType] = useState<"note"|"pyq"|"ct-pyq"|"assignment">("note");
   const [uploadMethod, setUploadMethod] = useState<"link"|"file">("link");
   const [uploadLoading, setUploadLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -36,14 +37,16 @@ export function AdminContent() {
 
   const loadContent = async () => {
     try {
-      const [n, p, c] = await Promise.all([
+      const [n, p, c, a] = await Promise.all([
         api.get("/admin/notes"),
         api.get("/admin/pyqs"),
         api.get("/admin/ct-pyqs"),
+        api.get("/admin/assignments"),
       ]);
       setNotes(Array.isArray(n.data) ? n.data : []);
       setPyqs(Array.isArray(p.data) ? p.data : []);
       setCtPyqs(Array.isArray(c.data) ? c.data : []);
+      setAssignments(Array.isArray(a.data) ? a.data : []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -70,9 +73,18 @@ export function AdminContent() {
             branch: formData.branch,
             driveUrl: formData.driveUrl
           });
-        } else {
+        } else if (uploadType === "ct-pyq") {
           await api.post("/admin/ct-pyqs/link", {
             paperName: finalTitle,
+            subject: formData.subject,
+            semester: formData.semester,
+            syllabus: formData.syllabus,
+            branch: formData.branch,
+            driveUrl: formData.driveUrl
+          });
+        } else {
+          await api.post("/admin/assignments/link", {
+            title: finalTitle,
             subject: formData.subject,
             semester: formData.semester,
             syllabus: formData.syllabus,
@@ -100,7 +112,7 @@ export function AdminContent() {
         data.append("syllabus", formData.syllabus);
         data.append("branch", formData.branch);
 
-        const endpoint = uploadType === "note" ? "/notes/upload" : uploadType === "pyq" ? "/pyq/upload" : "/ct-pyq/upload";
+        const endpoint = uploadType === "note" ? "/notes/upload" : uploadType === "pyq" ? "/pyq/upload" : uploadType === "ct-pyq" ? "/ct-pyq/upload" : "/assignments/upload";
         
         await api.post(endpoint, data, {
           headers: { "Content-Type": "multipart/form-data" }
@@ -119,7 +131,7 @@ export function AdminContent() {
     }
   };
 
-  const deleteItem = async (id: string, type: "notes"|"pyqs"|"ct-pyqs", title: string) => {
+  const deleteItem = async (id: string, type: "notes"|"pyqs"|"ct-pyqs"|"assignments", title: string) => {
     if (!window.confirm(`Delete "${title}"?`)) return;
     try {
       await api.delete(`/admin/${type}/${id}`);
@@ -130,13 +142,13 @@ export function AdminContent() {
     }
   };
 
-  const handleDownload = async (item: Note | Pyq | CtPyq, type: "notes"|"pyqs"|"ct-pyqs") => {
+  const handleDownload = async (item: any, type: "notes"|"pyqs"|"ct-pyqs"|"assignments") => {
     if (item.driveUrl) {
       window.open(item.driveUrl, "_blank");
       return;
     }
     
-    const endpoint = type === "notes" ? "/notes" : type === "pyqs" ? "/pyq" : "/ct-pyq";
+    const endpoint = type === "notes" ? "/notes" : type === "pyqs" ? "/pyq" : type === "ct-pyqs" ? "/ct-pyq" : "/assignments";
     try {
       const response = await api.get(`${endpoint}/download/${item._id}`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -153,13 +165,13 @@ export function AdminContent() {
     }
   };
 
-  const handleView = async (item: Note | Pyq | CtPyq, type: "notes"|"pyqs"|"ct-pyqs") => {
+  const handleView = async (item: any, type: "notes"|"pyqs"|"ct-pyqs"|"assignments") => {
     if (item.driveUrl) {
       window.open(item.driveUrl, "_blank");
       return;
     }
 
-    const endpoint = type === "notes" ? "/notes" : type === "pyqs" ? "/pyq" : "/ct-pyq";
+    const endpoint = type === "notes" ? "/notes" : type === "pyqs" ? "/pyq" : type === "ct-pyqs" ? "/ct-pyq" : "/assignments";
     try {
       const response = await api.get(`${endpoint}/download/${item._id}`, { responseType: 'blob' });
       const fileURL = URL.createObjectURL(response.data);
@@ -177,7 +189,7 @@ export function AdminContent() {
     </div>;
   }
 
-  const renderTable = (items: any[], type: "notes"|"pyqs"|"ct-pyqs") => (
+  const renderTable = (items: any[], type: "notes"|"pyqs"|"ct-pyqs"|"assignments") => (
     <table className="w-full text-left text-sm text-zinc-400">
       <thead className="bg-[#0f0f0f] text-xs uppercase border-b border-[#1f1f1f]">
         <tr>
@@ -259,12 +271,21 @@ export function AdminContent() {
         >
           CT PYQs
         </button>
+        <button
+          onClick={() => setTab("assignments")}
+          className={`flex-1 sm:flex-none px-6 py-3 font-semibold text-sm border-b-2 transition-colors ${
+            tab === "assignments" ? "border-[#FF9000] text-[#FF9000]" : "border-transparent text-zinc-500 hover:text-white"
+          }`}
+        >
+          Assignments
+        </button>
       </div>
 
       <div className="rounded-xl border border-[#1f1f1f] overflow-hidden">
         {tab === "notes" && renderTable(notes, "notes")}
         {tab === "pyqs" && renderTable(pyqs, "pyqs")}
         {tab === "ct-pyqs" && renderTable(ctPyqs, "ct-pyqs")}
+        {tab === "assignments" && renderTable(assignments, "assignments")}
       </div>
 
       {showUpload && (
@@ -272,7 +293,7 @@ export function AdminContent() {
           <div className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-2xl w-full max-w-md overflow-hidden">
             <div className="p-4 border-b border-[#1f1f1f] flex items-center justify-between">
               <h2 className="text-lg font-bold text-white">
-                Upload {uploadType === "note" ? "Note" : uploadType === "pyq" ? "PYQ" : "CT PYQ"}
+                Upload {uploadType === "note" ? "Note" : uploadType === "pyq" ? "PYQ" : uploadType === "ct-pyq" ? "CT PYQ" : "Assignment"}
               </h2>
               <button onClick={() => setShowUpload(false)} className="text-zinc-500 hover:text-white transition-colors">
                 <span className="material-symbols-outlined">close</span>
@@ -302,6 +323,13 @@ export function AdminContent() {
                   className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${uploadType === "ct-pyq" ? "bg-[#2a2a2a] text-white" : "text-zinc-500 hover:text-white"}`}
                 >
                   CT PYQ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUploadType("assignment")}
+                  className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${uploadType === "assignment" ? "bg-[#2a2a2a] text-white" : "text-zinc-500 hover:text-white"}`}
+                >
+                  Assignment
                 </button>
               </div>
 
