@@ -15,7 +15,10 @@ const registerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(["student"]).default("student")
+  role: z.enum(["student"]).default("student"),
+  branch: z.string().optional(),
+  semester: z.number().optional(),
+  rollNumber: z.string().optional()
 });
 
 authRouter.post("/register", async (req, res, next) => {
@@ -24,8 +27,10 @@ authRouter.post("/register", async (req, res, next) => {
     const exists = await User.exists({ email: data.email });
     if (exists) return res.status(409).json({ message: "Email already exists" });
 
-    const user = await User.create(data);
-    await Student.create({ user: user._id, rollNumber: `STU-${Date.now()}`, semester: 1 });
+    const user = await User.create({
+      ...data,
+      isProfileComplete: !!(data.branch && data.semester && data.rollNumber)
+    });
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
     res.status(201).json({ token, user: sanitizeUser(user) });
   } catch (error) {
@@ -54,16 +59,7 @@ authRouter.get("/me", requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const user = await User.findById(req.user?.id).populate("department", "name code");
     if (!user) return res.status(404).json({ message: "User not found" });
-    const student = await Student.findOne({ user: user._id });
-    res.json({
-      user: {
-        ...sanitizeUser(user),
-        rollNumber: student?.rollNumber,
-        semester: student?.semester,
-
-        cgpa: student?.cgpa
-      }
-    });
+    res.json({ user: sanitizeUser(user) });
   } catch (error) {
     next(error);
   }
@@ -113,12 +109,6 @@ authRouter.post("/social-login", async (req, res, next) => {
         role: "student",
         avatar,
         isProfileComplete: false
-      });
-
-      // Create temporary student document
-      await Student.create({
-        user: user._id,
-        rollNumber: `TEMP-STU-${Date.now()}`
       });
     }
 
@@ -261,7 +251,6 @@ authRouter.post("/linkedin", async (req, res, next) => {
         avatar,
         isProfileComplete: false
       });
-      await Student.create({ user: user._id, rollNumber: `TEMP-STU-${Date.now()}` });
     }
 
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
@@ -273,10 +262,11 @@ authRouter.post("/linkedin", async (req, res, next) => {
 
 authRouter.put("/complete-profile", requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    const { name, rollNumber, department, semester } = z.object({
+    const { name, rollNumber, department, branch, semester } = z.object({
       name: z.string().min(2, "Name is too short"),
       rollNumber: z.string().min(5, "Invalid roll number"),
       department: z.string().optional(),
+      branch: z.string().optional(),
       semester: z.number().min(1).max(8).optional()
     }).parse(req.body);
 
@@ -284,8 +274,8 @@ authRouter.put("/complete-profile", requireAuth, async (req: AuthRequest, res, n
     if (!userId) return res.status(401).json({ message: "Authentication required" });
 
     // Check rollNumber uniqueness
-    const existingStudent = await Student.findOne({ rollNumber, user: { $ne: userId } });
-    if (existingStudent) {
+    const existingUser = await User.findOne({ rollNumber, _id: { $ne: userId } });
+    if (existingUser) {
       return res.status(409).json({ message: "Roll number is already taken by another student" });
     }
 
@@ -293,27 +283,14 @@ authRouter.put("/complete-profile", requireAuth, async (req: AuthRequest, res, n
     if (!user) return res.status(404).json({ message: "User not found" });
 
     user.name = name;
+    user.rollNumber = rollNumber;
+    if (department) user.department = department as any;
+    if (branch) user.branch = branch;
+    if (semester) user.semester = semester;
     user.isProfileComplete = true;
     await user.save();
 
-    const student = await Student.findOne({ user: userId });
-    if (!student) return res.status(404).json({ message: "Student record not found" });
-
-    student.rollNumber = rollNumber;
-    if (department) student.department = department as any;
-    if (semester) student.semester = semester;
-    await student.save();
-
-    const token = signToken({ id: user.id, role: user.role, isProfileComplete: true });
-    res.json({
-      token,
-      user: {
-        ...sanitizeUser(user),
-        rollNumber: student.rollNumber,
-        semester: student.semester,
-        cgpa: student.cgpa
-      }
-    });
+    res.json({ message: "Profile updated successfully", user: sanitizeUser(user) });
   } catch (error) {
     next(error);
   }
@@ -328,7 +305,10 @@ function sanitizeUser(user: any) {
     role: user.role,
     avatar: user.avatar,
     isProfileComplete: user.isProfileComplete,
-    department: user.department
+    department: user.department,
+    branch: user.branch,
+    semester: user.semester,
+    rollNumber: user.rollNumber
   };
 }
 
@@ -336,6 +316,30 @@ authRouter.get("/departments", async (req, res, next) => {
   try {
     const departments = await Department.find({}, "name code");
     res.json(departments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+authRouter.put('/update-profile', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const { name, rollNumber, branch, semester } = z.object({
+      name: z.string().optional(),
+      rollNumber: z.string().optional(),
+      branch: z.string().optional(),
+      semester: z.number().optional()
+    }).parse(req.body);
+
+    const user = await User.findById(req.user?.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (name) user.name = name;
+    if (rollNumber) user.rollNumber = rollNumber;
+    if (branch) user.branch = branch;
+    if (semester) user.semester = semester;
+    
+    await user.save();
+    res.json({ message: 'Profile updated successfully', user: sanitizeUser(user) });
   } catch (error) {
     next(error);
   }

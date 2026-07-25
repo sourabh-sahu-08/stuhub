@@ -13,11 +13,13 @@ import {
   UploadCloud,
   X,
   AlertCircle,
-  BookOpen
+  BookOpen,
+  Bookmark
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { useWorkspace } from "../context/WorkspaceContext";
 
 interface SubjectOption {
   name: string;
@@ -54,6 +56,7 @@ const BRANCHES = [
 
 export function NotesPage() {
   const { user } = useAuth();
+  const { isBookmarked, toggleBookmark } = useWorkspace();
 
   // Navigation State
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -523,6 +526,16 @@ export function NotesPage() {
                                   <Download size={12} /> Download
                                 </button>
                               )}
+                              <button
+                                onClick={() => toggleBookmark({ id: note._id, title: note.title, type: 'note', subject: note.subject, url: note.driveUrl })}
+                                className={`flex items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-bold transition-colors ${
+                                  isBookmarked(note._id) ? "bg-[#F5A524]/20 text-[#F5A524]" : "bg-surface-container text-zinc-200 hover:bg-[#27272D]"
+                                }`}
+                                title="Bookmark Note"
+                              >
+                                <Bookmark size={12} fill={isBookmarked(note._id) ? "currentColor" : "none"} /> 
+                                {isBookmarked(note._id) ? "Saved" : "Save"}
+                              </button>
                             </div>
                           </div>
                         </div>

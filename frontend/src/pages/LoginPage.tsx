@@ -173,6 +173,9 @@ export function LoginPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rollNumber, setRollNumber] = useState("");
+  const [branch, setBranch] = useState("");
+  const [semester, setSemester] = useState<number | "">("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -261,23 +264,32 @@ export function LoginPage() {
     return () => clearInterval(interval);
   }, [isModalOpen]);
 
-  async function handleAuthSubmit(event: FormEvent) {
-    event.preventDefault();
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setError("");
+
     try {
       if (modalMode === "login") {
         await login(email, password);
       } else {
-        await register({ name, email, password, role: "student" });
+        await register({ 
+          name, 
+          email, 
+          password, 
+          role: "student",
+          branch,
+          semester: semester ? Number(semester) : undefined,
+          rollNumber 
+        });
       }
       setIsModalOpen(false);
     } catch (err: any) {
-      setError(err.response?.data?.message ?? "Authentication failed. Please check your credentials.");
+      setError(err.response?.data?.message || "Authentication failed. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -612,62 +624,69 @@ export function LoginPage() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
-                className="col-span-1 row-span-2 bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-6 flex flex-col justify-between hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group relative overflow-hidden"
+                className="col-span-1 row-span-2 bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-6 flex flex-col hover:border-[#333333] hover:-translate-y-[2px] hover:shadow-xl transition-all duration-200 group relative overflow-hidden"
               >
                 {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase">Preview</div>}
-                <div>
+                <div className="flex-1">
                   <div className="flex items-center justify-between mb-5">
-                    <span className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors">Assignments</span>
+                    <span className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors">Assignment Solutions</span>
                     <span className="text-[10px] font-medium text-white px-2 py-0.5 bg-[#222222] rounded-md border border-[#333]">
-                      {user ? `${metrics.pendingAssignments} Due` : "3 Due"}
+                      {user ? `${assignments.length} Solutions` : "4 Solutions"}
                     </span>
                   </div>
                   <div className="space-y-4">
                     {user ? (
-                      assignments.slice(0, 2).map((a: any, i: number) => (
-                        <div key={a._id} className="flex items-start gap-3">
-                          <div className={`w-1.5 h-1.5 rounded-full ${a.status === 'Submitted' ? 'bg-emerald-500' : 'bg-[#FF9000]'} mt-1.5 shrink-0`} />
+                      assignments.slice(0, 3).map((a: any, i: number) => (
+                        <div key={a._id} className="flex items-start gap-3 group/item">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF9000]/10 text-[#FF9000] shrink-0 group-hover/item:bg-[#FF9000] group-hover/item:text-black transition-colors">
+                            <BookOpen size={14} />
+                          </div>
                           <div>
-                            <p className="text-sm font-medium text-white line-clamp-1">{a.title}</p>
-                            <p className="text-[11px] text-zinc-500">{new Date(a.dueDate).toLocaleDateString()}</p>
+                            <p className="text-sm font-medium text-white line-clamp-1">{a.title || a.paperName || a.name || 'Assignment'}</p>
+                            <p className="text-[10px] text-zinc-500 uppercase font-mono mt-1">
+                              {a.subject || 'RESOURCE'}
+                            </p>
                           </div>
                         </div>
                       ))
                     ) : (
                       <>
-                        <div className="flex items-start gap-3">
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#FF9000] mt-1.5 shrink-0" />
+                        <div className="flex items-start gap-3 group/item">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF9000]/10 text-[#FF9000] shrink-0 group-hover/item:bg-[#FF9000] group-hover/item:text-black transition-colors">
+                            <BookOpen size={14} />
+                          </div>
                           <div>
-                            <p className="text-sm font-medium text-white">OS Kernel Lab</p>
-                            <p className="text-[11px] text-zinc-500">Tomorrow, 11:59 PM</p>
+                            <p className="text-sm font-medium text-white">OS Lab Solutions</p>
+                            <p className="text-[10px] text-zinc-500 uppercase font-mono mt-1">OPERATING SYSTEMS</p>
                           </div>
                         </div>
-                        <div className="flex items-start gap-3">
-                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-700 mt-1.5 shrink-0" />
+                        <div className="flex items-start gap-3 group/item">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#222] text-zinc-400 shrink-0 group-hover/item:bg-zinc-700 transition-colors">
+                            <BookOpen size={14} />
+                          </div>
                           <div>
-                            <p className="text-sm font-medium text-zinc-400">DBMS Schema</p>
-                            <p className="text-[11px] text-zinc-600">Jul 24</p>
+                            <p className="text-sm font-medium text-zinc-300">DBMS Assignment 2</p>
+                            <p className="text-[10px] text-zinc-600 uppercase font-mono mt-1">DATABASE SYSTEMS</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 group/item">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#222] text-zinc-400 shrink-0 group-hover/item:bg-zinc-700 transition-colors">
+                            <BookOpen size={14} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-zinc-300">Network Topology</p>
+                            <p className="text-[10px] text-zinc-600 uppercase font-mono mt-1">COMPUTER NETWORKS</p>
                           </div>
                         </div>
                       </>
                     )}
                     {user && assignments.length === 0 && (
-                      <p className="text-xs text-zinc-500 text-center py-4">No assignments yet</p>
+                      <div className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-[#222] rounded-lg bg-[#111]">
+                        <BookOpen size={20} className="text-zinc-600 mb-2" />
+                        <p className="text-xs text-zinc-500">No solutions available</p>
+                      </div>
                     )}
                   </div>
-                </div>
-                <div className="pt-5 mt-4">
-                  <div className="w-full h-1 bg-[#222222] rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: user ? (assignments.length > 0 ? "35%" : "0%") : "65%" }}
-                      transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-                      className="h-full bg-gradient-to-r from-[#FF9000]/80 to-[#FF9000]" 
-                    />
-                  </div>
-                  <p className="text-[10px] text-zinc-500 mt-2 text-right">
-                    {user ? (assignments.length > 0 ? "In Progress" : "All Clear") : "65% Completed"}
-                  </p>
                 </div>
               </motion.div>
 
@@ -771,7 +790,9 @@ export function LoginPage() {
                     {!user && <div className="absolute top-0 right-0 bg-[#FF9000]/20 text-[#FF9000] text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase z-10">Preview</div>}
                     <div className="border-b border-[#222222] bg-[#111111] px-5 py-4 flex items-center justify-between">
                       <span className="text-sm font-semibold text-white">Solutions</span>
-                      <span className="text-xs font-medium px-2 py-1 bg-[#FF9000]/10 text-[#FF9000] rounded">CSE | Sem 4</span>
+                      <span className="text-xs font-medium px-2 py-1 bg-[#FF9000]/10 text-[#FF9000] rounded">
+                        {user && (user.branch || user.semester) ? `${user.branch || 'N/A'} | Sem ${user.semester || 'N/A'}` : "CSE | Sem 4"}
+                      </span>
                     </div>
                     <div className="p-4 grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto">
                       {(features[activeFeature].mockup.data as any[]).map((item, idx) => (
@@ -873,7 +894,7 @@ export function LoginPage() {
                             </div>
                             <div>
                               <p className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">{file.name || file.title}</p>
-                              <p className="text-xs text-zinc-500 mt-0.5 font-mono">{file.subject || file.tag || "Subject"} • {file.branch || "CSE"}</p>
+                              <p className="text-xs text-zinc-500 mt-0.5 font-mono">{file.subject || file.tag || "Subject"} • {user?.branch || file.branch || "CSE"}</p>
                             </div>
                           </div>
                         ))}
@@ -1184,15 +1205,53 @@ export function LoginPage() {
 
               <form onSubmit={handleAuthSubmit} className="space-y-4">
                 {modalMode === "register" && (
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Full Name</label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
-                    />
-                  </div>
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Full Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Roll Number</label>
+                        <input
+                          type="text"
+                          value={rollNumber}
+                          onChange={(e) => setRollNumber(e.target.value)}
+                          placeholder="e.g. CSE-24-001"
+                          className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Semester</label>
+                        <select
+                          value={semester}
+                          onChange={(e) => setSemester(Number(e.target.value))}
+                          className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white appearance-none"
+                        >
+                          <option value="">Select</option>
+                          {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                            <option key={s} value={s}>Semester {s}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Branch</label>
+                      <input
+                        type="text"
+                        value={branch}
+                        onChange={(e) => setBranch(e.target.value)}
+                        placeholder="e.g. CSE, IT, ECE"
+                        className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
+                      />
+                    </div>
+                  </>
                 )}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Email</label>

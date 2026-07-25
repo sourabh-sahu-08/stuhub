@@ -13,6 +13,7 @@ export interface User {
     code: string;
   };
   rollNumber?: string;
+  branch?: string;
   semester?: number;
   cgpa?: number;
 }

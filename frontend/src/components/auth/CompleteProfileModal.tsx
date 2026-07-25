@@ -17,6 +17,7 @@ export function CompleteProfileModal() {
   const [name, setName] = useState(user?.name ?? "");
   const [rollNumber, setRollNumber] = useState("");
   const [department, setDepartment] = useState("");
+  const [branch, setBranch] = useState("");
   const [semester, setSemester] = useState<number | "">("");
   
   // UI states
@@ -65,6 +66,7 @@ export function CompleteProfileModal() {
         name,
         rollNumber,
         department,
+        branch,
         semester: Number(semester)
       });
     } catch (err: any) {
@@ -141,7 +143,20 @@ export function CompleteProfileModal() {
             </select>
           </div>
 
-          <div>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Branch */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Branch *</label>
+              <input
+                type="text"
+                required
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                placeholder="e.g. CSE"
+                className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded h-11 px-3 text-white focus:outline-none focus:border-primary transition-colors text-sm"
+              />
+            </div>
+
             {/* Semester */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Semester *</label>
