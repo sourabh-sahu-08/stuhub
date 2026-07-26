@@ -162,13 +162,11 @@ notesRouter.get("/subjects/:branch/:semester", requireAuth, async (req: AuthRequ
       return res.status(400).json({ message: "Semester must be a number between 1 and 8." });
     }
 
-    const dept = await Department.findOne({ code: req.params.branch.toUpperCase() });
-    if (!dept) {
-      return res.json([]);
-    }
-
     const { syllabus } = req.query;
-    let query: any = { semester: semNum, department: dept._id };
+    let query: any = { 
+      semesters: semNum, 
+      branches: req.params.branch.toUpperCase() 
+    };
     if (syllabus === "new" || syllabus === "old") {
       query.syllabus = syllabus;
     }

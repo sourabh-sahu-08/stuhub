@@ -269,7 +269,7 @@ router.put("/feedback/:id/status", async (req, res, next) => {
 // ── Subjects (Admin) ───────────────────────────────────────────────────────
 router.get("/subjects", async (_req, res, next) => {
   try {
-    const subjects = await Subject.find().populate("department", "name code");
+    const subjects = await Subject.find();
     res.json(subjects);
   } catch (error) {
     next(error);
@@ -278,22 +278,27 @@ router.get("/subjects", async (_req, res, next) => {
 
 router.post("/subjects", async (req, res, next) => {
   try {
-    const { name, code, departmentCode, semester, syllabus } = req.body;
-    const dept = await Department.findOne({ code: departmentCode.toUpperCase() });
-    if (!dept) {
-      return res.status(404).json({ message: "Department not found" });
-    }
+    const { name, code, branches, semesters, syllabus } = req.body;
     
+    if (!name || typeof name !== "string") {
+      return res.status(400).json({ message: "Subject name is required" });
+    }
+    if (!Array.isArray(branches) || branches.length === 0) {
+      return res.status(400).json({ message: "At least one branch must be selected" });
+    }
+    if (!Array.isArray(semesters) || semesters.length === 0) {
+      return res.status(400).json({ message: "At least one semester must be selected" });
+    }
+
     const subject = await Subject.create({
       name,
       code,
-      department: dept._id,
-      semester: parseInt(semester),
+      branches: branches.map(b => b.toUpperCase()),
+      semesters: semesters.map(s => parseInt(s)),
       syllabus
     });
     
-    const populated = await subject.populate("department", "name code");
-    res.status(201).json(populated);
+    res.status(201).json(subject);
   } catch (error) {
     next(error);
   }
@@ -301,22 +306,30 @@ router.post("/subjects", async (req, res, next) => {
 
 router.put("/subjects/:id", async (req, res, next) => {
   try {
-    const { name, code, departmentCode, semester, syllabus } = req.body;
-    let updateData: any = { name, code, semester: parseInt(semester), syllabus };
+    const { name, code, branches, semesters, syllabus } = req.body;
     
-    if (departmentCode) {
-      const dept = await Department.findOne({ code: departmentCode.toUpperCase() });
-      if (!dept) {
-        return res.status(404).json({ message: "Department not found" });
-      }
-      updateData.department = dept._id;
+    if (!name || typeof name !== "string") {
+      return res.status(400).json({ message: "Subject name is required" });
+    }
+    if (!Array.isArray(branches) || branches.length === 0) {
+      return res.status(400).json({ message: "At least one branch must be selected" });
+    }
+    if (!Array.isArray(semesters) || semesters.length === 0) {
+      return res.status(400).json({ message: "At least one semester must be selected" });
     }
 
+    let updateData: any = { 
+      name, 
+      code, 
+      branches: branches.map(b => b.toUpperCase()), 
+      semesters: semesters.map(s => parseInt(s)), 
+      syllabus 
+    };
+    
     const subject = await Subject.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!subject) return res.status(404).json({ message: "Subject not found" });
     
-    const populated = await subject.populate("department", "name code");
-    res.json(populated);
+    res.json(subject);
   } catch (error) {
     next(error);
   }
