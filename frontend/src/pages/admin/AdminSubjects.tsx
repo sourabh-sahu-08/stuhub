@@ -20,6 +20,9 @@ export function AdminSubjects() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  const [filterBranch, setFilterBranch] = useState<string>("All");
+  const [filterSemester, setFilterSemester] = useState<string>("All");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -273,6 +276,38 @@ export function AdminSubjects() {
         </div>
       )}
 
+      {/* Filters */}
+      {!showForm && subjects.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-4 bg-[#0A0A0A] border border-[#222] p-4 rounded-2xl shadow-xl">
+          <div className="flex-1">
+            <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Filter by Branch</label>
+            <select
+              value={filterBranch}
+              onChange={e => setFilterBranch(e.target.value)}
+              className="w-full bg-[#111] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:border-[#FF9000] outline-none transition-colors appearance-none font-medium"
+            >
+              <option value="All">All Branches</option>
+              {AVAILABLE_BRANCHES.map(b => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Filter by Semester</label>
+            <select
+              value={filterSemester}
+              onChange={e => setFilterSemester(e.target.value)}
+              className="w-full bg-[#111] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:border-[#FF9000] outline-none transition-colors appearance-none font-medium"
+            >
+              <option value="All">All Semesters</option>
+              {AVAILABLE_SEMESTERS.map(s => (
+                <option key={s} value={s.toString()}>Semester {s}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
       <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl overflow-hidden shadow-xl">
         {subjects.length === 0 ? (
           <div className="p-16 text-center text-zinc-500 flex flex-col items-center">
@@ -295,7 +330,11 @@ export function AdminSubjects() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#222]">
-                {subjects.map(subject => (
+                {subjects.filter(subject => {
+                  const branchMatch = filterBranch === "All" || subject.branches?.includes(filterBranch);
+                  const semMatch = filterSemester === "All" || subject.semesters?.includes(parseInt(filterSemester));
+                  return branchMatch && semMatch;
+                }).map(subject => (
                   <tr key={subject._id} className="hover:bg-[#111] transition-colors group">
                     <td className="px-6 py-4 text-white font-medium">
                       <div className="flex items-center gap-3">
