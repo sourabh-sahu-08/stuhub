@@ -1247,7 +1247,7 @@ export function LoginPage() {
                         type="text"
                         value={branch}
                         onChange={(e) => setBranch(e.target.value)}
-                        placeholder="e.g. CSE, IT, ECE"
+                        placeholder="e.g. CSE, IT, ET&T"
                         className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
                       />
                     </div>
