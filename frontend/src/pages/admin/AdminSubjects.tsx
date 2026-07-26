@@ -12,7 +12,7 @@ interface Subject {
   createdAt: string;
 }
 
-const AVAILABLE_BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "MINING"];
+const AVAILABLE_BRANCHES = ["CSE", "IT", "ET&T", "EEE", "MECH", "CIVIL", "MINING"];
 const AVAILABLE_SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 export function AdminSubjects() {

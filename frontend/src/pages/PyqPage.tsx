@@ -51,7 +51,7 @@ const BRANCHES = [
   { code: "CIVIL", name: "Civil Engineering" },
   { code: "MINING", name: "Mining Engineering" },
   { code: "ELEC", name: "Electrical Engineering" },
-  { code: "ELECTRONICS AND TELECOMMUNICATION", name: "Electronics and Telecommunication" }
+  { code: "ET&T", name: "Electronics and Telecommunication" }
 ];
 
 export function PyqPage() {

@@ -265,7 +265,7 @@ export function AdminContent() {
   );
 
   const existingBranches = Array.from(new Set(subjects.flatMap(s => s.branches || []).filter(Boolean)));
-  const uniqueBranches = Array.from(new Set([...existingBranches, "CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "MINING"]));
+  const uniqueBranches = Array.from(new Set([...existingBranches, "CSE", "IT", "ET&T", "EEE", "MECH", "CIVIL", "MINING"]));
   
   // Smart Subject Filtering: Only show subjects mapped to the chosen branch & semester
   const availableSubjectsForSelection = subjects.filter(s => 
