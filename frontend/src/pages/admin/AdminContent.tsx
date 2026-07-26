@@ -252,7 +252,7 @@ export function AdminContent() {
   );
 
   const uniqueSubjects = Array.from(new Set(subjects.map(s => s.name)));
-  const existingBranches = Array.from(new Set(subjects.map(s => s.department?.code || s.departmentCode || s.branch).filter(Boolean)));
+  const existingBranches = Array.from(new Set(subjects.flatMap(s => s.branches || []).filter(Boolean)));
   const uniqueBranches = Array.from(new Set([...existingBranches, "CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "AIDS", "AIML"]));
 
   return (
