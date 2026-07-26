@@ -85,10 +85,20 @@ notesRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest,
       return res.status(400).json({ message: "Semester must be a number between 1 and 8." });
     }
 
+    const branchCode = req.params.branch.toUpperCase();
+    const validSubjects = await Subject.find({
+      branches: branchCode,
+      semesters: semNum
+    });
+    const validSubjectNames = validSubjects.map(s => s.name);
+
     const { q, syllabus } = req.query;
     let query: any = {
       semester: semNum,
-      branch: req.params.branch.toUpperCase()
+      $or: [
+        { branch: branchCode },
+        { subject: { $in: validSubjectNames } }
+      ]
     };
 
     if (syllabus === "new" || syllabus === "old") {
@@ -97,10 +107,12 @@ notesRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest,
 
     if (q && typeof q === "string" && q.trim().length > 0) {
       const searchRegex = new RegExp(q.trim(), "i");
-      query.$or = [
-        { title: searchRegex },
-        { subject: searchRegex }
-      ];
+      query = {
+        $and: [
+          query,
+          { $or: [{ title: searchRegex }, { subject: searchRegex }] }
+        ]
+      };
     }
 
     const notes = await Note.find(query)

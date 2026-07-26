@@ -73,10 +73,20 @@ pyqRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest, r
       return res.status(400).json({ message: "Semester must be a number between 1 and 8." });
     }
 
+    const branchCode = req.params.branch.toUpperCase();
+    const validSubjects = await Subject.find({
+      branches: branchCode,
+      semesters: semNum
+    });
+    const validSubjectNames = validSubjects.map(s => s.name);
+
     const { q, syllabus } = req.query;
     let query: any = {
       semester: semNum,
-      branch: req.params.branch.toUpperCase()
+      $or: [
+        { branch: branchCode },
+        { subject: { $in: validSubjectNames } }
+      ]
     };
 
     if (syllabus === "new" || syllabus === "old") {
@@ -85,10 +95,12 @@ pyqRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest, r
 
     if (q && typeof q === "string" && q.trim().length > 0) {
       const searchRegex = new RegExp(q.trim(), "i");
-      query.$or = [
-        { paperName: searchRegex },
-        { subject: searchRegex }
-      ];
+      query = {
+        $and: [
+          query,
+          { $or: [{ paperName: searchRegex }, { subject: searchRegex }] }
+        ]
+      };
     }
 
     const papers = await Pyq.find(query)
