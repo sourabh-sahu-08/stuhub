@@ -16,11 +16,11 @@ export function AdminLayout() {
 
   const navItems = [
     { label: "Overview", path: "/admin", icon: Shield, end: true },
-    { label: "Users", path: "/admin/users", icon: Users },
+    ...(isOwner ? [{ label: "Users", path: "/admin/users", icon: Users }] : []),
     { label: "Subjects", path: "/admin/subjects", icon: BookOpen },
     { label: "Content", path: "/admin/content", icon: FileText },
     { label: "Resources", path: "/admin/resources", icon: LinkIcon },
-    { label: "Feedback", path: "/admin/feedback", icon: MessageSquare },
+    ...(isOwner ? [{ label: "Feedback", path: "/admin/feedback", icon: MessageSquare }] : []),
   ];
 
   return (

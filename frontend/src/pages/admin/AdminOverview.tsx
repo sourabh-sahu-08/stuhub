@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext";
 import { Users, Folder, FileText, Bot } from "lucide-react";
 
 interface Stats { totalUsers: number; totalNotes: number; totalPyqs: number; }
@@ -20,6 +21,9 @@ function StatCard({ icon: Icon, label, value }: { icon: any; label: string; valu
 }
 
 export function AdminOverview() {
+  const { user } = useAuth();
+  const isOwner = user?.role === "owner" || user?.role === "co-owner";
+  
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalNotes: 0, totalPyqs: 0 });
   const [users, setUsers] = useState<User[]>([]);
   const [aiEnabled, setAiEnabled] = useState(true);
@@ -80,50 +84,59 @@ export function AdminOverview() {
         <StatCard icon={FileText} label="PYQs" value={stats.totalPyqs} />
       </div>
 
-      {/* System Settings */}
-      <div>
-        <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">System Settings</h2>
-        <div className="rounded-2xl border border-[#222] overflow-hidden bg-[#111] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF9000] to-[#E58100] flex items-center justify-center text-black shadow-lg shadow-[#FF9000]/20">
-              <Bot size={24} strokeWidth={2.5} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-white">Global AI Chatbot</p>
-              <p className="text-xs text-zinc-500">Enable or disable the floating AI assistant site-wide.</p>
-            </div>
-          </div>
-          <button
-            onClick={toggleAiChatbot}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${aiEnabled ? 'bg-[#FF9000]' : 'bg-[#333]'}`}
-          >
-            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${aiEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
-          </button>
-        </div>
-      </div>
-
-      {/* Recent Users */}
-      <div>
-        <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Recent Signups</h2>
-        <div className="rounded-2xl border border-[#222] overflow-hidden shadow-lg bg-[#111]">
-          {users.slice(0, 5).map((u, i) => (
-            <div key={u._id} className={`flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 ${i !== 0 ? "border-t border-[#222]" : ""}`}>
+      {isOwner && (
+        <>
+          {/* System Settings */}
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">System Settings</h2>
+            <div className="rounded-2xl border border-[#222] overflow-hidden bg-[#111] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-[#FF9000]/10 flex items-center justify-center text-[#FF9000] font-bold text-sm shadow-inner">
-                  {u.name[0].toUpperCase()}
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF9000] to-[#E58100] flex items-center justify-center text-black shadow-lg shadow-[#FF9000]/20">
+                  <Bot size={24} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-white">{u.name}</p>
-                  <p className="text-xs text-zinc-500">{u.email}</p>
+                  <p className="text-sm font-medium text-white">Global AI Chatbot</p>
+                  <p className="text-xs text-zinc-500">Enable or disable the floating AI assistant site-wide.</p>
                 </div>
               </div>
-              <span className={`text-[10px] font-bold uppercase px-3 py-1 rounded-full tracking-wider border ${u.role === "admin" ? "bg-[#FF9000]/10 text-[#FF9000] border-[#FF9000]/20" : "bg-[#222] text-zinc-400 border-[#333]"}`}>
-                {u.role}
-              </span>
+              <button
+                onClick={toggleAiChatbot}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${aiEnabled ? 'bg-[#FF9000]' : 'bg-[#333]'}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${aiEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+
+          {/* Recent Users */}
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Recent Signups</h2>
+            <div className="rounded-2xl border border-[#222] overflow-hidden shadow-lg bg-[#111]">
+              {users.slice(0, 5).map((u, i) => (
+                <div key={u._id} className={`flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 ${i !== 0 ? "border-t border-[#222]" : ""}`}>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-[#FF9000]/10 flex items-center justify-center text-[#FF9000] font-bold text-sm shadow-inner">
+                      {u.name[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">{u.name}</p>
+                      <p className="text-xs text-zinc-500">{u.email}</p>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] font-bold uppercase px-3 py-1 rounded-full tracking-wider border ${
+                    u.role === "owner" ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                    u.role === "co-owner" ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
+                    u.role === "admin" ? "bg-[#FF9000]/10 text-[#FF9000] border-[#FF9000]/20" : 
+                    "bg-[#222] text-zinc-400 border-[#333]"
+                  }`}>
+                    {u.role}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
