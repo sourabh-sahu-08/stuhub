@@ -13,7 +13,7 @@ import type { AuthRequest } from "../types.js";
 const router = Router();
 
 // Secure all admin routes
-router.use(requireAuth, allowRoles("admin"));
+router.use(requireAuth, allowRoles("admin", "co-owner", "owner"));
 
 // ── Stats ──────────────────────────────────────────────────────────────────
 router.get("/stats", async (_req, res, next) => {
@@ -39,24 +39,61 @@ router.get("/users", async (_req, res, next) => {
   }
 });
 
-router.put("/users/:id/role", async (req, res, next) => {
+router.put("/users/:id/role", async (req: AuthRequest, res, next) => {
   try {
     const { role } = req.body;
-    if (!["student", "admin"].includes(role)) {
+    if (!["student", "admin", "co-owner"].includes(role)) {
       return res.status(400).json({ message: "Invalid role" });
     }
-    const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
+    
+    // Only owner/co-owner can change roles
+    if (!req.user || (req.user.role !== "owner" && req.user.role !== "co-owner")) {
+      return res.status(403).json({ message: "Only owners and co-owners can change roles" });
+    }
+
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) return res.status(404).json({ message: "User not found" });
+
+    // Protect owners
+    if (targetUser.role === "owner") {
+      return res.status(403).json({ message: "Cannot change the role of an owner" });
+    }
+
+    // Co-owners cannot demote other co-owners (only owner can)
+    if (targetUser.role === "co-owner" && req.user.role === "co-owner" && req.user.id !== targetUser.id) {
+      return res.status(403).json({ message: "Co-owners cannot change the role of other co-owners" });
+    }
+
+    targetUser.role = role;
+    await targetUser.save();
+    
+    res.json({ message: "Role updated successfully", user: targetUser });
   } catch (error) {
     next(error);
   }
 });
 
-router.delete("/users/:id", async (req, res, next) => {
+router.delete("/users/:id", async (req: AuthRequest, res, next) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    // Only owner/co-owner can delete users
+    if (!req.user || (req.user.role !== "owner" && req.user.role !== "co-owner")) {
+      return res.status(403).json({ message: "Only owners and co-owners can delete users" });
+    }
+
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) return res.status(404).json({ message: "User not found" });
+
+    // Protect owners
+    if (targetUser.role === "owner") {
+      return res.status(403).json({ message: "Cannot delete an owner" });
+    }
+
+    // Co-owners cannot delete other co-owners
+    if (targetUser.role === "co-owner" && req.user.role === "co-owner" && req.user.id !== targetUser.id) {
+      return res.status(403).json({ message: "Co-owners cannot delete other co-owners" });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
     res.json({ message: "User deleted successfully" });
   } catch (error) {
     next(error);

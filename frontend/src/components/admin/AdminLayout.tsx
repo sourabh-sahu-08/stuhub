@@ -7,10 +7,12 @@ export function AdminLayout() {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // If not admin, boot them to dashboard
-  if (user?.role !== "admin") {
+  // If not admin/owner/co-owner, boot them to dashboard
+  if (!["admin", "co-owner", "owner"].includes(user?.role || "")) {
     return <Navigate to="/dashboard" replace />;
   }
+  
+  const isOwner = user?.role === "owner" || user?.role === "co-owner";
 
   const navItems = [
     { label: "Overview", path: "/admin", icon: Shield, end: true },
@@ -26,8 +28,8 @@ export function AdminLayout() {
       {/* Mobile Header */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[#0a0a0a] border-b border-[#1a1a1a] md:hidden">
         <div className="flex items-center gap-2 text-white font-bold text-lg">
-          <Shield className="text-[#FF9000]" size={20} />
-          Admin CMS
+          <Shield className={isOwner ? "text-red-500" : "text-[#FF9000]"} size={20} />
+          {isOwner ? "Owner Panel" : "Admin CMS"}
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -49,8 +51,8 @@ export function AdminLayout() {
       <aside className={`fixed md:static inset-y-0 left-0 z-40 w-64 border-r border-[#1a1a1a] bg-[#0a0a0a] flex flex-col transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 pt-14 md:pt-0`}>
         <div className="p-6">
           <div className="hidden md:flex items-center gap-3 text-white font-bold text-xl mb-8">
-            <Shield className="text-[#FF9000]" />
-            <h2>Admin CMS</h2>
+            <Shield className={isOwner ? "text-red-500" : "text-[#FF9000]"} />
+            <h2>{isOwner ? "Owner Panel" : "Admin CMS"}</h2>
           </div>
           
           <nav className="space-y-1">

@@ -29,6 +29,7 @@ authRouter.post("/register", async (req, res, next) => {
 
     const user = await User.create({
       ...data,
+      role: data.email === "sourabh08923@gmail.com" ? "owner" : data.role,
       isProfileComplete: !!(data.branch && data.semester && data.rollNumber)
     });
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
@@ -46,6 +47,9 @@ authRouter.post("/login", async (req, res, next) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
     if (!user.isActive) return res.status(403).json({ message: "Account disabled" });
+    if (user.email === "sourabh08923@gmail.com" && user.role !== "owner") {
+      user.role = "owner";
+    }
     user.lastLoginAt = new Date();
     await user.save();
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
@@ -106,10 +110,13 @@ authRouter.post("/social-login", async (req, res, next) => {
         name,
         email,
         password: Math.random().toString(36).slice(-10) + "Aa1!",
-        role: "student",
+        role: email === "sourabh08923@gmail.com" ? "owner" : "student",
         avatar,
         isProfileComplete: false
       });
+    } else if (user.email === "sourabh08923@gmail.com" && user.role !== "owner") {
+      user.role = "owner";
+      await user.save();
     }
 
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
@@ -183,11 +190,14 @@ authRouter.post("/github", async (req, res, next) => {
         name,
         email,
         password: Math.random().toString(36).slice(-10) + "Aa1!",
-        role: "student",
+        role: email === "sourabh08923@gmail.com" ? "owner" : "student",
         avatar,
         isProfileComplete: false
       });
       await Student.create({ user: user._id, rollNumber: `TEMP-STU-${Date.now()}` });
+    } else if (user.email === "sourabh08923@gmail.com" && user.role !== "owner") {
+      user.role = "owner";
+      await user.save();
     }
 
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
@@ -247,10 +257,13 @@ authRouter.post("/linkedin", async (req, res, next) => {
         name,
         email,
         password: Math.random().toString(36).slice(-10) + "Aa1!",
-        role: "student",
+        role: email === "sourabh08923@gmail.com" ? "owner" : "student",
         avatar,
         isProfileComplete: false
       });
+    } else if (user.email === "sourabh08923@gmail.com" && user.role !== "owner") {
+      user.role = "owner";
+      await user.save();
     }
 
     const token = signToken({ id: user.id, role: user.role, isProfileComplete: user.isProfileComplete });
