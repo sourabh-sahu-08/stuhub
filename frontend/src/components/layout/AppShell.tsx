@@ -361,16 +361,16 @@ export function AppShell() {
                           My Profile
                         </Link>
 
-                        {user?.role === "admin" && (
-                          <Link
-                            to="/admin"
-                            onClick={() => setProfileDropdownOpen(false)}
-                            className="flex items-center gap-2 rounded-md p-2 text-xs text-zinc-200 transition-colors hover:bg-surface-container"
-                          >
-                            <Shield size={14} className="text-[#FF9000]" />
-                            Admin Panel
-                          </Link>
-                        )}
+                        {['admin', 'co-owner', 'owner'].includes(user?.role || '') && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-2 rounded-md p-2 text-xs text-zinc-200 transition-colors hover:bg-surface-container"
+                        >
+                          <Shield size={14} className={user?.role === "owner" || user?.role === "co-owner" ? "text-red-500" : "text-[#FF9000]"} />
+                          {user?.role === "owner" || user?.role === "co-owner" ? "Owner Panel" : "Admin Panel"}
+                        </Link>
+                      )}
 
                         <button
                           type="button"
