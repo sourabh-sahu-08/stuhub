@@ -1,18 +1,13 @@
-FROM node:20-alpine AS deps
-WORKDIR /app
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
 COPY package.json package-lock.json* ./
-COPY backend/package.json backend/package.json
+
 RUN npm install
 
-FROM deps AS build
-COPY backend backend
-RUN npm run build --workspace backend
+COPY . .
 
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=deps /app/node_modules node_modules
-COPY --from=build /app/backend/dist backend/dist
-COPY backend/package.json backend/package.json
 EXPOSE 5000
-CMD ["npm", "run", "start", "--workspace", "backend"]
+
+CMD ["npm", "run", "dev"]

@@ -95,7 +95,7 @@ export function AppShell() {
     if (!user) return;
 
     const socket = io(
-      import.meta.env.MODE === "production" ? "/" : (import.meta.env.VITE_SOCKET_URL || "http://localhost:5000")
+      import.meta.env.MODE === "production" ? "/" : (import.meta.env.VITE_SOCKET_URL || `http://${window.location.hostname}:5000`)
     );
 
     socket.emit("join", user.id);

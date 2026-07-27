@@ -1,12 +1,13 @@
-FROM node:20-alpine AS build
-WORKDIR /app
-COPY package.json package-lock.json* ./
-COPY frontend/package.json frontend/package.json
-RUN npm install
-COPY frontend frontend
-RUN npm run build --workspace frontend
+FROM node:20-alpine
 
-FROM nginx:1.27-alpine
-COPY --from=build /app/frontend/dist /usr/share/nginx/html
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+WORKDIR /usr/src/app
+
+COPY package.json package-lock.json* ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev"]
