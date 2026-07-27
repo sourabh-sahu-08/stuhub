@@ -36,7 +36,8 @@ export const Subject = mongoose.model(
       branches: [{ type: String }],
       credits: Number,
       semesters: [{ type: Number }],
-      syllabus: { type: String, enum: ["new", "old"], default: "new" }
+      syllabus: { type: String, enum: ["new", "old"], default: "new" },
+      createdBy: { type: Schema.Types.ObjectId, ref: "User" }
     },
     { timestamps: true }
   )

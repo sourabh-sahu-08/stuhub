@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { Search, ShieldAlert, Trash2, Users } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
-interface User { _id: string; name: string; email: string; role: "student" | "admin"; createdAt: string; }
+interface User { _id: string; name: string; email: string; role: "student" | "admin" | "co-owner" | "owner"; createdAt: string; }
 
 export function AdminUsers() {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -24,15 +26,14 @@ export function AdminUsers() {
     }
   };
 
-  const toggleRole = async (u: User) => {
-    const newRole = u.role === "admin" ? "student" : "admin";
+  const changeRole = async (u: User, newRole: string) => {
     if (!window.confirm(`Change role of ${u.name} to ${newRole}?`)) return;
     try {
       await api.put(`/admin/users/${u._id}/role`, { role: newRole });
       loadUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Failed to update user role");
+      alert(error.response?.data?.message || "Failed to update user role");
     }
   };
 
@@ -41,9 +42,9 @@ export function AdminUsers() {
     try {
       await api.delete(`/admin/users/${u._id}`);
       loadUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Failed to delete user");
+      alert(error.response?.data?.message || "Failed to delete user");
     }
   };
 
@@ -104,7 +105,12 @@ export function AdminUsers() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`text-[10px] font-bold uppercase px-3 py-1 rounded-full tracking-wider border ${u.role === "admin" ? "bg-[#FF9000]/10 text-[#FF9000] border-[#FF9000]/20" : "bg-[#222] text-zinc-400 border-[#333]"}`}>
+                    <span className={`text-[10px] font-bold uppercase px-3 py-1 rounded-full tracking-wider border ${
+                      u.role === "owner" ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                      u.role === "co-owner" ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
+                      u.role === "admin" ? "bg-[#FF9000]/10 text-[#FF9000] border-[#FF9000]/20" : 
+                      "bg-[#222] text-zinc-400 border-[#333]"
+                    }`}>
                       {u.role}
                     </span>
                   </td>
@@ -112,14 +118,22 @@ export function AdminUsers() {
                     {new Date(u.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => toggleRole(u)} className="p-2 text-zinc-500 hover:text-[#FF9000] hover:bg-[#FF9000]/10 rounded-lg transition-colors" title="Toggle Role">
-                        <ShieldAlert size={16} />
-                      </button>
-                      <button onClick={() => deleteUser(u)} className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete User">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+                    {(currentUser?.role === "owner" || currentUser?.role === "co-owner") && u.role !== "owner" && !(currentUser.role === "co-owner" && u.role === "co-owner" && currentUser.id !== u._id) && (
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <select
+                          value={u.role}
+                          onChange={(e) => changeRole(u, e.target.value)}
+                          className="bg-[#111] border border-[#333] text-zinc-300 text-xs rounded px-2 py-1 focus:outline-none focus:border-[#FF9000]"
+                        >
+                          <option value="student">Student</option>
+                          <option value="admin">Admin</option>
+                          <option value="co-owner">Co-Owner</option>
+                        </select>
+                        <button onClick={() => deleteUser(u)} className="p-1.5 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded transition-colors" title="Delete User">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

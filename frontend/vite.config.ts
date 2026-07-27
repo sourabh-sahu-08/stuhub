@@ -6,6 +6,9 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    headers: {
+      "Cross-Origin-Opener-Policy": "unsafe-none",
+    },
     watch: {
       usePolling: true
     }

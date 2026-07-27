@@ -1,12 +1,17 @@
 import { useEffect, useState, useRef } from "react";
 import { api } from "../../lib/api";
-import { Eye, Download, Trash2, Plus, X, FileText, BookOpen, Clock, CheckCircle } from "lucide-react";
+import { Eye, Download, Trash2, Plus, X, FileText, BookOpen, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { ReportIssueModal } from "../../components/admin/ReportIssueModal";
 
 interface Note { _id: string; title: string; subject: string; branch: string; semester: number; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; }
 interface Pyq  { _id: string; paperName: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; }
 interface CtPyq { _id: string; paperName: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; }
 
 export function AdminContent() {
+  const { user: currentUser } = useAuth();
+  const isOwner = currentUser?.role === "owner" || currentUser?.role === "co-owner";
+
   const [tab, setTab] = useState<"notes" | "pyqs" | "ct-pyqs" | "assignments">("notes");
   const [notes, setNotes] = useState<Note[]>([]);
   const [pyqs, setPyqs] = useState<Pyq[]>([]);
@@ -14,6 +19,9 @@ export function AdminContent() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportItem, setReportItem] = useState({ id: "", type: "", title: "" });
 
   // Upload state
   const [showUpload, setShowUpload] = useState(false);
@@ -84,7 +92,7 @@ export function AdminContent() {
             branch: formData.branch,
             driveUrl: formData.driveUrl
           });
-        } else {
+        } else if (uploadType === "assignment") {
           await api.post("/admin/assignments/link", {
             title: finalTitle,
             subject: formData.subject,
@@ -239,9 +247,23 @@ export function AdminContent() {
                   <button onClick={() => handleDownload(item, type)} className="text-zinc-500 hover:text-[#FF9000] p-2 rounded-lg hover:bg-[#FF9000]/10 transition-colors" title="Download">
                     <Download size={16} />
                   </button>
-                  <button onClick={() => deleteItem(item._id, type, item.title || item.paperName)} className="text-zinc-500 hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition-colors" title="Delete">
-                    <Trash2 size={16} />
-                  </button>
+                  {isOwner || item.user?._id === currentUser?.id || item.uploadedBy?._id === currentUser?.id ? (
+                    <button onClick={() => deleteItem(item._id, type, item.title || item.paperName)} className="text-zinc-500 hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition-colors" title="Delete">
+                      <Trash2 size={16} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setReportItem({ id: item._id, type: type === "ct-pyqs" ? "CT PYQ" : type === "pyqs" ? "PYQ" : type === "assignments" ? "Assignment" : "Note", title: item.title || item.paperName });
+                        setReportModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#FF9000]/10 text-[#FF9000] rounded-lg hover:bg-[#FF9000]/20 transition-colors border border-[#FF9000]/20 ml-2"
+                      title="Report Issue"
+                    >
+                      <AlertCircle size={14} />
+                      Report Issue
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
@@ -283,7 +305,7 @@ export function AdminContent() {
         </div>
         
         <button
-          onClick={() => { setUploadType(tab === "notes" ? "note" : tab === "pyqs" ? "pyq" : "ct-pyq"); setShowUpload(true); }}
+          onClick={() => { setUploadType(tab === "notes" ? "note" : tab === "pyqs" ? "pyq" : tab === "ct-pyqs" ? "ct-pyq" : "assignment"); setUploadMethod("link"); setShowUpload(true); }}
           className="bg-[#FF9000] text-black px-4 py-2.5 rounded-lg font-bold text-sm hover:bg-[#E58100] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[#FF9000]/20"
         >
           <Plus size={18} strokeWidth={3} />
@@ -329,13 +351,13 @@ export function AdminContent() {
               {/* Type Selection */}
               <div>
                 <label className="block text-xs font-bold text-zinc-400 mb-2 uppercase tracking-wider">Content Type</label>
-                <div className="flex bg-[#111] rounded-lg p-1 gap-1 border border-[#222]">
+                <div className="flex bg-[#111] rounded-lg p-1 gap-1 border border-[#222] overflow-x-auto scrollbar-hide">
                   {(["note", "pyq", "ct-pyq", "assignment"] as const).map((type) => (
                     <button
                       key={type}
                       type="button"
-                      onClick={() => setUploadType(type)}
-                      className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${uploadType === type ? "bg-[#222] text-[#FF9000] shadow" : "text-zinc-500 hover:text-white hover:bg-[#1A1A1A]"}`}
+                      onClick={() => { setUploadType(type); }}
+                      className={`px-3 py-2 text-xs font-bold rounded-md transition-all whitespace-nowrap ${uploadType === type ? "bg-[#222] text-[#FF9000] shadow" : "text-zinc-500 hover:text-white hover:bg-[#1A1A1A]"}`}
                     >
                       {type === "note" ? "Note" : type === "pyq" ? "PYQ" : type === "ct-pyq" ? "CT PYQ" : "Solution"}
                     </button>
@@ -401,7 +423,7 @@ export function AdminContent() {
               {uploadMethod === "link" ? (
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Google Drive Link</label>
-                  <input required type="url" value={formData.driveUrl} onChange={e => setFormData({...formData, driveUrl: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="https://drive.google.com/..." />
+                  <input required type="url" value={formData.driveUrl} onChange={e => setFormData({...formData, driveUrl: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="https://..." />
                 </div>
               ) : (
                 <div>
@@ -425,6 +447,14 @@ export function AdminContent() {
           </div>
         </div>
       )}
+
+      <ReportIssueModal 
+        isOpen={reportModalOpen} 
+        onClose={() => setReportModalOpen(false)} 
+        itemId={reportItem.id} 
+        itemType={reportItem.type} 
+        itemTitle={reportItem.title} 
+      />
     </div>
   );
 }

@@ -91,8 +91,8 @@ export function setupSocketServer(io: Server) {
     });
     // Admin: Delete a message
     socket.on("delete_message", async (messageId: string) => {
-      if (!socket.user || socket.user.role !== "admin") {
-        return; // Only admins can delete
+      if (!socket.user || !["admin", "co-owner", "owner"].includes(socket.user.role)) {
+        return; // Only admins, co-owners, and owners can delete
       }
 
       try {

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, X, Loader2, RefreshCcw, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Link } from "react-router-dom";
 import { api } from "../../lib/api";
 
 type Message = {
@@ -146,7 +147,17 @@ export function AiChatWidget() {
                   }`}>
                     {msg.role === "assistant" ? (
                       <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-[#0A0A0A] prose-pre:border prose-pre:border-[#222]">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            a: ({ node, ...props }) => {
+                              if (props.href && props.href.startsWith('/')) {
+                                return <Link to={props.href} className="text-[#FF9000] hover:underline font-medium" {...props}>{props.children}</Link>;
+                              }
+                              return <a className="text-[#FF9000] hover:underline font-medium" target="_blank" rel="noopener noreferrer" {...props}>{props.children}</a>;
+                            }
+                          }}
+                        >
                           {msg.content}
                         </ReactMarkdown>
                       </div>

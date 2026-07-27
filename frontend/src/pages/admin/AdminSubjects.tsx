@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { Plus, Trash2, BookOpen, Edit2, Check } from "lucide-react";
+import { Plus, Trash2, BookOpen, Edit2, Check, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { ReportIssueModal } from "../../components/admin/ReportIssueModal";
 
 interface Subject {
   _id: string;
@@ -10,16 +12,23 @@ interface Subject {
   syllabus: "new" | "old";
   branches: string[];
   createdAt: string;
+  createdBy?: string;
 }
 
 const AVAILABLE_BRANCHES = ["CSE", "IT", "ET&T", "EEE", "MECH", "CIVIL", "MINING"];
 const AVAILABLE_SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 export function AdminSubjects() {
+  const { user } = useAuth();
+  const isOwner = user?.role === "owner" || user?.role === "co-owner";
+
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportItem, setReportItem] = useState({ id: "", type: "", title: "" });
 
   const [filterBranch, setFilterBranch] = useState<string>("All");
   const [filterSemester, setFilterSemester] = useState<string>("All");
@@ -374,20 +383,36 @@ export function AdminSubjects() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleEdit(subject)}
-                          className="p-2 text-zinc-500 hover:text-[#FF9000] hover:bg-[#FF9000]/10 rounded-lg transition-colors"
-                          title="Edit Subject"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(subject._id)}
-                          className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                          title="Delete Subject"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {isOwner || subject.createdBy === user?.id ? (
+                          <>
+                            <button
+                              onClick={() => handleEdit(subject)}
+                              className="p-2 text-zinc-500 hover:text-[#FF9000] hover:bg-[#FF9000]/10 rounded-lg transition-colors"
+                              title="Edit Subject"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(subject._id)}
+                              className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                              title="Delete Subject"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setReportItem({ id: subject._id, type: "Subject", title: subject.name });
+                              setReportModalOpen(true);
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#FF9000]/10 text-[#FF9000] rounded-lg hover:bg-[#FF9000]/20 transition-colors border border-[#FF9000]/20"
+                            title="Report Issue"
+                          >
+                            <AlertCircle size={14} />
+                            Report Issue
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -397,6 +422,14 @@ export function AdminSubjects() {
           </div>
         )}
       </div>
+      
+      <ReportIssueModal 
+        isOpen={reportModalOpen} 
+        onClose={() => setReportModalOpen(false)} 
+        itemId={reportItem.id} 
+        itemType={reportItem.type} 
+        itemTitle={reportItem.title} 
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { CtPyqPage } from "./pages/CtPyqPage";
 import { PyqAnalyzerPage } from "./pages/PyqAnalyzerPage";
 import { NotesPage } from "./pages/NotesPage";
 import { AssignmentsPage } from "./pages/AssignmentsPage";
+import { ResourcesPage } from "./pages/ResourcesPage";
 import { ChatPage } from "./pages/ChatPage";
 import { AppShell } from "./components/layout/AppShell";
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -15,6 +16,7 @@ import { AdminOverview } from "./pages/admin/AdminOverview";
 import { AdminUsers } from "./pages/admin/AdminUsers";
 import { AdminSubjects } from "./pages/admin/AdminSubjects";
 import { AdminContent } from "./pages/admin/AdminContent";
+import { AdminResources } from "./pages/admin/AdminResources";
 import { AdminFeedback } from "./pages/admin/AdminFeedback";
 import { useAuth } from "./context/AuthContext";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
@@ -43,6 +45,7 @@ export function App() {
           <Route path="ct-pyq" element={<CtPyqPage />} />
           <Route path="pyq-analyzer" element={<PyqAnalyzerPage />} />
           <Route path="library" element={<NotesPage />} />
+          <Route path="resources" element={<ResourcesPage />} />
           <Route path="chat" element={<ChatPage />} />
           <Route path=":module" element={<ModulePage />} />
         </Route>
@@ -53,6 +56,7 @@ export function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="subjects" element={<AdminSubjects />} />
           <Route path="content" element={<AdminContent />} />
+          <Route path="resources" element={<AdminResources />} />
           <Route path="feedback" element={<AdminFeedback />} />
         </Route>
 

@@ -5,6 +5,7 @@ import { Pyq } from "../models/Pyq.js";
 import { CtPyq } from "../models/CtPyq.js";
 import { Assignment } from "../models/Assignment.js";
 import { Feedback } from "../models/Feedback.js";
+import { Resource } from "../models/Resource.js";
 import { Subject, Department } from "../models/Academic.js";
 import { requireAuth, allowRoles } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
@@ -12,7 +13,7 @@ import type { AuthRequest } from "../types.js";
 const router = Router();
 
 // Secure all admin routes
-router.use(requireAuth, allowRoles("admin"));
+router.use(requireAuth, allowRoles("admin", "co-owner", "owner"));
 
 // ── Stats ──────────────────────────────────────────────────────────────────
 router.get("/stats", async (_req, res, next) => {
@@ -38,24 +39,61 @@ router.get("/users", async (_req, res, next) => {
   }
 });
 
-router.put("/users/:id/role", async (req, res, next) => {
+router.put("/users/:id/role", async (req: AuthRequest, res, next) => {
   try {
     const { role } = req.body;
-    if (!["student", "admin"].includes(role)) {
+    if (!["student", "admin", "co-owner"].includes(role)) {
       return res.status(400).json({ message: "Invalid role" });
     }
-    const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
+    
+    // Only owner/co-owner can change roles
+    if (!req.user || (req.user.role !== "owner" && req.user.role !== "co-owner")) {
+      return res.status(403).json({ message: "Only owners and co-owners can change roles" });
+    }
+
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) return res.status(404).json({ message: "User not found" });
+
+    // Protect owners
+    if (targetUser.role === "owner") {
+      return res.status(403).json({ message: "Cannot change the role of an owner" });
+    }
+
+    // Co-owners cannot demote other co-owners (only owner can)
+    if (targetUser.role === "co-owner" && req.user.role === "co-owner" && req.user.id !== targetUser.id) {
+      return res.status(403).json({ message: "Co-owners cannot change the role of other co-owners" });
+    }
+
+    targetUser.role = role;
+    await targetUser.save();
+    
+    res.json({ message: "Role updated successfully", user: targetUser });
   } catch (error) {
     next(error);
   }
 });
 
-router.delete("/users/:id", async (req, res, next) => {
+router.delete("/users/:id", async (req: AuthRequest, res, next) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    // Only owner/co-owner can delete users
+    if (!req.user || (req.user.role !== "owner" && req.user.role !== "co-owner")) {
+      return res.status(403).json({ message: "Only owners and co-owners can delete users" });
+    }
+
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) return res.status(404).json({ message: "User not found" });
+
+    // Protect owners
+    if (targetUser.role === "owner") {
+      return res.status(403).json({ message: "Cannot delete an owner" });
+    }
+
+    // Co-owners cannot delete other co-owners
+    if (targetUser.role === "co-owner" && req.user.role === "co-owner" && req.user.id !== targetUser.id) {
+      return res.status(403).json({ message: "Co-owners cannot delete other co-owners" });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
     res.json({ message: "User deleted successfully" });
   } catch (error) {
     next(error);
@@ -97,10 +135,17 @@ router.post("/notes/link", requireAuth, allowRoles("admin"), async (req: AuthReq
   }
 });
 
-router.delete("/notes/:id", async (req, res, next) => {
+router.delete("/notes/:id", async (req: AuthRequest, res, next) => {
   try {
-    const note = await Note.findByIdAndDelete(req.params.id);
+    const note = await Note.findById(req.params.id);
     if (!note) return res.status(404).json({ message: "Note not found" });
+
+    // Ownership check for standard admins
+    if (req.user?.role === "admin" && note.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await note.deleteOne();
     res.json({ message: "Note deleted" });
   } catch (error) {
     next(error);
@@ -142,10 +187,16 @@ router.post("/pyqs/link", requireAuth, allowRoles("admin"), async (req: AuthRequ
   }
 });
 
-router.delete("/pyqs/:id", async (req, res, next) => {
+router.delete("/pyqs/:id", async (req: AuthRequest, res, next) => {
   try {
-    const pyq = await Pyq.findByIdAndDelete(req.params.id);
+    const pyq = await Pyq.findById(req.params.id);
     if (!pyq) return res.status(404).json({ message: "PYQ not found" });
+
+    if (req.user?.role === "admin" && pyq.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await pyq.deleteOne();
     res.json({ message: "PYQ deleted" });
   } catch (error) {
     next(error);
@@ -187,10 +238,16 @@ router.post("/ct-pyqs/link", requireAuth, allowRoles("admin"), async (req: AuthR
   }
 });
 
-router.delete("/ct-pyqs/:id", async (req, res, next) => {
+router.delete("/ct-pyqs/:id", async (req: AuthRequest, res, next) => {
   try {
-    const ctPyq = await CtPyq.findByIdAndDelete(req.params.id);
+    const ctPyq = await CtPyq.findById(req.params.id);
     if (!ctPyq) return res.status(404).json({ message: "CT-PYQ not found" });
+
+    if (req.user?.role === "admin" && ctPyq.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await ctPyq.deleteOne();
     res.json({ message: "CT-PYQ deleted" });
   } catch (error) {
     next(error);
@@ -232,11 +289,68 @@ router.post("/assignments/link", requireAuth, allowRoles("admin"), async (req: A
   }
 });
 
-router.delete("/assignments/:id", async (req, res, next) => {
+router.delete("/assignments/:id", async (req: AuthRequest, res, next) => {
   try {
-    const assignment = await Assignment.findByIdAndDelete(req.params.id);
+    const assignment = await Assignment.findById(req.params.id);
     if (!assignment) return res.status(404).json({ message: "Assignment not found" });
+
+    if (req.user?.role === "admin" && assignment.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await assignment.deleteOne();
     res.json({ message: "Assignment deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── Resources (Admin: all resources) ──────────────────────────────────────
+router.get("/resources", async (_req, res, next) => {
+  try {
+    const resources = await Resource.find()
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+    res.json(resources);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/resources/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const { title, url, type, subject, semester, syllabus, branch } = req.body;
+      if (!title || !url || !type) {
+        return res.status(400).json({ message: "Title, url, and type are required fields" });
+      }
+  
+      const resource = await Resource.create({
+        user: req.user?.id,
+        title,
+        url,
+        type,
+        subject: subject || undefined,
+        semester: semester ? parseInt(semester) : undefined,
+        syllabus: syllabus || undefined,
+        branch: branch || undefined
+      });
+    res.status(201).json(resource);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/resources/:id", async (req: AuthRequest, res, next) => {
+  try {
+    const resource = await Resource.findById(req.params.id);
+    if (!resource) return res.status(404).json({ message: "Resource not found" });
+
+    if (req.user?.role === "admin" && resource.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await resource.deleteOne();
+    res.json({ message: "Resource deleted" });
   } catch (error) {
     next(error);
   }
@@ -276,7 +390,7 @@ router.get("/subjects", async (_req, res, next) => {
   }
 });
 
-router.post("/subjects", async (req, res, next) => {
+router.post("/subjects", async (req: AuthRequest, res, next) => {
   try {
     const { name, code, branches, semesters, syllabus } = req.body;
     
@@ -295,7 +409,8 @@ router.post("/subjects", async (req, res, next) => {
       code,
       branches: branches.map(b => b.toUpperCase()),
       semesters: semesters.map(s => parseInt(s)),
-      syllabus
+      syllabus,
+      createdBy: req.user?.id
     });
     
     res.status(201).json(subject);
@@ -304,7 +419,7 @@ router.post("/subjects", async (req, res, next) => {
   }
 });
 
-router.put("/subjects/:id", async (req, res, next) => {
+router.put("/subjects/:id", async (req: AuthRequest, res, next) => {
   try {
     const { name, code, branches, semesters, syllabus } = req.body;
     
@@ -318,6 +433,13 @@ router.put("/subjects/:id", async (req, res, next) => {
       return res.status(400).json({ message: "At least one semester must be selected" });
     }
 
+    const subject = await Subject.findById(req.params.id);
+    if (!subject) return res.status(404).json({ message: "Subject not found" });
+
+    if (req.user?.role === "admin" && subject.createdBy?.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only edit subjects that you created" });
+    }
+
     let updateData: any = { 
       name, 
       code, 
@@ -326,8 +448,8 @@ router.put("/subjects/:id", async (req, res, next) => {
       syllabus 
     };
     
-    const subject = await Subject.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!subject) return res.status(404).json({ message: "Subject not found" });
+    Object.assign(subject, updateData);
+    await subject.save();
     
     res.json(subject);
   } catch (error) {
@@ -335,10 +457,16 @@ router.put("/subjects/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/subjects/:id", async (req, res, next) => {
+router.delete("/subjects/:id", async (req: AuthRequest, res, next) => {
   try {
-    const subject = await Subject.findByIdAndDelete(req.params.id);
+    const subject = await Subject.findById(req.params.id);
     if (!subject) return res.status(404).json({ message: "Subject not found" });
+
+    if (req.user?.role === "admin" && subject.createdBy?.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete subjects that you created" });
+    }
+
+    await subject.deleteOne();
     res.json({ message: "Subject deleted" });
   } catch (error) {
     next(error);

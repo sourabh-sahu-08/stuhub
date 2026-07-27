@@ -67,7 +67,8 @@ export function ChatPage() {
     
     const newSocket = io(backendUrl, {
       auth: { token },
-      withCredentials: true
+      withCredentials: true,
+      transports: ["websocket"]
     });
 
     newSocket.on("connect_error", (err) => {
@@ -108,7 +109,7 @@ export function ChatPage() {
   };
 
   const deleteMessage = (messageId: string) => {
-    if (!socket || user?.role !== 'admin') return;
+    if (!socket || !['admin', 'co-owner', 'owner'].includes(user?.role || '')) return;
     if (window.confirm("Are you sure you want to delete this message?")) {
       socket.emit("delete_message", messageId);
     }
@@ -212,7 +213,7 @@ export function ChatPage() {
                       </button>
 
                       {/* Admin Delete Button */}
-                      {user?.role === 'admin' && (
+                      {['admin', 'co-owner', 'owner'].includes(user?.role || '') && (
                         <button
                           onClick={() => deleteMessage(msg._id)}
                           className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-all"

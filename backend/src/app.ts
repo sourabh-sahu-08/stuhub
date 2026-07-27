@@ -16,6 +16,7 @@ import { notesRouter } from "./routes/notes.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
 import { assignmentsRouter } from "./routes/assignments.routes.js";
 import { dashboardRouter } from "./routes/dashboard.routes.js";
+import { resourcesRouter } from "./routes/resources.routes.js";
 import { settingsRouter } from "./routes/settings.routes.js";
 import { aiRouter } from "./routes/ai.routes.js";
 import feedbackRouter from "./routes/feedback.routes.js";
@@ -25,7 +26,7 @@ export function createApp() {
   const app = express();
   app.use(helmet({ 
     contentSecurityPolicy: false,
-    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+    crossOriginOpenerPolicy: false
   }));
   app.use(cors({ origin: env.NODE_ENV === "production" ? env.CLIENT_URL : true, credentials: true }));
   app.use(compression());
@@ -51,6 +52,7 @@ export function createApp() {
   app.use("/api/pyq-analyzer", pyqAnalyzerRouter);
   app.use("/api/notes", notesRouter);
   app.use("/api/assignments", assignmentsRouter);
+  app.use("/api/resources", resourcesRouter);
   app.use("/api/dashboard", dashboardRouter);
   app.use("/api/settings", settingsRouter);
   app.use("/api/ai", aiRouter);
