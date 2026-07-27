@@ -67,7 +67,8 @@ export function ChatPage() {
     
     const newSocket = io(backendUrl, {
       auth: { token },
-      withCredentials: true
+      withCredentials: true,
+      transports: ["websocket"]
     });
 
     newSocket.on("connect_error", (err) => {
