@@ -113,7 +113,7 @@ router.get("/notes", async (_req, res, next) => {
   }
 });
 
-router.post("/notes/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post("/notes/link", async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { title, subject, semester, syllabus, branch, driveUrl } = req.body;
     if (!title || !subject || !semester || !syllabus || !branch || !driveUrl) {
@@ -165,7 +165,7 @@ router.get("/pyqs", async (_req, res, next) => {
   }
 });
 
-router.post("/pyqs/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post("/pyqs/link", async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { paperName, subject, semester, syllabus, branch, driveUrl } = req.body;
     if (!paperName || !subject || !semester || !syllabus || !branch || !driveUrl) {
@@ -216,7 +216,7 @@ router.get("/ct-pyqs", async (_req, res, next) => {
   }
 });
 
-router.post("/ct-pyqs/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post("/ct-pyqs/link", async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { paperName, subject, semester, syllabus, branch, driveUrl } = req.body;
     if (!paperName || !subject || !semester || !syllabus || !branch || !driveUrl) {
@@ -267,7 +267,7 @@ router.get("/assignments", async (_req, res, next) => {
   }
 });
 
-router.post("/assignments/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post("/assignments/link", async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { title, subject, semester, syllabus, branch, driveUrl } = req.body;
     if (!title || !subject || !semester || !syllabus || !branch || !driveUrl) {
@@ -317,7 +317,7 @@ router.get("/resources", async (_req, res, next) => {
   }
 });
 
-router.post("/resources/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post("/resources/link", async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const { title, url, type, subject, semester, syllabus, branch } = req.body;
       if (!title || !url || !type) {
