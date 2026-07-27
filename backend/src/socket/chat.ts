@@ -96,10 +96,49 @@ export function setupSocketServer(io: Server) {
       }
 
       try {
+        const message = await Message.findById(messageId).populate("sender");
+        if (!message) return;
+
+        // Prevent non-owners from deleting owner messages
+        if ((message.sender as any).role === "owner" && socket.user.role !== "owner") {
+          return;
+        }
+
         await Message.findByIdAndDelete(messageId);
         io.emit("message_deleted", messageId);
       } catch (err) {
         console.error("Error deleting message:", err);
+      }
+    });
+
+    // Owner: Edit a message
+    socket.on("edit_message", async (payload: { messageId: string; newText: string }) => {
+      if (!socket.user || socket.user.role !== "owner") {
+        return; // Only owners can edit messages
+      }
+
+      try {
+        const { messageId, newText } = payload;
+        if (!newText || typeof newText !== "string" || newText.trim().length === 0) return;
+
+        const updatedMessage = await Message.findByIdAndUpdate(
+          messageId,
+          { text: newText.trim(), isEdited: true },
+          { new: true }
+        )
+          .populate("sender", "name avatar role")
+          .populate({
+            path: "replyTo",
+            select: "text sender",
+            populate: { path: "sender", select: "name" }
+          })
+          .lean();
+
+        if (updatedMessage) {
+          io.emit("message_edited", updatedMessage);
+        }
+      } catch (err) {
+        console.error("Error editing message:", err);
       }
     });
     socket.on("disconnect", () => {

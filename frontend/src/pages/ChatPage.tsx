@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
-import { Send, Users, AlertCircle, Trash2, Reply, X } from "lucide-react";
+import { Send, Users, AlertCircle, Trash2, Reply, X, Edit2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ChatUser {
@@ -20,6 +20,7 @@ interface Message {
     text: string;
     sender: { name: string };
   };
+  isEdited?: boolean;
   createdAt: string;
 }
 
@@ -51,6 +52,8 @@ export function ChatPage() {
   const [inputText, setInputText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editInputText, setEditInputText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -88,6 +91,12 @@ export function ChatPage() {
       setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
     });
 
+    newSocket.on("message_edited", (updatedMessage: Message) => {
+      setMessages((prev) =>
+        prev.map((msg) => (msg._id === updatedMessage._id ? updatedMessage : msg))
+      );
+    });
+
     setSocket(newSocket);
 
     return () => {
@@ -109,10 +118,15 @@ export function ChatPage() {
   };
 
   const deleteMessage = (messageId: string) => {
-    if (!socket || !['admin', 'co-owner', 'owner'].includes(user?.role || '')) return;
     if (window.confirm("Are you sure you want to delete this message?")) {
-      socket.emit("delete_message", messageId);
+      socket?.emit("delete_message", messageId);
     }
+  };
+
+  const saveEdit = (messageId: string) => {
+    if (!editInputText.trim() || !socket) return;
+    socket.emit("edit_message", { messageId, newText: editInputText });
+    setEditingMessageId(null);
   };
 
   const formatTime = (isoString: string) => {
@@ -176,6 +190,12 @@ export function ChatPage() {
                   {!isMe && showAvatar && (
                     <div className="flex items-center gap-2 mb-1 pl-1">
                       <span className="text-xs font-medium text-on-surface-variant">{msg.sender.name}</span>
+                      {msg.sender.role === 'owner' && (
+                        <span className="text-[10px] uppercase font-bold tracking-wider bg-red-500/20 text-red-500 px-1.5 py-0.5 rounded">Owner</span>
+                      )}
+                      {msg.sender.role === 'co-owner' && (
+                        <span className="text-[10px] uppercase font-bold tracking-wider bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded">Co-Owner</span>
+                      )}
                       {msg.sender.role === 'admin' && (
                         <span className="text-[10px] uppercase font-bold tracking-wider bg-primary/20 text-primary px-1.5 py-0.5 rounded">Admin</span>
                       )}
@@ -194,11 +214,29 @@ export function ChatPage() {
                           <span className="font-semibold">{msg.replyTo.sender.name}</span>: <span className="line-clamp-1">{msg.replyTo.text}</span>
                         </div>
                       )}
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                      
+                      {editingMessageId === msg._id ? (
+                        <div className="flex flex-col gap-2 w-full mt-1">
+                          <textarea
+                            value={editInputText}
+                            onChange={(e) => setEditInputText(e.target.value)}
+                            className="bg-black/40 border border-white/20 text-white rounded p-2 text-sm focus:outline-none w-full min-w-[200px]"
+                            rows={3}
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <button onClick={() => setEditingMessageId(null)} className="text-xs px-2 py-1 bg-zinc-800 rounded hover:bg-zinc-700">Cancel</button>
+                            <button onClick={() => saveEdit(msg._id)} className="text-xs px-2 py-1 bg-primary text-black rounded hover:bg-primary/90 font-medium">Save</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                      )}
+                      
                       <span 
                         className={`text-[10px] mt-1 block ${isMe ? "text-on-primary/70 text-right" : "text-on-surface-variant"}`}
                       >
                         {formatTime(msg.createdAt)}
+                        {msg.isEdited && <span className="ml-1 italic">(edited)</span>}
                       </span>
                     </div>
 
@@ -211,6 +249,17 @@ export function ChatPage() {
                       >
                         <Reply className="w-4 h-4" />
                       </button>
+
+                      {/* Owner Edit Button */}
+                      {user?.role === 'owner' && (
+                        <button
+                          onClick={() => { setEditingMessageId(msg._id); setEditInputText(msg.text); }}
+                          className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                          title="Edit Message"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      )}
 
                       {/* Admin Delete Button */}
                       {['admin', 'co-owner', 'owner'].includes(user?.role || '') && (
