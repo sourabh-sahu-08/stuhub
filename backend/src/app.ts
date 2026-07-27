@@ -6,6 +6,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
+import mongoose from "mongoose";
 import { env } from "./config/env.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { pyqRouter } from "./routes/pyq.routes.js";
@@ -32,7 +33,17 @@ export function createApp() {
   app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
   app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 500 }));
 
-  app.get("/health", (_req, res) => res.json({ ok: true, service: "stuhub-api" }));
+  app.get("/health", (_req, res) => {
+    const dbState = mongoose.connection.readyState;
+    const dbStatus = dbState === 1 ? 'connected' : dbState === 2 ? 'connecting' : 'disconnected';
+    
+    res.json({ 
+      status: "ok", 
+      service: "stuhub-api",
+      uptime: process.uptime(),
+      database: dbStatus
+    });
+  });
   app.use("/api/auth", authRouter);
   app.use("/api/admin", adminRouter);
   app.use("/api/pyq", pyqRouter);

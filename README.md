@@ -89,11 +89,41 @@ npm run dev
 
 The frontend will be available at `http://localhost:5173` and the backend API at `http://localhost:5000`.
 
-## 🐳 Docker Deployment
+## 🐳 Docker Development Environment
 
-To spin up the entire stack using Docker:
+StuHub includes a complete Docker configuration for a seamless development experience without needing local Node.js or MongoDB installations (other than Docker Desktop).
+
+### Prerequisites
+- Docker Desktop
+
+### First Time Setup
+To build the images and start the containers for the first time:
 ```bash
 docker compose up --build
+```
+
+### Start
+To start the environment after it has been built:
+```bash
+docker compose up
+```
+
+### Stop
+To stop the running containers:
+```bash
+docker compose down
+```
+
+### Stop and Remove Volumes
+To completely stop the environment and destroy the persistent database data:
+```bash
+docker compose down -v
+```
+
+### Rebuild
+To force a clean rebuild of the Docker images:
+```bash
+docker compose build --no-cache
 ```
 
 ## 🌐 Production Deployment (Render)
