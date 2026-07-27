@@ -13,6 +13,18 @@ export function AdminLayout() {
   }
   
   const isOwner = user?.role === "owner" || user?.role === "co-owner";
+  
+  const getPanelTitle = () => {
+    if (user?.role === "owner") return "Owner Panel";
+    if (user?.role === "co-owner") return "Co-Owner Panel";
+    return "Admin CMS";
+  };
+  
+  const getPanelColor = () => {
+    if (user?.role === "owner") return "text-red-500";
+    if (user?.role === "co-owner") return "text-purple-500";
+    return "text-[#FF9000]";
+  };
 
   const navItems = [
     { label: "Overview", path: "/admin", icon: Shield, end: true },
@@ -28,8 +40,8 @@ export function AdminLayout() {
       {/* Mobile Header */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[#0a0a0a] border-b border-[#1a1a1a] md:hidden">
         <div className="flex items-center gap-2 text-white font-bold text-lg">
-          <Shield className={isOwner ? "text-red-500" : "text-[#FF9000]"} size={20} />
-          {isOwner ? "Owner Panel" : "Admin CMS"}
+          <Shield className={getPanelColor()} size={20} />
+          {getPanelTitle()}
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -51,8 +63,8 @@ export function AdminLayout() {
       <aside className={`fixed md:static inset-y-0 left-0 z-40 w-64 border-r border-[#1a1a1a] bg-[#0a0a0a] flex flex-col transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 pt-14 md:pt-0`}>
         <div className="p-6">
           <div className="hidden md:flex items-center gap-3 text-white font-bold text-xl mb-8">
-            <Shield className={isOwner ? "text-red-500" : "text-[#FF9000]"} />
-            <h2>{isOwner ? "Owner Panel" : "Admin CMS"}</h2>
+            <Shield className={getPanelColor()} />
+            <h2>{getPanelTitle()}</h2>
           </div>
           
           <nav className="space-y-1">

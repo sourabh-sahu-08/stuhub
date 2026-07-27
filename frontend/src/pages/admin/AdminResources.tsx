@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { api } from "../../lib/api";
-import { Plus, Link, Youtube, Globe, Trash2, Loader2, ExternalLink } from "lucide-react";
+import { Plus, Link, Youtube, Globe, Trash2, Loader2, ExternalLink, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { ReportIssueModal } from "../../components/admin/ReportIssueModal";
 
 interface Resource {
   _id: string;
@@ -11,13 +13,20 @@ interface Resource {
   semester?: number;
   branch?: string;
   createdAt: string;
+  user?: { _id: string; name: string };
 }
 
 export function AdminResources() {
+  const { user } = useAuth();
+  const isOwner = user?.role === "owner" || user?.role === "co-owner";
+
   const [resources, setResources] = useState<Resource[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportItem, setReportItem] = useState({ id: "", type: "", title: "" });
+
   const [showUpload, setShowUpload] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   
@@ -157,9 +166,23 @@ export function AdminResources() {
                       <a href={item.url} target="_blank" rel="noopener noreferrer" className="p-2 text-zinc-500 hover:text-white bg-[#111] hover:bg-[#222] rounded-lg transition-all" title="Visit Link">
                         <ExternalLink size={16} />
                       </a>
-                      <button onClick={() => deleteResource(item._id, item.title)} className="p-2 text-zinc-500 hover:text-red-500 bg-[#111] hover:bg-red-500/10 rounded-lg transition-all" title="Delete">
-                        <Trash2 size={16} />
-                      </button>
+                      {isOwner || item.user?._id === user?.id ? (
+                        <button onClick={() => deleteResource(item._id, item.title)} className="p-2 text-zinc-500 hover:text-red-500 bg-[#111] hover:bg-red-500/10 rounded-lg transition-all" title="Delete">
+                          <Trash2 size={16} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setReportItem({ id: item._id, type: "Resource", title: item.title });
+                            setReportModalOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#FF9000]/10 text-[#FF9000] rounded-lg hover:bg-[#FF9000]/20 transition-colors border border-[#FF9000]/20 ml-2"
+                          title="Report Issue"
+                        >
+                          <AlertCircle size={14} />
+                          Report Issue
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -253,6 +276,14 @@ export function AdminResources() {
           </div>
         </div>
       )}
+
+      <ReportIssueModal 
+        isOpen={reportModalOpen} 
+        onClose={() => setReportModalOpen(false)} 
+        itemId={reportItem.id} 
+        itemType={reportItem.type} 
+        itemTitle={reportItem.title} 
+      />
     </div>
   );
 }

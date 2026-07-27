@@ -135,10 +135,17 @@ router.post("/notes/link", requireAuth, allowRoles("admin"), async (req: AuthReq
   }
 });
 
-router.delete("/notes/:id", async (req, res, next) => {
+router.delete("/notes/:id", async (req: AuthRequest, res, next) => {
   try {
-    const note = await Note.findByIdAndDelete(req.params.id);
+    const note = await Note.findById(req.params.id);
     if (!note) return res.status(404).json({ message: "Note not found" });
+
+    // Ownership check for standard admins
+    if (req.user?.role === "admin" && note.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await note.deleteOne();
     res.json({ message: "Note deleted" });
   } catch (error) {
     next(error);
@@ -180,10 +187,16 @@ router.post("/pyqs/link", requireAuth, allowRoles("admin"), async (req: AuthRequ
   }
 });
 
-router.delete("/pyqs/:id", async (req, res, next) => {
+router.delete("/pyqs/:id", async (req: AuthRequest, res, next) => {
   try {
-    const pyq = await Pyq.findByIdAndDelete(req.params.id);
+    const pyq = await Pyq.findById(req.params.id);
     if (!pyq) return res.status(404).json({ message: "PYQ not found" });
+
+    if (req.user?.role === "admin" && pyq.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await pyq.deleteOne();
     res.json({ message: "PYQ deleted" });
   } catch (error) {
     next(error);
@@ -225,10 +238,16 @@ router.post("/ct-pyqs/link", requireAuth, allowRoles("admin"), async (req: AuthR
   }
 });
 
-router.delete("/ct-pyqs/:id", async (req, res, next) => {
+router.delete("/ct-pyqs/:id", async (req: AuthRequest, res, next) => {
   try {
-    const ctPyq = await CtPyq.findByIdAndDelete(req.params.id);
+    const ctPyq = await CtPyq.findById(req.params.id);
     if (!ctPyq) return res.status(404).json({ message: "CT-PYQ not found" });
+
+    if (req.user?.role === "admin" && ctPyq.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await ctPyq.deleteOne();
     res.json({ message: "CT-PYQ deleted" });
   } catch (error) {
     next(error);
@@ -270,10 +289,16 @@ router.post("/assignments/link", requireAuth, allowRoles("admin"), async (req: A
   }
 });
 
-router.delete("/assignments/:id", async (req, res, next) => {
+router.delete("/assignments/:id", async (req: AuthRequest, res, next) => {
   try {
-    const assignment = await Assignment.findByIdAndDelete(req.params.id);
+    const assignment = await Assignment.findById(req.params.id);
     if (!assignment) return res.status(404).json({ message: "Assignment not found" });
+
+    if (req.user?.role === "admin" && assignment.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await assignment.deleteOne();
     res.json({ message: "Assignment deleted" });
   } catch (error) {
     next(error);
@@ -315,10 +340,16 @@ router.post("/resources/link", requireAuth, allowRoles("admin"), async (req: Aut
   }
 });
 
-router.delete("/resources/:id", async (req, res, next) => {
+router.delete("/resources/:id", async (req: AuthRequest, res, next) => {
   try {
-    const resource = await Resource.findByIdAndDelete(req.params.id);
+    const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ message: "Resource not found" });
+
+    if (req.user?.role === "admin" && resource.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete content that you created" });
+    }
+
+    await resource.deleteOne();
     res.json({ message: "Resource deleted" });
   } catch (error) {
     next(error);
@@ -359,7 +390,7 @@ router.get("/subjects", async (_req, res, next) => {
   }
 });
 
-router.post("/subjects", async (req, res, next) => {
+router.post("/subjects", async (req: AuthRequest, res, next) => {
   try {
     const { name, code, branches, semesters, syllabus } = req.body;
     
@@ -378,7 +409,8 @@ router.post("/subjects", async (req, res, next) => {
       code,
       branches: branches.map(b => b.toUpperCase()),
       semesters: semesters.map(s => parseInt(s)),
-      syllabus
+      syllabus,
+      createdBy: req.user?.id
     });
     
     res.status(201).json(subject);
@@ -387,7 +419,7 @@ router.post("/subjects", async (req, res, next) => {
   }
 });
 
-router.put("/subjects/:id", async (req, res, next) => {
+router.put("/subjects/:id", async (req: AuthRequest, res, next) => {
   try {
     const { name, code, branches, semesters, syllabus } = req.body;
     
@@ -401,6 +433,13 @@ router.put("/subjects/:id", async (req, res, next) => {
       return res.status(400).json({ message: "At least one semester must be selected" });
     }
 
+    const subject = await Subject.findById(req.params.id);
+    if (!subject) return res.status(404).json({ message: "Subject not found" });
+
+    if (req.user?.role === "admin" && subject.createdBy?.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only edit subjects that you created" });
+    }
+
     let updateData: any = { 
       name, 
       code, 
@@ -409,8 +448,8 @@ router.put("/subjects/:id", async (req, res, next) => {
       syllabus 
     };
     
-    const subject = await Subject.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!subject) return res.status(404).json({ message: "Subject not found" });
+    Object.assign(subject, updateData);
+    await subject.save();
     
     res.json(subject);
   } catch (error) {
@@ -418,10 +457,16 @@ router.put("/subjects/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/subjects/:id", async (req, res, next) => {
+router.delete("/subjects/:id", async (req: AuthRequest, res, next) => {
   try {
-    const subject = await Subject.findByIdAndDelete(req.params.id);
+    const subject = await Subject.findById(req.params.id);
     if (!subject) return res.status(404).json({ message: "Subject not found" });
+
+    if (req.user?.role === "admin" && subject.createdBy?.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only delete subjects that you created" });
+    }
+
+    await subject.deleteOne();
     res.json({ message: "Subject deleted" });
   } catch (error) {
     next(error);
