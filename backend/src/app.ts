@@ -25,7 +25,7 @@ export function createApp() {
   const app = express();
   app.use(helmet({ 
     contentSecurityPolicy: false,
-    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+    crossOriginOpenerPolicy: false
   }));
   app.use(cors({ origin: env.NODE_ENV === "production" ? env.CLIENT_URL : true, credentials: true }));
   app.use(compression());
