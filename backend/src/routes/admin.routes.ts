@@ -5,6 +5,7 @@ import { Pyq } from "../models/Pyq.js";
 import { CtPyq } from "../models/CtPyq.js";
 import { Assignment } from "../models/Assignment.js";
 import { Feedback } from "../models/Feedback.js";
+import { Resource } from "../models/Resource.js";
 import { Subject, Department } from "../models/Academic.js";
 import { requireAuth, allowRoles } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
@@ -237,6 +238,51 @@ router.delete("/assignments/:id", async (req, res, next) => {
     const assignment = await Assignment.findByIdAndDelete(req.params.id);
     if (!assignment) return res.status(404).json({ message: "Assignment not found" });
     res.json({ message: "Assignment deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── Resources (Admin: all resources) ──────────────────────────────────────
+router.get("/resources", async (_req, res, next) => {
+  try {
+    const resources = await Resource.find()
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+    res.json(resources);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/resources/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { title, url, type, subject, semester, syllabus, branch } = req.body;
+    if (!title || !url || !type || !subject || !semester || !syllabus || !branch) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const resource = await Resource.create({
+      user: req.user?.id,
+      title,
+      url,
+      type,
+      subject,
+      semester: parseInt(semester),
+      syllabus,
+      branch
+    });
+    res.status(201).json(resource);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/resources/:id", async (req, res, next) => {
+  try {
+    const resource = await Resource.findByIdAndDelete(req.params.id);
+    if (!resource) return res.status(404).json({ message: "Resource not found" });
+    res.json({ message: "Resource deleted" });
   } catch (error) {
     next(error);
   }
