@@ -63,7 +63,7 @@ export const SearchAndFilter: React.FC<Props> = ({ data }) => {
       </div>
 
       <div className="border border-gray-800 rounded-lg overflow-hidden">
-        <div className="max-h-[600px] overflow-y-auto">
+        <div className="max-h-[600px] overflow-y-auto overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead className="bg-[#111] sticky top-0 z-10">
               <tr>
