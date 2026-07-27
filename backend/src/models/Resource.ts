@@ -19,10 +19,10 @@ const resourceSchema = new Schema<IResource>(
     title: { type: String, required: true },
     url: { type: String, required: true },
     type: { type: String, enum: ["youtube", "website"], required: true },
-    subject: { type: String, required: true },
-    semester: { type: Number, required: true, min: 1, max: 8 },
-    syllabus: { type: String, enum: ["new", "old"], required: true },
-    branch: { type: String, required: true },
+    subject: { type: String },
+    semester: { type: Number, min: 1, max: 8 },
+    syllabus: { type: String, enum: ["new", "old"] },
+    branch: { type: String },
   },
   { timestamps: true }
 );

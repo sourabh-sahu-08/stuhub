@@ -16,6 +16,7 @@ import { AdminOverview } from "./pages/admin/AdminOverview";
 import { AdminUsers } from "./pages/admin/AdminUsers";
 import { AdminSubjects } from "./pages/admin/AdminSubjects";
 import { AdminContent } from "./pages/admin/AdminContent";
+import { AdminResources } from "./pages/admin/AdminResources";
 import { AdminFeedback } from "./pages/admin/AdminFeedback";
 import { useAuth } from "./context/AuthContext";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
@@ -55,6 +56,7 @@ export function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="subjects" element={<AdminSubjects />} />
           <Route path="content" element={<AdminContent />} />
+          <Route path="resources" element={<AdminResources />} />
           <Route path="feedback" element={<AdminFeedback />} />
         </Route>
 

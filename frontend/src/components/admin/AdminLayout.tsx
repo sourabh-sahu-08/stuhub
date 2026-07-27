@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, Navigate, NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Shield, Users, Home, LogOut, FileText, MessageSquare, BookOpen, Menu, X } from "lucide-react";
+import { Shield, Users, Home, LogOut, FileText, MessageSquare, BookOpen, Menu, X, Link as LinkIcon } from "lucide-react";
 
 export function AdminLayout() {
   const { user, logout } = useAuth();
@@ -17,6 +17,7 @@ export function AdminLayout() {
     { label: "Users", path: "/admin/users", icon: Users },
     { label: "Subjects", path: "/admin/subjects", icon: BookOpen },
     { label: "Content", path: "/admin/content", icon: FileText },
+    { label: "Resources", path: "/admin/resources", icon: LinkIcon },
     { label: "Feedback", path: "/admin/feedback", icon: MessageSquare },
   ];
 

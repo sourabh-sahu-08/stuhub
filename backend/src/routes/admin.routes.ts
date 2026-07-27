@@ -256,22 +256,22 @@ router.get("/resources", async (_req, res, next) => {
 });
 
 router.post("/resources/link", requireAuth, allowRoles("admin"), async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const { title, url, type, subject, semester, syllabus, branch } = req.body;
-    if (!title || !url || !type || !subject || !semester || !syllabus || !branch) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    const resource = await Resource.create({
-      user: req.user?.id,
-      title,
-      url,
-      type,
-      subject,
-      semester: parseInt(semester),
-      syllabus,
-      branch
-    });
+    try {
+      const { title, url, type, subject, semester, syllabus, branch } = req.body;
+      if (!title || !url || !type) {
+        return res.status(400).json({ message: "Title, url, and type are required fields" });
+      }
+  
+      const resource = await Resource.create({
+        user: req.user?.id,
+        title,
+        url,
+        type,
+        subject: subject || undefined,
+        semester: semester ? parseInt(semester) : undefined,
+        syllabus: syllabus || undefined,
+        branch: branch || undefined
+      });
     res.status(201).json(resource);
   } catch (error) {
     next(error);

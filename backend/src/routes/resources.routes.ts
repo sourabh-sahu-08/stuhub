@@ -37,10 +37,10 @@ resourcesRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequ
 
     const { q, syllabus } = req.query;
     let query: any = {
-      semester: semNum,
-      $or: [
-        { branch: branchCode },
-        { subject: { $in: validSubjectNames } }
+      $and: [
+        { $or: [{ branch: branchCode }, { branch: { $exists: false } }, { branch: null }, { branch: "" }, { branch: "ALL" }] },
+        { $or: [{ semester: semNum }, { semester: { $exists: false } }, { semester: null }] },
+        { $or: [{ subject: { $in: validSubjectNames } }, { subject: { $exists: false } }, { subject: null }, { subject: "" }] }
       ]
     };
 
