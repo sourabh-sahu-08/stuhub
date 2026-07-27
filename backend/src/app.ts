@@ -26,7 +26,7 @@ export function createApp() {
     contentSecurityPolicy: false,
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
   }));
-  app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
+  app.use(cors({ origin: env.NODE_ENV === "production" ? env.CLIENT_URL : true, credentials: true }));
   app.use(compression());
   app.use(express.json({ limit: "2mb" }));
   app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));

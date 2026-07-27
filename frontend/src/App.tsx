@@ -8,6 +8,7 @@ import { CtPyqPage } from "./pages/CtPyqPage";
 import { PyqAnalyzerPage } from "./pages/PyqAnalyzerPage";
 import { NotesPage } from "./pages/NotesPage";
 import { AssignmentsPage } from "./pages/AssignmentsPage";
+import { ChatPage } from "./pages/ChatPage";
 import { AppShell } from "./components/layout/AppShell";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { AdminOverview } from "./pages/admin/AdminOverview";
@@ -42,6 +43,7 @@ export function App() {
           <Route path="ct-pyq" element={<CtPyqPage />} />
           <Route path="pyq-analyzer" element={<PyqAnalyzerPage />} />
           <Route path="library" element={<NotesPage />} />
+          <Route path="chat" element={<ChatPage />} />
           <Route path=":module" element={<ModulePage />} />
         </Route>
 
