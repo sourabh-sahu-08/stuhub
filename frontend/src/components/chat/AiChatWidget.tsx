@@ -83,7 +83,7 @@ export function AiChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-gradient-to-br from-[#FF9000] to-[#E58100] text-white shadow-xl shadow-[#FF9000]/20 flex items-center justify-center hover:scale-105 transition-transform"
+          className="fixed bottom-[90px] md:bottom-6 right-4 md:right-6 z-50 h-14 w-14 rounded-full bg-gradient-to-br from-[#FF9000] to-[#E58100] text-white shadow-xl shadow-[#FF9000]/20 flex items-center justify-center hover:scale-105 transition-transform"
         >
           <div className="relative">
             <Sparkles size={24} />
@@ -94,7 +94,7 @@ export function AiChatWidget() {
 
       {/* Chat Popover */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[380px] h-[600px] max-h-[85vh] max-w-[calc(100vw-3rem)] flex flex-col bg-[#050505] rounded-2xl border border-[#1A1A1A] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-200">
+        <div className="fixed bottom-[90px] md:bottom-6 right-4 md:right-6 z-50 w-[380px] h-[600px] max-h-[85vh] max-w-[calc(100vw-2rem)] flex flex-col bg-[#050505] rounded-2xl border border-[#1A1A1A] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-200">
           {/* Header */}
           <div className="flex-none p-4 border-b border-[#1A1A1A] bg-[#0A0A0A] flex items-center justify-between">
             <div className="flex items-center gap-3">
