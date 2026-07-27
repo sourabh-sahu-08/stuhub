@@ -36,6 +36,11 @@ export function setupSocketServer(io: Server) {
         .sort({ createdAt: -1 })
         .limit(50)
         .populate("sender", "name avatar role")
+        .populate({
+          path: "replyTo",
+          select: "text sender",
+          populate: { path: "sender", select: "name" }
+        })
         .lean();
 
       // Reverse to chronological order (oldest to newest)
@@ -46,7 +51,19 @@ export function setupSocketServer(io: Server) {
     }
 
     // Handle incoming messages
-    socket.on("send_message", async (text: string) => {
+    socket.on("send_message", async (payload: { text: string; replyTo?: string } | string) => {
+      let text = "";
+      let replyToId = null;
+
+      if (typeof payload === "string") {
+        text = payload;
+      } else if (payload && typeof payload === "object") {
+        text = payload.text;
+        if (payload.replyTo) {
+          replyToId = payload.replyTo;
+        }
+      }
+
       if (!text || typeof text !== "string" || text.trim().length === 0) return;
       if (!socket.user) return;
 
@@ -54,10 +71,16 @@ export function setupSocketServer(io: Server) {
         const newMessage = await Message.create({
           text: text.trim(),
           sender: socket.user.id,
+          replyTo: replyToId
         });
 
         const populatedMessage = await Message.findById(newMessage._id)
           .populate("sender", "name avatar role")
+          .populate({
+            path: "replyTo",
+            select: "text sender",
+            populate: { path: "sender", select: "name" }
+          })
           .lean();
 
         // Broadcast to all connected clients
@@ -66,7 +89,19 @@ export function setupSocketServer(io: Server) {
         console.error("Error saving message:", err);
       }
     });
+    // Admin: Delete a message
+    socket.on("delete_message", async (messageId: string) => {
+      if (!socket.user || socket.user.role !== "admin") {
+        return; // Only admins can delete
+      }
 
+      try {
+        await Message.findByIdAndDelete(messageId);
+        io.emit("message_deleted", messageId);
+      } catch (err) {
+        console.error("Error deleting message:", err);
+      }
+    });
     socket.on("disconnect", () => {
       console.log(`User disconnected from chat: ${socket.user?.id}`);
     });

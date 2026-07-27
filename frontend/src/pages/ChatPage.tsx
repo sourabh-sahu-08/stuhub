@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
-import { Send, Users, AlertCircle } from "lucide-react";
+import { Send, Users, AlertCircle, Trash2, Reply, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ChatUser {
@@ -15,6 +15,11 @@ interface Message {
   _id: string;
   text: string;
   sender: ChatUser;
+  replyTo?: {
+    _id: string;
+    text: string;
+    sender: { name: string };
+  };
   createdAt: string;
 }
 
@@ -45,6 +50,7 @@ export function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -77,6 +83,10 @@ export function ChatPage() {
       setMessages((prev) => [...prev, message]);
     });
 
+    newSocket.on("message_deleted", (messageId: string) => {
+      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+    });
+
     setSocket(newSocket);
 
     return () => {
@@ -92,8 +102,16 @@ export function ChatPage() {
     e.preventDefault();
     if (!inputText.trim() || !socket) return;
 
-    socket.emit("send_message", inputText);
+    socket.emit("send_message", { text: inputText, replyTo: replyingTo?._id });
     setInputText("");
+    setReplyingTo(null);
+  };
+
+  const deleteMessage = (messageId: string) => {
+    if (!socket || user?.role !== 'admin') return;
+    if (window.confirm("Are you sure you want to delete this message?")) {
+      socket.emit("delete_message", messageId);
+    }
   };
 
   const formatTime = (isoString: string) => {
@@ -145,7 +163,7 @@ export function ChatPage() {
                 key={msg._id || index}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`flex gap-3 max-w-[85%] ${isMe ? "self-end flex-row-reverse" : "self-start"}`}
+                className={`flex gap-3 max-w-[85%] group ${isMe ? "self-end flex-row-reverse" : "self-start"}`}
               >
                 {!isMe && (
                   <div className="flex-shrink-0 w-8">
@@ -162,19 +180,48 @@ export function ChatPage() {
                       )}
                     </div>
                   )}
-                  <div
-                    className={`px-4 py-2.5 rounded-2xl relative ${
-                      isMe 
-                        ? "bg-primary text-on-primary rounded-tr-sm" 
-                        : "bg-surface-container text-on-surface border border-outline rounded-tl-sm"
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                    <span 
-                      className={`text-[10px] mt-1 block ${isMe ? "text-on-primary/70 text-right" : "text-on-surface-variant"}`}
+                  <div className={`flex items-center gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                    <div
+                      className={`px-4 py-2.5 rounded-2xl relative flex flex-col gap-1 ${
+                        isMe 
+                          ? "bg-primary text-on-primary rounded-tr-sm" 
+                          : "bg-surface-container text-on-surface border border-outline rounded-tl-sm"
+                      }`}
                     >
-                      {formatTime(msg.createdAt)}
-                    </span>
+                      {msg.replyTo && (
+                        <div className={`text-[11px] px-2 py-1.5 rounded bg-black/20 border-l-2 ${isMe ? 'border-on-primary/50 text-on-primary/80' : 'border-primary/50 text-on-surface-variant'}`}>
+                          <span className="font-semibold">{msg.replyTo.sender.name}</span>: <span className="line-clamp-1">{msg.replyTo.text}</span>
+                        </div>
+                      )}
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                      <span 
+                        className={`text-[10px] mt-1 block ${isMe ? "text-on-primary/70 text-right" : "text-on-surface-variant"}`}
+                      >
+                        {formatTime(msg.createdAt)}
+                      </span>
+                    </div>
+
+                    <div className="opacity-0 group-hover:opacity-100 flex items-center transition-all">
+                      {/* Reply Button (for everyone) */}
+                      <button
+                        onClick={() => setReplyingTo(msg)}
+                        className={`p-1.5 rounded-lg transition-all ${isMe ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-500 hover:text-white hover:bg-white/10'}`}
+                        title="Reply"
+                      >
+                        <Reply className="w-4 h-4" />
+                      </button>
+
+                      {/* Admin Delete Button */}
+                      {user?.role === 'admin' && (
+                        <button
+                          onClick={() => deleteMessage(msg._id)}
+                          className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-all"
+                          title="Delete Message"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -186,35 +233,52 @@ export function ChatPage() {
 
       {/* Input Area */}
       <div className="p-4 bg-surface-container border-t border-outline flex-none">
-        <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex items-end gap-3 relative">
-          <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage(e);
-              }
-            }}
-            placeholder="Type a message... (Shift+Enter for new line)"
-            className="flex-1 bg-surface border border-outline rounded-2xl py-3 px-4 pr-12 text-sm text-on-surface focus:outline-none focus:border-primary resize-none custom-scrollbar min-h-[52px] max-h-32 transition-colors"
-            rows={1}
-            style={{ 
-              height: inputText ? (inputText.split('\n').length * 20 + 32 + 'px') : '52px'
-            }}
-          />
-          <button
-            type="submit"
-            disabled={!inputText.trim() || !socket?.connected}
-            className={`absolute right-2 bottom-2 w-9 h-9 flex items-center justify-center rounded-xl transition-all ${
-              inputText.trim() && socket?.connected
-                ? "bg-primary text-on-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
-                : "bg-surface text-on-surface-variant cursor-not-allowed"
-            }`}
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
+        <div className="max-w-4xl mx-auto flex flex-col gap-2">
+          {replyingTo && (
+            <div className="flex items-center justify-between bg-black/20 px-4 py-2.5 rounded-xl border border-outline/50 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+              <div className="flex flex-col text-xs pl-2">
+                <span className="text-primary font-bold">Replying to {replyingTo.sender.name}</span>
+                <span className="text-on-surface-variant line-clamp-1 mt-0.5">{replyingTo.text}</span>
+              </div>
+              <button 
+                onClick={() => setReplyingTo(null)} 
+                className="text-zinc-500 hover:text-white p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          <form onSubmit={sendMessage} className="flex items-end gap-3 relative">
+            <textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage(e as any);
+                }
+              }}
+              placeholder="Type a message... (Shift+Enter for new line)"
+              className="flex-1 bg-surface border border-outline rounded-2xl py-3 px-4 pr-12 text-sm text-on-surface focus:outline-none focus:border-primary resize-none custom-scrollbar min-h-[52px] max-h-32 transition-colors"
+              rows={1}
+              style={{ 
+                height: inputText ? (inputText.split('\n').length * 20 + 32 + 'px') : '52px'
+              }}
+            />
+            <button
+              type="submit"
+              disabled={!inputText.trim() || !socket?.connected}
+              className={`absolute right-2 bottom-2 w-9 h-9 flex items-center justify-center rounded-xl transition-all ${
+                inputText.trim() && socket?.connected
+                  ? "bg-primary text-on-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+                  : "bg-surface text-on-surface-variant cursor-not-allowed"
+              }`}
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

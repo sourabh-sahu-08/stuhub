@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IMessage extends Document {
   text: string;
   sender: mongoose.Types.ObjectId;
+  replyTo?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,6 +20,11 @@ const messageSchema = new Schema<IMessage>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true
+    },
+    replyTo: {
+      type: Schema.Types.ObjectId,
+      ref: "Message",
+      default: null
     }
   },
   {
