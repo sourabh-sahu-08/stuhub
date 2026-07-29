@@ -20,6 +20,8 @@ import { resourcesRouter } from "./routes/resources.routes.js";
 import { settingsRouter } from "./routes/settings.routes.js";
 import { aiRouter } from "./routes/ai.routes.js";
 import feedbackRouter from "./routes/feedback.routes.js";
+import { gamificationRouter } from "./routes/gamification.routes.js";
+import { messagesRouter } from "./routes/messages.routes.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
 export function createApp() {
@@ -57,6 +59,8 @@ export function createApp() {
   app.use("/api/settings", settingsRouter);
   app.use("/api/ai", aiRouter);
   app.use("/api/feedback", feedbackRouter);
+  app.use("/api/gamification", gamificationRouter);
+  app.use("/api/messages", messagesRouter);
 
   // Serve Frontend statically (works regardless of NODE_ENV on Render)
   const __filename = fileURLToPath(import.meta.url);

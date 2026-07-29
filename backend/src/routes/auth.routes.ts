@@ -2,6 +2,9 @@ import { Router } from "express";
 import { z } from "zod";
 import { User } from "../models/User.js";
 import { Note } from "../models/Note.js";
+import { Pyq } from "../models/Pyq.js";
+import { CtPyq } from "../models/CtPyq.js";
+import { Assignment } from "../models/Assignment.js";
 import { Student, Department } from "../models/Academic.js";
 import { requireAuth, signToken } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
@@ -406,14 +409,35 @@ authRouter.put('/settings', requireAuth, async (req: AuthRequest, res, next) => 
 
 authRouter.get("/top-contributors", async (req, res, next) => {
   try {
-    const topContributors = await Note.aggregate([
-      { $group: { _id: "$user", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 10 },
-      { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "user" } },
-      { $unwind: "$user" },
-      { $project: { _id: 1, count: 1, name: "$user.name", avatar: "$user.avatar", branch: "$user.branch" } }
+    const [notes, pyqs, ctpyqs, assignments] = await Promise.all([
+      Note.aggregate([{ $group: { _id: "$user", count: { $sum: 1 } } }]),
+      Pyq.aggregate([{ $group: { _id: "$user", count: { $sum: 1 } } }]),
+      CtPyq.aggregate([{ $group: { _id: "$user", count: { $sum: 1 } } }]),
+      Assignment.aggregate([{ $group: { _id: "$user", count: { $sum: 1 } } }])
     ]);
+
+    const countsMap = new Map<string, number>();
+    [...notes, ...pyqs, ...ctpyqs, ...assignments].forEach(item => {
+      if (!item._id) return;
+      const userId = item._id.toString();
+      countsMap.set(userId, (countsMap.get(userId) || 0) + item.count);
+    });
+
+    const sorted = Array.from(countsMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+
+    const topContributors = await Promise.all(sorted.map(async ([userId, count]) => {
+      const user = await User.findById(userId).select("name avatar branch");
+      return { 
+        _id: userId, 
+        count, 
+        name: user?.name || "Unknown", 
+        avatar: user?.avatar, 
+        branch: user?.branch 
+      };
+    }));
+
     res.json(topContributors);
   } catch (error) {
     next(error);

@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
 import { CtPyq } from "../models/CtPyq.js";
+import { GamificationService } from "../services/gamification.service.js";
 import { Subject, Department } from "../models/Academic.js";
 import { getSubjectQuery, getUniqueSubjects } from "../utils/subjectHelper.js";
 import type { AuthRequest } from "../types.js";
@@ -57,10 +58,18 @@ ctPyqRouter.post("/upload", requireAuth, upload.single("file"), async (req: Auth
       mimeType: req.file.mimetype
     });
 
-    const pyqResult = newPyq.toObject();
-    delete (pyqResult as any).fileData;
+    const ctPyqResult = newPyq.toObject();
+    delete (ctPyqResult as any).fileData;
 
-    res.status(201).json(pyqResult);
+    await GamificationService.logActivity(
+      req.user!.id,
+      "UPLOAD_CTPYQ",
+      newPyq._id,
+      "CtPyq",
+      `Uploaded CT PYQ: ${paperName.trim()}`
+    );
+
+    res.status(201).json(ctPyqResult);
   } catch (error) {
     next(error);
   }

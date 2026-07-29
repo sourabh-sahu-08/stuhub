@@ -11,6 +11,9 @@ export interface IPyq extends Document {
   fileData?: string; // Base64 representation of file
   mimeType?: string; // File mime type
   driveUrl?: string; // Drive link for the PYQ
+  views: number;
+  downloads: number;
+  likes: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,7 +29,10 @@ const pyqSchema = new Schema<IPyq>(
     fileName: { type: String },
     fileData: { type: String },
     mimeType: { type: String },
-    driveUrl: { type: String }
+    driveUrl: { type: String },
+    views: { type: Number, default: 0 },
+    downloads: { type: Number, default: 0 },
+    likes: [{ type: Schema.Types.ObjectId, ref: "User" }]
   },
   { timestamps: true }
 );

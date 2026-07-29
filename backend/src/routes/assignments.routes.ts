@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
 import { Assignment } from "../models/Assignment.js";
+import { GamificationService } from "../services/gamification.service.js";
 import { Subject, Department } from "../models/Academic.js";
 import { getSubjectQuery, getUniqueSubjects } from "../utils/subjectHelper.js";
 import type { AuthRequest } from "../types.js";
@@ -75,6 +76,14 @@ assignmentsRouter.post("/upload", requireAuth, upload.single("file"), async (req
 
     const assignmentResult = newAssignment.toObject();
     delete (assignmentResult as any).fileData;
+
+    await GamificationService.logActivity(
+      req.user!.id,
+      "UPLOAD_ASSIGNMENT",
+      newAssignment._id,
+      "Assignment",
+      `Uploaded Assignment: ${title.trim()}`
+    );
 
     res.status(201).json(assignmentResult);
   } catch (error) {

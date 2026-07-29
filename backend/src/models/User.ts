@@ -23,6 +23,15 @@ const userSchema = new Schema(
       upcomingDeadlines: { type: Boolean, default: true },
       aiAnalysisComplete: { type: Boolean, default: true },
       peerActivity: { type: Boolean, default: false }
+    },
+    // Gamification
+    gamification: {
+      xp: { type: Number, default: 0 },
+      level: { type: Number, default: 1 },
+      reputation: { type: Number, default: 0 },
+      currentStreak: { type: Number, default: 0 },
+      longestStreak: { type: Number, default: 0 },
+      lastContributionDate: { type: Date }
     }
   },
   { timestamps: true }

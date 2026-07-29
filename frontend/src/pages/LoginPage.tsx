@@ -31,7 +31,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useWorkspace } from "../context/WorkspaceContext";
 import { CompleteProfileModal } from "../components/auth/CompleteProfileModal";
-import { HeroesSection } from "../components/HeroesSection";
+import { HallOfFameSection } from "../components/hall-of-fame/HallOfFameSection";
 import { api } from "../lib/api";
 
 const features = [
@@ -393,7 +393,7 @@ export function LoginPage() {
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-300">
           <a href="#home" className="hover:text-brand-500 transition-colors duration-200">Home</a>
           <a href="#features" className="hover:text-brand-500 transition-colors duration-200">Workspace Overview</a>
-          <a href="#heroes" className="hover:text-brand-500 transition-colors duration-200">Our Heroes</a>
+          <a href="#heroes" className="hover:text-brand-500 transition-colors duration-200">Hall of Fame</a>
           <a href="#faq" className="hover:text-brand-500 transition-colors duration-200">FAQ</a>
           <a href="#connect" className="hover:text-brand-500 transition-colors duration-200">Connect</a>
         </nav>
@@ -434,7 +434,7 @@ export function LoginPage() {
       </header>
 
       {/* 2. Premium Hero Section */}
-      <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-24 bg-black overflow-hidden">
+      <section id="home" className="relative min-h-[90vh] flex items-center justify-center px-6 py-12 md:py-16 bg-black overflow-hidden">
         {/* Subtle grid background for depth */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,#000_70%,transparent_100%)]" />
 
@@ -721,7 +721,7 @@ export function LoginPage() {
       </section>
 
       {/* 3. Platform Overview Section */}
-      <section id="features" className="py-24 px-6 max-w-7xl mx-auto space-y-16">
+      <section id="features" className="py-12 md:py-16 px-6 max-w-7xl mx-auto space-y-12">
         <div className="flex flex-col items-center max-w-2xl mx-auto text-center space-y-4">
           <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Core Modules</h2>
           <p className="text-zinc-400 text-base leading-relaxed">
@@ -985,8 +985,8 @@ export function LoginPage() {
       </section>
 
       {/* 4. FAQ Section */}
-      <section id="faq" className="py-32 bg-black border-t border-[#111111] px-6">
-        <div className="max-w-3xl mx-auto space-y-16">
+      <section id="faq" className="py-12 md:py-16 bg-black border-t border-[#111111] px-6">
+        <div className="max-w-3xl mx-auto space-y-10">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-semibold text-white tracking-tight">Frequently Asked Questions</h2>
             <p className="text-zinc-500 text-base">Everything you need to know about the StuHub platform.</p>
@@ -1030,11 +1030,11 @@ export function LoginPage() {
         </div>
       </section>
 
-      {/* Heroes Section */}
-      <HeroesSection />
+      {/* Hall of Fame Section */}
+      <HallOfFameSection />
 
       {/* 5. Connect With Me */}
-      <section id="connect" className="py-32 bg-[#050505] border-t border-[#111111] px-6">
+      <section id="connect" className="py-12 md:py-16 bg-black border-t border-[#111111] px-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A1A1A] border border-[#333333] mb-8">
             <div className="w-2 h-2 rounded-full bg-[#FF9000]"></div>

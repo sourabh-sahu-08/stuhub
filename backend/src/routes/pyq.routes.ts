@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
 import { Pyq } from "../models/Pyq.js";
+import { GamificationService } from "../services/gamification.service.js";
 import { Subject, Department } from "../models/Academic.js";
 import { getSubjectQuery, getUniqueSubjects } from "../utils/subjectHelper.js";
 import type { AuthRequest } from "../types.js";
@@ -59,6 +60,14 @@ pyqRouter.post("/upload", requireAuth, upload.single("file"), async (req: AuthRe
 
     const pyqResult = newPyq.toObject();
     delete (pyqResult as any).fileData;
+
+    await GamificationService.logActivity(
+      req.user!.id,
+      "UPLOAD_PYQ",
+      newPyq._id,
+      "Pyq",
+      `Uploaded PYQ: ${paperName.trim()}`
+    );
 
     res.status(201).json(pyqResult);
   } catch (error) {

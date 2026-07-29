@@ -58,6 +58,16 @@ body {
   @apply absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-primary;
 }
 
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Simulated Heatmap Cell animations */
 .heatmap-cell {
   @apply w-2.5 h-2.5 rounded-[2px] bg-surface-container-lowest transition-colors duration-300;

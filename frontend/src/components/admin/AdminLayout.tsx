@@ -32,7 +32,8 @@ export function AdminLayout() {
     { label: "Subjects", path: "/admin/subjects", icon: BookOpen },
     { label: "Content", path: "/admin/content", icon: FileText },
     { label: "Resources", path: "/admin/resources", icon: LinkIcon },
-    ...(isOwner ? [{ label: "Feedback", path: "/admin/feedback", icon: MessageSquare }] : []),
+    ...(isOwner ? [{ label: "Messages", path: "/admin/messages", icon: MessageSquare }] : []),
+    ...(isOwner ? [{ label: "Feedback", path: "/admin/feedback", icon: Shield }] : []),
   ];
 
   return (

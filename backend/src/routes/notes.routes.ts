@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
 import { Note } from "../models/Note.js";
+import { GamificationService } from "../services/gamification.service.js";
 import { Subject, Department } from "../models/Academic.js";
 import { getSubjectQuery, getUniqueSubjects } from "../utils/subjectHelper.js";
 import type { AuthRequest } from "../types.js";
@@ -71,6 +72,14 @@ notesRouter.post("/upload", requireAuth, upload.single("file"), async (req: Auth
 
     const noteResult = newNote.toObject();
     delete (noteResult as any).fileData;
+
+    await GamificationService.logActivity(
+      req.user!.id,
+      "UPLOAD_NOTE",
+      newNote._id,
+      "Note",
+      `Uploaded note: ${title.trim()}`
+    );
 
     res.status(201).json(noteResult);
   } catch (error) {

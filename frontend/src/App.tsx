@@ -19,6 +19,7 @@ import { AdminSubjects } from "./pages/admin/AdminSubjects";
 import { AdminContent } from "./pages/admin/AdminContent";
 import { AdminResources } from "./pages/admin/AdminResources";
 import { AdminFeedback } from "./pages/admin/AdminFeedback";
+import { AdminMessages } from "./pages/admin/AdminMessages";
 import { useAuth } from "./context/AuthContext";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
 import { AiChatWidget } from "./components/chat/AiChatWidget";
@@ -59,6 +60,7 @@ export function App() {
           <Route path="subjects" element={<AdminSubjects />} />
           <Route path="content" element={<AdminContent />} />
           <Route path="resources" element={<AdminResources />} />
+          <Route path="messages" element={<AdminMessages />} />
           <Route path="feedback" element={<AdminFeedback />} />
         </Route>
 
