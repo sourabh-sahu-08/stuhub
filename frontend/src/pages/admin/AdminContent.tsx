@@ -9,13 +9,14 @@ interface Note { _id: string; title: string; subject: string; branch: string; se
 interface Pyq  { _id: string; paperName: string; title?: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; uploadedBy?: { _id: string; name: string }; }
 interface CtPyq { _id: string; paperName: string; title?: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; uploadedBy?: { _id: string; name: string }; }
 
-const AVAILABLE_BRANCHES = ["CSE", "IT", "ET&T", "EE", "MECH", "CIVIL", "MINING"];
+const AVAILABLE_BRANCHES = ["CSE", "IT", "ET&T", "EE", "EEE", "MECH", "CIVIL", "MINING"];
 const AVAILABLE_SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 const BRANCHES_MAP: Record<string, string> = {
   "CSE": "Computer Science and Engineering",
   "IT": "Information Technology",
   "ET&T": "Electronics and Telecommunication",
   "EE": "Electrical Engineering",
+  "EEE": "Electrical and Electronics Engineering",
   "MECH": "Mechanical Engineering",
   "CIVIL": "Civil Engineering",
   "MINING": "Mining Engineering"
@@ -327,7 +328,16 @@ export function AdminContent() {
         </div>
         
         <button
-          onClick={() => { setUploadType(tab === "notes" ? "note" : tab === "pyqs" ? "pyq" : tab === "ct-pyqs" ? "ct-pyq" : "assignment"); setUploadMethod("link"); setShowUpload(true); }}
+          onClick={() => { 
+            setUploadType(tab === "notes" ? "note" : tab === "pyqs" ? "pyq" : tab === "ct-pyqs" ? "ct-pyq" : "assignment"); 
+            setUploadMethod("link");
+            setFormData(prev => ({
+              ...prev,
+              branch: selectedBranch || "IT",
+              semester: selectedSemester ? selectedSemester.toString() : "4"
+            }));
+            setShowUpload(true); 
+          }}
           className="bg-[#FF9000] text-black px-4 py-2.5 rounded-lg font-bold text-sm hover:bg-[#E58100] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[#FF9000]/20"
         >
           <Plus size={18} strokeWidth={3} />
@@ -578,8 +588,8 @@ export function AdminContent() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Title / Paper Name</label>
-                <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. Operating Systems Unit 1" />
+                <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Title</label>
+                <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="" />
               </div>
 
               {uploadMethod === "link" ? (

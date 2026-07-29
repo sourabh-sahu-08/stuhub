@@ -1253,6 +1253,7 @@ export function LoginPage() {
                         <option value="IT">Information Technology (IT)</option>
                         <option value="ET&T">Electronics and Telecommunication (ET&T)</option>
                         <option value="EE">Electrical Engineering (EE)</option>
+                        <option value="EEE">Electrical & Electronics Engineering (EEE)</option>
                         <option value="MECH">Mechanical Engineering (MECH)</option>
                         <option value="CIVIL">Civil Engineering (CIVIL)</option>
                         <option value="MINING">Mining Engineering (MINING)</option>
