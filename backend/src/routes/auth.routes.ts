@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { User } from "../models/User.js";
+import { Note } from "../models/Note.js";
 import { Student, Department } from "../models/Academic.js";
 import { requireAuth, signToken } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
@@ -398,6 +399,22 @@ authRouter.put('/settings', requireAuth, async (req: AuthRequest, res, next) => 
 
     await user.save();
     res.json({ message: 'Settings updated successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+authRouter.get("/top-contributors", async (req, res, next) => {
+  try {
+    const topContributors = await Note.aggregate([
+      { $group: { _id: "$user", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+      { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "user" } },
+      { $unwind: "$user" },
+      { $project: { _id: 1, count: 1, name: "$user.name", avatar: "$user.avatar", branch: "$user.branch" } }
+    ]);
+    res.json(topContributors);
   } catch (error) {
     next(error);
   }

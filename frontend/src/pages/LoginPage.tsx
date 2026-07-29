@@ -31,6 +31,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useWorkspace } from "../context/WorkspaceContext";
 import { CompleteProfileModal } from "../components/auth/CompleteProfileModal";
+import { HeroesSection } from "../components/HeroesSection";
 import { api } from "../lib/api";
 
 const features = [
@@ -1027,6 +1028,9 @@ export function LoginPage() {
           </div>
         </div>
       </section>
+
+      {/* Heroes Section */}
+      <HeroesSection />
 
       {/* 5. Connect With Me */}
       <section id="connect" className="py-32 bg-[#050505] border-t border-[#111111] px-6">
