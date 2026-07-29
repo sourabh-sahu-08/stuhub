@@ -86,7 +86,10 @@ export function AdminContent() {
     e.preventDefault();
     setUploadLoading(true);
     try {
-      const finalTitle = formData.title.trim();
+      let finalTitle = formData.title.trim();
+      if ((uploadType === "pyq" || uploadType === "ct-pyq") && !finalTitle) {
+        finalTitle = `${formData.subject} ${uploadType === "pyq" ? "PYQ" : "CT PYQ"}`;
+      }
 
       if (uploadMethod === "link") {
         if (uploadType === "note") {
@@ -587,10 +590,12 @@ export function AdminContent() {
                 </label>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Title</label>
-                <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="" />
-              </div>
+              {uploadType !== "pyq" && uploadType !== "ct-pyq" && (
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Title</label>
+                  <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="" />
+                </div>
+              )}
 
               {uploadMethod === "link" ? (
                 <div>
