@@ -16,7 +16,7 @@ interface Subject {
   createdBy?: string;
 }
 
-const AVAILABLE_BRANCHES = ["CSE", "IT", "ET&T", "EE", "MECH", "CIVIL", "MINING"];
+const AVAILABLE_BRANCHES = ["CSE", "IT", "ET&T", "EE", "EEE", "MECH", "CIVIL", "MINING"];
 const AVAILABLE_SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 const BRANCHES_MAP: Record<string, string> = {
@@ -24,6 +24,7 @@ const BRANCHES_MAP: Record<string, string> = {
   "IT": "Information Technology",
   "ET&T": "Electronics and Telecommunication",
   "EE": "Electrical Engineering",
+  "EEE": "Electrical and Electronics Engineering",
   "MECH": "Mechanical Engineering",
   "CIVIL": "Civil Engineering",
   "MINING": "Mining Engineering"

@@ -49,6 +49,7 @@ const BRANCHES = [
   { code: "IT", name: "Information Technology" },
   { code: "ET&T", name: "Electronics and Telecommunication" },
   { code: "EE", name: "Electrical Engineering" },
+  { code: "EEE", name: "Electrical & Electronics Engineering" },
   { code: "MECH", name: "Mechanical Engineering" },
   { code: "CIVIL", name: "Civil Engineering" },
   { code: "MINING", name: "Mining Engineering" }

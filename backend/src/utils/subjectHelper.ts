@@ -3,7 +3,7 @@ export function getSubjectQuery(branchCode: string, semNum: number, syllabus?: a
   
   if (syllabus === "old" && (semNum === 1 || semNum === 2)) {
     const group1 = ["CSE", "IT", "ET&T"];
-    const group2 = ["MECH", "CIVIL", "EE", "MINING"];
+    const group2 = ["MECH", "CIVIL", "EE", "EEE", "MINING"];
     const altSem = semNum === 1 ? 2 : 1;
     
     if (group1.includes(branchCode)) {

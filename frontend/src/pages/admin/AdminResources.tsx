@@ -161,7 +161,7 @@ export function AdminResources() {
     );
   }
 
-  const branches = ["CSE", "IT", "ET&T", "EE", "MECH", "CIVIL", "MINING"];
+  const branches = ["CSE", "IT", "ET&T", "EE", "EEE", "MECH", "CIVIL", "MINING"];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
