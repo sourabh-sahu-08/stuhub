@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { Plus, Trash2, BookOpen, Edit2, Check, AlertCircle } from "lucide-react";
+import { Plus, Trash2, BookOpen, Edit2, Check, AlertCircle, Folder, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { ReportIssueModal } from "../../components/admin/ReportIssueModal";
 
@@ -15,8 +16,18 @@ interface Subject {
   createdBy?: string;
 }
 
-const AVAILABLE_BRANCHES = ["CSE", "IT", "ET&T", "EEE", "MECH", "CIVIL", "MINING"];
+const AVAILABLE_BRANCHES = ["CSE", "IT", "ET&T", "EE", "MECH", "CIVIL", "MINING"];
 const AVAILABLE_SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
+
+const BRANCHES_MAP: Record<string, string> = {
+  "CSE": "Computer Science and Engineering",
+  "IT": "Information Technology",
+  "ET&T": "Electronics and Telecommunication",
+  "EE": "Electrical Engineering",
+  "MECH": "Mechanical Engineering",
+  "CIVIL": "Civil Engineering",
+  "MINING": "Mining Engineering"
+};
 
 export function AdminSubjects() {
   const { user } = useAuth();
@@ -30,8 +41,8 @@ export function AdminSubjects() {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportItem, setReportItem] = useState({ id: "", type: "", title: "" });
 
-  const [filterBranch, setFilterBranch] = useState<string>("All");
-  const [filterSemester, setFilterSemester] = useState<string>("All");
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -285,143 +296,256 @@ export function AdminSubjects() {
         </div>
       )}
 
-      {/* Filters */}
+      {/* Drill-down UI */}
       {!showForm && subjects.length > 0 && (
-        <div className="flex flex-col sm:flex-row gap-4 bg-[#0A0A0A] border border-[#222] p-4 rounded-2xl shadow-xl">
-          <div className="flex-1">
-            <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Filter by Branch</label>
-            <select
-              value={filterBranch}
-              onChange={e => setFilterBranch(e.target.value)}
-              className="w-full bg-[#111] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:border-[#FF9000] outline-none transition-colors appearance-none font-medium"
+        <>
+          <div className="mb-6 flex flex-wrap items-center gap-1.5 font-mono text-[10px] text-zinc-500">
+            <button
+              onClick={() => {
+                setSelectedBranch(null);
+                setSelectedSemester(null);
+              }}
+              className={`hover:text-[#FF9000] transition-colors ${
+                selectedBranch === null ? "text-[#FF9000] font-bold" : ""
+              }`}
             >
-              <option value="All">All Branches</option>
-              {AVAILABLE_BRANCHES.map(b => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
+              ALL SUBJECTS
+            </button>
+            {selectedBranch !== null && (
+              <>
+                <span>/</span>
+                <button
+                  onClick={() => {
+                    setSelectedSemester(null);
+                  }}
+                  className={`hover:text-[#FF9000] transition-colors ${
+                    selectedSemester === null ? "text-[#FF9000] font-bold" : ""
+                  }`}
+                >
+                  {selectedBranch}
+                </button>
+              </>
+            )}
+            {selectedSemester !== null && (
+              <>
+                <span>/</span>
+                <span className="text-[#FF9000] font-bold">SEMESTER {selectedSemester}</span>
+              </>
+            )}
           </div>
-          <div className="flex-1">
-            <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Filter by Semester</label>
-            <select
-              value={filterSemester}
-              onChange={e => setFilterSemester(e.target.value)}
-              className="w-full bg-[#111] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:border-[#FF9000] outline-none transition-colors appearance-none font-medium"
-            >
-              <option value="All">All Semesters</option>
-              {AVAILABLE_SEMESTERS.map(s => (
-                <option key={s} value={s.toString()}>Semester {s}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )}
 
-      <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl overflow-hidden shadow-xl">
-        {subjects.length === 0 ? (
-          <div className="p-16 text-center text-zinc-500 flex flex-col items-center">
-            <div className="w-16 h-16 bg-[#111] rounded-2xl flex items-center justify-center mb-4 border border-[#222]">
-              <BookOpen size={32} className="text-zinc-600" />
-            </div>
-            <p className="font-medium text-white">No subjects found.</p>
-            <p className="text-sm mt-1">Create one to get started.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-[#111] border-b border-[#222]">
-                  <th className="px-6 py-4 font-semibold text-zinc-300 text-sm">Subject Name & Code</th>
-                  <th className="px-6 py-4 font-semibold text-zinc-300 text-sm w-1/3">Mapped Branches</th>
-                  <th className="px-6 py-4 font-semibold text-zinc-300 text-sm w-1/4">Mapped Semesters</th>
-                  <th className="px-6 py-4 font-semibold text-zinc-300 text-sm">Syllabus</th>
-                  <th className="px-6 py-4 font-semibold text-zinc-300 text-sm text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#222]">
-                {subjects.filter(subject => {
-                  const branchMatch = filterBranch === "All" || subject.branches?.includes(filterBranch);
-                  const semMatch = filterSemester === "All" || subject.semesters?.includes(parseInt(filterSemester));
-                  return branchMatch && semMatch;
-                }).map(subject => (
-                  <tr key={subject._id} className="hover:bg-[#111] transition-colors group">
-                    <td className="px-6 py-4 text-white font-medium">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#FF9000]/10 flex items-center justify-center text-[#FF9000] shrink-0">
-                          <BookOpen size={14} />
-                        </div>
-                        <div>
-                          <div>{subject.name}</div>
-                          {subject.code && <div className="text-xs text-zinc-500 font-mono mt-0.5">{subject.code}</div>}
-                        </div>
+          <AnimatePresence mode="wait">
+            {selectedBranch === null ? (
+              /* ================= LEVEL 1: BRANCHES ================= */
+              <motion.div
+                key="branches"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col space-y-6"
+              >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {AVAILABLE_BRANCHES.map((b) => (
+                    <button
+                      key={b}
+                      onClick={() => setSelectedBranch(b)}
+                      className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-[#222] bg-[#0A0A0A] p-5 text-left transition-all hover:border-[#FF9000] hover:shadow-[0_0_15px_rgba(255,144,0,0.05)] focus:outline-none"
+                    >
+                      <div className="absolute -right-3 -top-3 h-14 w-14 rounded-full bg-[#FF9000]/5 transition-transform group-hover:scale-125" />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#FF9000]/10 text-[#FF9000] transition-colors group-hover:bg-[#FF9000] group-hover:text-black">
+                        <Folder size={18} fill="currentColor" className="opacity-80" />
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1.5">
-                        {subject.branches?.map(b => (
-                          <span key={b} className="bg-[#222] text-zinc-300 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border border-[#333]">
-                            {b}
-                          </span>
-                        ))}
+                      <div className="mt-6">
+                        <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+                          Branch: {b}
+                        </span>
+                        <h3 className="mt-0.5 text-sm font-bold text-zinc-200 group-hover:text-white line-clamp-1">
+                          {BRANCHES_MAP[b] || b}
+                        </h3>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1.5">
-                        {subject.semesters?.map(s => (
-                          <span key={s} className="bg-[#222] text-zinc-300 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border border-[#333]">
-                            Sem {s}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
-                        subject.syllabus === "new" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-orange-500/10 text-orange-400 border-orange-500/20"
-                      }`}>
-                        {subject.syllabus}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            ) : selectedSemester === null ? (
+              /* ================= LEVEL 2: SEMESTERS ================= */
+              <motion.div
+                key="semesters"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col space-y-6"
+              >
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedBranch(null)}
+                    className="flex h-9 w-9 items-center justify-center rounded-md border border-[#222] bg-[#111] text-zinc-400 transition-colors hover:bg-[#222] hover:text-white"
+                    aria-label="Back to branches"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+                  <div>
+                    <h1 className="text-xl font-bold text-white sm:text-2xl">
+                      {BRANCHES_MAP[selectedBranch] || selectedBranch}
+                    </h1>
+                    <p className="text-xs text-zinc-400">Select semester</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {AVAILABLE_SEMESTERS.map((sem) => (
+                    <button
+                      key={sem}
+                      onClick={() => setSelectedSemester(sem)}
+                      className="group flex flex-col items-center justify-center rounded-lg border border-[#222] bg-[#0A0A0A] p-4 transition-colors hover:border-[#FF9000] hover:bg-[#FF9000]/5"
+                    >
+                      <span className="text-sm font-bold text-zinc-300 group-hover:text-[#FF9000]">
+                        Semester {sem}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isOwner || subject.createdBy === user?.id ? (
-                          <>
-                            <button
-                              onClick={() => handleEdit(subject)}
-                              className="p-2 text-zinc-500 hover:text-[#FF9000] hover:bg-[#FF9000]/10 rounded-lg transition-colors"
-                              title="Edit Subject"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(subject._id)}
-                              className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Delete Subject"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setReportItem({ id: subject._id, type: "Subject", title: subject.name });
-                              setReportModalOpen(true);
-                            }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#FF9000]/10 text-[#FF9000] rounded-lg hover:bg-[#FF9000]/20 transition-colors border border-[#FF9000]/20"
-                            title="Report Issue"
-                          >
-                            <AlertCircle size={14} />
-                            Report Issue
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            ) : (
+              /* ================= LEVEL 3: SUBJECTS TABLE ================= */
+              <motion.div
+                key="subjects"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col space-y-6"
+              >
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedSemester(null)}
+                    className="flex h-9 w-9 items-center justify-center rounded-md border border-[#222] bg-[#111] text-zinc-400 transition-colors hover:bg-[#222] hover:text-white"
+                    aria-label="Back to semesters"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+                  <div>
+                    <h1 className="text-xl font-bold text-white sm:text-2xl">
+                      Semester {selectedSemester} Subjects
+                    </h1>
+                    <p className="text-xs text-zinc-400">
+                      {BRANCHES_MAP[selectedBranch] || selectedBranch}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl overflow-hidden shadow-xl">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[800px]">
+                      <thead>
+                        <tr className="bg-[#111] border-b border-[#222]">
+                          <th className="px-6 py-4 font-semibold text-zinc-300 text-sm">Subject Name & Code</th>
+                          <th className="px-6 py-4 font-semibold text-zinc-300 text-sm w-1/3">Mapped Branches</th>
+                          <th className="px-6 py-4 font-semibold text-zinc-300 text-sm w-1/4">Mapped Semesters</th>
+                          <th className="px-6 py-4 font-semibold text-zinc-300 text-sm">Syllabus</th>
+                          <th className="px-6 py-4 font-semibold text-zinc-300 text-sm text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#222]">
+                        {subjects.filter(subject => {
+                          const branchMatch = subject.branches?.includes(selectedBranch);
+                          const semMatch = subject.semesters?.includes(selectedSemester);
+                          return branchMatch && semMatch;
+                        }).length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                              No subjects mapped to this branch and semester yet.
+                            </td>
+                          </tr>
+                        ) : subjects.filter(subject => {
+                          const branchMatch = subject.branches?.includes(selectedBranch);
+                          const semMatch = subject.semesters?.includes(selectedSemester);
+                          return branchMatch && semMatch;
+                        }).map(subject => (
+                          <tr key={subject._id} className="hover:bg-[#111] transition-colors group">
+                            <td className="px-6 py-4 text-white font-medium">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-[#FF9000]/10 flex items-center justify-center text-[#FF9000] shrink-0">
+                                  <BookOpen size={14} />
+                                </div>
+                                <div>
+                                  <div>{subject.name}</div>
+                                  {subject.code && <div className="text-xs text-zinc-500 font-mono mt-0.5">{subject.code}</div>}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-wrap gap-1.5">
+                                {subject.branches?.map(b => (
+                                  <span key={b} className="bg-[#222] text-zinc-300 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border border-[#333]">
+                                    {b}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-wrap gap-1.5">
+                                {subject.semesters?.map(s => (
+                                  <span key={s} className="bg-[#222] text-zinc-300 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border border-[#333]">
+                                    Sem {s}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
+                                subject.syllabus === "new" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-orange-500/10 text-orange-400 border-orange-500/20"
+                              }`}>
+                                {subject.syllabus}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {isOwner || subject.createdBy === user?.id ? (
+                                  <>
+                                    <button
+                                      onClick={() => handleEdit(subject)}
+                                      className="p-2 text-zinc-500 hover:text-[#FF9000] hover:bg-[#FF9000]/10 rounded-lg transition-colors"
+                                      title="Edit Subject"
+                                    >
+                                      <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(subject._id)}
+                                      className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                      title="Delete Subject"
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      setReportItem({ id: subject._id, type: "Subject", title: subject.name });
+                                      setReportModalOpen(true);
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#FF9000]/10 text-[#FF9000] rounded-lg hover:bg-[#FF9000]/20 transition-colors border border-[#FF9000]/20"
+                                    title="Report Issue"
+                                  >
+                                    <AlertCircle size={14} />
+                                    Report Issue
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
       
       <ReportIssueModal 
         isOpen={reportModalOpen} 

@@ -147,14 +147,21 @@ export function CompleteProfileModal() {
             {/* Branch */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Branch *</label>
-              <input
-                type="text"
+              <select
                 required
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
-                placeholder="e.g. CSE"
                 className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded h-11 px-3 text-white focus:outline-none focus:border-primary transition-colors text-sm"
-              />
+              >
+                <option value="" disabled>Select Branch</option>
+                <option value="CSE">Computer Science and Engineering (CSE)</option>
+                <option value="IT">Information Technology (IT)</option>
+                <option value="ET&T">Electronics and Telecommunication (ET&T)</option>
+                <option value="EE">Electrical Engineering (EE)</option>
+                <option value="MECH">Mechanical Engineering (MECH)</option>
+                <option value="CIVIL">Civil Engineering (CIVIL)</option>
+                <option value="MINING">Mining Engineering (MINING)</option>
+              </select>
             </div>
 
             {/* Semester */}

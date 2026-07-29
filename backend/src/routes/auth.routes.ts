@@ -357,3 +357,48 @@ authRouter.put('/update-profile', requireAuth, async (req: AuthRequest, res, nex
     next(error);
   }
 });
+
+authRouter.get('/settings', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const user = await User.findById(req.user?.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json({
+      stealthMode: user.stealthMode,
+      publicDiscovery: user.publicDiscovery,
+      notifications: user.notifications
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+authRouter.put('/settings', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const { stealthMode, publicDiscovery, notifications } = req.body;
+    
+    const user = await User.findById(req.user?.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (stealthMode !== undefined) user.stealthMode = stealthMode;
+    if (publicDiscovery !== undefined) user.publicDiscovery = publicDiscovery;
+    
+    if (notifications) {
+      if (!user.notifications) {
+        user.notifications = {
+          upcomingDeadlines: true,
+          aiAnalysisComplete: true,
+          peerActivity: false
+        };
+      }
+      if (notifications.upcomingDeadlines !== undefined) user.notifications.upcomingDeadlines = notifications.upcomingDeadlines;
+      if (notifications.aiAnalysisComplete !== undefined) user.notifications.aiAnalysisComplete = notifications.aiAnalysisComplete;
+      if (notifications.peerActivity !== undefined) user.notifications.peerActivity = notifications.peerActivity;
+    }
+
+    await user.save();
+    res.json({ message: 'Settings updated successfully' });
+  } catch (error) {
+    next(error);
+  }
+});

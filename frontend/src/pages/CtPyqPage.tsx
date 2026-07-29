@@ -43,13 +43,13 @@ interface PyqPaper {
 }
 
 const BRANCHES = [
-  { code: "IT", name: "Information Technology" },
   { code: "CSE", name: "Computer Science and Engineering" },
-  { code: "MECHNICAL", name: "Mechanical Engineering" },
+  { code: "IT", name: "Information Technology" },
+  { code: "ET&T", name: "Electronics and Telecommunication" },
+  { code: "EE", name: "Electrical Engineering" },
+  { code: "MECH", name: "Mechanical Engineering" },
   { code: "CIVIL", name: "Civil Engineering" },
-  { code: "MINING", name: "Mining Engineering" },
-  { code: "ELEC", name: "Electrical Engineering" },
-  { code: "ET&T", name: "Electronics and Telecommunication" }
+  { code: "MINING", name: "Mining Engineering" }
 ];
 
 export function CtPyqPage() {

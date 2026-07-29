@@ -1243,13 +1243,20 @@ export function LoginPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Branch</label>
-                      <input
-                        type="text"
+                      <select
                         value={branch}
                         onChange={(e) => setBranch(e.target.value)}
-                        placeholder="e.g. CSE, IT, ET&T"
                         className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
-                      />
+                      >
+                        <option value="" disabled>Select your branch</option>
+                        <option value="CSE">Computer Science and Engineering (CSE)</option>
+                        <option value="IT">Information Technology (IT)</option>
+                        <option value="ET&T">Electronics and Telecommunication (ET&T)</option>
+                        <option value="EE">Electrical Engineering (EE)</option>
+                        <option value="MECH">Mechanical Engineering (MECH)</option>
+                        <option value="CIVIL">Civil Engineering (CIVIL)</option>
+                        <option value="MINING">Mining Engineering (MINING)</option>
+                      </select>
                     </div>
                   </>
                 )}

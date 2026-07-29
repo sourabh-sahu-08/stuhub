@@ -10,6 +10,7 @@ import { NotesPage } from "./pages/NotesPage";
 import { AssignmentsPage } from "./pages/AssignmentsPage";
 import { ResourcesPage } from "./pages/ResourcesPage";
 import { ChatPage } from "./pages/ChatPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { AppShell } from "./components/layout/AppShell";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { AdminOverview } from "./pages/admin/AdminOverview";
@@ -47,6 +48,7 @@ export function App() {
           <Route path="library" element={<NotesPage />} />
           <Route path="resources" element={<ResourcesPage />} />
           <Route path="chat" element={<ChatPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path=":module" element={<ModulePage />} />
         </Route>
 
