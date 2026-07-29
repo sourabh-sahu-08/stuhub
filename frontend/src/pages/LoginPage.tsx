@@ -393,6 +393,7 @@ export function LoginPage() {
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-300">
           <a href="#home" className="hover:text-brand-500 transition-colors duration-200">Home</a>
           <a href="#features" className="hover:text-brand-500 transition-colors duration-200">Workspace Overview</a>
+          <a href="#heroes" className="hover:text-brand-500 transition-colors duration-200">Our Heroes</a>
           <a href="#faq" className="hover:text-brand-500 transition-colors duration-200">FAQ</a>
           <a href="#connect" className="hover:text-brand-500 transition-colors duration-200">Connect</a>
         </nav>
@@ -456,10 +457,10 @@ export function LoginPage() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-4xl sm:text-5xl lg:text-[52px] font-semibold tracking-tight leading-[1.15] text-white"
+                className="text-4xl sm:text-5xl lg:text-[56px] font-bold tracking-tight leading-[1.1] text-white"
               >
                 The Command Center <br className="hidden sm:block"/>
-                for <span className="text-[#FF9000]">Academic Success</span>.
+                for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF9000] to-yellow-400 drop-shadow-sm">Academic Success</span>.
               </motion.h1>
               
               <motion.p 
