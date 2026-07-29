@@ -1,12 +1,25 @@
 import { useEffect, useState, useRef } from "react";
 import { api } from "../../lib/api";
-import { Eye, Download, Trash2, Plus, X, FileText, BookOpen, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Eye, Download, Trash2, Plus, X, FileText, BookOpen, Clock, CheckCircle, AlertCircle, Folder, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { ReportIssueModal } from "../../components/admin/ReportIssueModal";
 
-interface Note { _id: string; title: string; subject: string; branch: string; semester: number; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; }
-interface Pyq  { _id: string; paperName: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; }
-interface CtPyq { _id: string; paperName: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; }
+interface Note { _id: string; title: string; subject: string; branch: string; semester: number; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; uploadedBy?: { _id: string; name: string }; }
+interface Pyq  { _id: string; paperName: string; title?: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; uploadedBy?: { _id: string; name: string }; }
+interface CtPyq { _id: string; paperName: string; title?: string; subject: string; semester: number; branch: string; fileName: string; driveUrl?: string; createdAt: string; user?: { name: string; email: string }; uploadedBy?: { _id: string; name: string }; }
+
+const AVAILABLE_BRANCHES = ["CSE", "IT", "ET&T", "EE", "MECH", "CIVIL", "MINING"];
+const AVAILABLE_SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
+const BRANCHES_MAP: Record<string, string> = {
+  "CSE": "Computer Science and Engineering",
+  "IT": "Information Technology",
+  "ET&T": "Electronics and Telecommunication",
+  "EE": "Electrical Engineering",
+  "MECH": "Mechanical Engineering",
+  "CIVIL": "Civil Engineering",
+  "MINING": "Mining Engineering"
+};
 
 export function AdminContent() {
   const { user: currentUser } = useAuth();
@@ -19,6 +32,9 @@ export function AdminContent() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportItem, setReportItem] = useState({ id: "", type: "", title: "" });
@@ -199,7 +215,12 @@ export function AdminContent() {
     </div>;
   }
 
-  const renderTable = (items: any[], type: "notes"|"pyqs"|"ct-pyqs"|"assignments") => (
+  const renderTable = (items: any[], type: "notes"|"pyqs"|"ct-pyqs"|"assignments") => {
+    const filteredItems = items.filter(item => 
+      item.branch?.toUpperCase() === selectedBranch?.toUpperCase() && Number(item.semester) === Number(selectedSemester)
+    );
+    
+    return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm text-zinc-400 border-collapse min-w-[800px]">
         <thead className="bg-[#111] text-xs uppercase border-b border-[#222]">
@@ -212,7 +233,7 @@ export function AdminContent() {
           </tr>
         </thead>
         <tbody className="divide-y divide-[#222]">
-          {items.map(item => (
+          {filteredItems.map(item => (
             <tr key={item._id} className="hover:bg-[#111] transition-colors group">
               <td className="px-5 py-4 font-medium text-white">
                 <div className="flex items-center gap-3">
@@ -268,7 +289,7 @@ export function AdminContent() {
               </td>
             </tr>
           ))}
-          {items.length === 0 && (
+          {filteredItems.length === 0 && (
             <tr>
               <td colSpan={5} className="px-5 py-16 text-center">
                 <div className="flex flex-col items-center justify-center text-zinc-500">
@@ -284,7 +305,8 @@ export function AdminContent() {
         </tbody>
       </table>
     </div>
-  );
+    );
+  };
 
   const existingBranches = Array.from(new Set(subjects.flatMap(s => s.branches || []).filter(Boolean)));
   const uniqueBranches = Array.from(new Set([...existingBranches, "CSE", "IT", "ET&T", "EEE", "MECH", "CIVIL", "MINING"]));
@@ -313,26 +335,166 @@ export function AdminContent() {
         </button>
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-2 border-b border-[#222] overflow-x-auto scrollbar-hide">
-        {(["notes", "pyqs", "ct-pyqs", "assignments"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
-              tab === t ? "border-[#FF9000] text-[#FF9000]" : "border-transparent text-zinc-500 hover:text-white"
-            }`}
-          >
-            {t === "notes" ? "Notes" : t === "pyqs" ? "PYQs" : t === "ct-pyqs" ? "CT PYQs" : "Assignment Solutions"}
-          </button>
-        ))}
+      <div className="mb-2 flex flex-wrap items-center gap-1.5 font-mono text-[10px] text-zinc-500">
+        <button
+          onClick={() => {
+            setSelectedBranch(null);
+            setSelectedSemester(null);
+          }}
+          className={`hover:text-[#FF9000] transition-colors ${
+            selectedBranch === null ? "text-[#FF9000] font-bold" : ""
+          }`}
+        >
+          ALL CONTENT
+        </button>
+        {selectedBranch !== null && (
+          <>
+            <span>/</span>
+            <button
+              onClick={() => {
+                setSelectedSemester(null);
+              }}
+              className={`hover:text-[#FF9000] transition-colors ${
+                selectedSemester === null ? "text-[#FF9000] font-bold" : ""
+              }`}
+            >
+              {selectedBranch}
+            </button>
+          </>
+        )}
+        {selectedSemester !== null && (
+          <>
+            <span>/</span>
+            <span className="text-[#FF9000] font-bold">SEMESTER {selectedSemester}</span>
+          </>
+        )}
       </div>
 
-      <div className="rounded-2xl border border-[#222] bg-[#0A0A0A] shadow-xl overflow-hidden">
-        {tab === "notes" && renderTable(notes, "notes")}
-        {tab === "pyqs" && renderTable(pyqs, "pyqs")}
-        {tab === "ct-pyqs" && renderTable(ctPyqs, "ct-pyqs")}
-        {tab === "assignments" && renderTable(assignments, "assignments")}
-      </div>
+      <AnimatePresence mode="wait">
+        {selectedBranch === null ? (
+          /* ================= LEVEL 1: BRANCHES ================= */
+          <motion.div
+            key="branches"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col space-y-6"
+          >
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {uniqueBranches.map((b) => (
+                <button
+                  key={b}
+                  onClick={() => setSelectedBranch(b)}
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-[#222] bg-[#0A0A0A] p-5 text-left transition-all hover:border-[#FF9000] hover:shadow-[0_0_15px_rgba(255,144,0,0.05)] focus:outline-none"
+                >
+                  <div className="absolute -right-3 -top-3 h-14 w-14 rounded-full bg-[#FF9000]/5 transition-transform group-hover:scale-125" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#FF9000]/10 text-[#FF9000] transition-colors group-hover:bg-[#FF9000] group-hover:text-black">
+                    <Folder size={18} fill="currentColor" className="opacity-80" />
+                  </div>
+                  <div className="mt-6">
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+                      Branch: {b}
+                    </span>
+                    <h3 className="mt-0.5 text-sm font-bold text-zinc-200 group-hover:text-white line-clamp-1">
+                      {BRANCHES_MAP[b] || b}
+                    </h3>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        ) : selectedSemester === null ? (
+          /* ================= LEVEL 2: SEMESTERS ================= */
+          <motion.div
+            key="semesters"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col space-y-6"
+          >
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedBranch(null)}
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-[#222] bg-[#111] text-zinc-400 transition-colors hover:bg-[#222] hover:text-white"
+                aria-label="Back to branches"
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-white sm:text-2xl">
+                  {BRANCHES_MAP[selectedBranch] || selectedBranch}
+                </h1>
+                <p className="text-xs text-zinc-400">Select semester</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {AVAILABLE_SEMESTERS.map((sem) => (
+                <button
+                  key={sem}
+                  onClick={() => setSelectedSemester(sem)}
+                  className="group flex flex-col items-center justify-center rounded-lg border border-[#222] bg-[#0A0A0A] p-4 transition-colors hover:border-[#FF9000] hover:bg-[#FF9000]/5"
+                >
+                  <span className="text-sm font-bold text-zinc-300 group-hover:text-[#FF9000]">
+                    Semester {sem}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        ) : (
+          /* ================= LEVEL 3: CONTENT TABS AND TABLES ================= */
+          <motion.div
+            key="content"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col space-y-6"
+          >
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedSemester(null)}
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-[#222] bg-[#111] text-zinc-400 transition-colors hover:bg-[#222] hover:text-white"
+                aria-label="Back to semesters"
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-white sm:text-2xl">
+                  Semester {selectedSemester} Content
+                </h1>
+                <p className="text-xs text-zinc-400">
+                  {BRANCHES_MAP[selectedBranch] || selectedBranch}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1 sm:gap-2 border-b border-[#222] overflow-x-auto scrollbar-hide">
+              {(["notes", "pyqs", "ct-pyqs", "assignments"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                    tab === t ? "border-[#FF9000] text-[#FF9000]" : "border-transparent text-zinc-500 hover:text-white"
+                  }`}
+                >
+                  {t === "notes" ? "Notes" : t === "pyqs" ? "PYQs" : t === "ct-pyqs" ? "CT PYQs" : "Assignment Solutions"}
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-2xl border border-[#222] bg-[#0A0A0A] shadow-xl overflow-hidden">
+              {tab === "notes" && renderTable(notes, "notes")}
+              {tab === "pyqs" && renderTable(pyqs, "pyqs")}
+              {tab === "ct-pyqs" && renderTable(ctPyqs, "ct-pyqs")}
+              {tab === "assignments" && renderTable(assignments, "assignments")}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {showUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">

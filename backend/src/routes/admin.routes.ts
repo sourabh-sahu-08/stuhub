@@ -340,6 +340,40 @@ router.post("/resources/link", async (req: AuthRequest, res: Response, next: Nex
   }
 });
 
+router.put("/resources/:id", async (req: AuthRequest, res, next) => {
+  try {
+    const { title, url, type, subject, semester, syllabus, branch } = req.body;
+    
+    if (!title || !url || !type) {
+      return res.status(400).json({ message: "Title, url, and type are required fields" });
+    }
+
+    const resource = await Resource.findById(req.params.id);
+    if (!resource) return res.status(404).json({ message: "Resource not found" });
+
+    if (req.user?.role === "admin" && resource.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only edit content that you created" });
+    }
+
+    let updateData: any = { 
+      title, 
+      url, 
+      type, 
+      subject: subject || undefined, 
+      semester: semester ? parseInt(semester) : undefined, 
+      syllabus: syllabus || undefined, 
+      branch: branch || undefined 
+    };
+    
+    Object.assign(resource, updateData);
+    await resource.save();
+    
+    res.json(resource);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.delete("/resources/:id", async (req: AuthRequest, res, next) => {
   try {
     const resource = await Resource.findById(req.params.id);
