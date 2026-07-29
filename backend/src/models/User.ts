@@ -15,7 +15,15 @@ const userSchema = new Schema(
     rollNumber: { type: String },
     isProfileComplete: { type: Boolean, default: true },
     isActive: { type: Boolean, default: true },
-    lastLoginAt: Date
+    lastLoginAt: Date,
+    // User Preferences
+    stealthMode: { type: Boolean, default: false },
+    publicDiscovery: { type: Boolean, default: true },
+    notifications: {
+      upcomingDeadlines: { type: Boolean, default: true },
+      aiAnalysisComplete: { type: Boolean, default: true },
+      peerActivity: { type: Boolean, default: false }
+    }
   },
   { timestamps: true }
 );
