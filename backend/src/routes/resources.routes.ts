@@ -37,10 +37,33 @@ resourcesRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequ
 
     const { q, syllabus } = req.query;
     let query: any = {
-      $and: [
-        { $or: [{ branch: branchCode }, { branch: { $exists: false } }, { branch: null }, { branch: "" }, { branch: "ALL" }] },
-        { $or: [{ semester: semNum }, { semester: { $exists: false } }, { semester: null }] },
-        { $or: [{ subject: { $in: validSubjectNames } }, { subject: { $exists: false } }, { subject: null }, { subject: "" }] }
+      $or: [
+        // Case 1: Match by subject (enables cross-branch and cross-semester for Sem 1/2)
+        {
+          subject: { $in: validSubjectNames },
+          $or: [
+            { semester: semNum },
+            { semester: null }, { semester: { $exists: false } },
+            ...(semNum === 1 || semNum === 2 ? [{ semester: semNum === 1 ? 2 : 1 }] : [])
+          ]
+        },
+        // Case 2: Match by exact branch (fallback if subject is invalid/unmapped)
+        {
+          branch: branchCode,
+          $or: [
+            { semester: semNum },
+            { semester: null }, { semester: { $exists: false } },
+            ...(semNum === 1 || semNum === 2 ? [{ semester: semNum === 1 ? 2 : 1 }] : [])
+          ]
+        },
+        // Case 3: Global resources (no subject, branch is ALL/null)
+        {
+          $and: [
+            { $or: [{ branch: null }, { branch: "" }, { branch: "ALL" }, { branch: { $exists: false } }] },
+            { $or: [{ semester: semNum }, { semester: null }, { semester: { $exists: false } }] },
+            { $or: [{ subject: null }, { subject: "" }, { subject: { $exists: false } }] }
+          ]
+        }
       ]
     };
 

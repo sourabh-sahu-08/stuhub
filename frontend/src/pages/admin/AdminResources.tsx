@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../../lib/api";
-import { Plus, Link, Youtube, Globe, Trash2, Loader2, ExternalLink, AlertCircle } from "lucide-react";
+import { Plus, Link, Youtube, Globe, Trash2, Loader2, ExternalLink, AlertCircle, Pencil } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { ReportIssueModal } from "../../components/admin/ReportIssueModal";
 
@@ -31,6 +31,18 @@ export function AdminResources() {
   const [uploadLoading, setUploadLoading] = useState(false);
   
   const [formData, setFormData] = useState({
+    title: "",
+    url: "",
+    type: "youtube" as "youtube" | "website",
+    subject: "",
+    semester: "",
+    branch: ""
+  });
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    _id: "",
     title: "",
     url: "",
     type: "youtube" as "youtube" | "website",
@@ -91,6 +103,45 @@ export function AdminResources() {
     }
   };
 
+  const handleEditClick = (item: Resource) => {
+    setEditFormData({
+      _id: item._id,
+      title: item.title,
+      url: item.url,
+      type: item.type,
+      subject: item.subject || "",
+      semester: item.semester ? item.semester.toString() : "",
+      branch: item.branch || ""
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editFormData.title || !editFormData.url) {
+      alert("Title and URL are required.");
+      return;
+    }
+
+    try {
+      setEditLoading(true);
+      await api.put(`/admin/resources/${editFormData._id}`, {
+        title: editFormData.title,
+        url: editFormData.url,
+        type: editFormData.type,
+        semester: editFormData.semester ? parseInt(editFormData.semester) : undefined,
+        branch: editFormData.branch || undefined,
+        subject: editFormData.subject || undefined
+      });
+      setEditModalOpen(false);
+      loadContent();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Edit failed");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   const deleteResource = async (id: string, title: string) => {
     if (!window.confirm(`Delete "${title}"?`)) return;
     try {
@@ -110,7 +161,7 @@ export function AdminResources() {
     );
   }
 
-  const branches = ["CSE", "ECE", "MECH", "CIVIL", "EEE", "IT"];
+  const branches = ["CSE", "IT", "ET&T", "EE", "MECH", "CIVIL", "MINING"];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -167,9 +218,14 @@ export function AdminResources() {
                         <ExternalLink size={16} />
                       </a>
                       {isOwner || item.user?._id === user?.id ? (
-                        <button onClick={() => deleteResource(item._id, item.title)} className="p-2 text-zinc-500 hover:text-red-500 bg-[#111] hover:bg-red-500/10 rounded-lg transition-all" title="Delete">
-                          <Trash2 size={16} />
-                        </button>
+                        <>
+                          <button onClick={() => handleEditClick(item)} className="p-2 text-zinc-500 hover:text-blue-500 bg-[#111] hover:bg-blue-500/10 rounded-lg transition-all" title="Edit">
+                            <Pencil size={16} />
+                          </button>
+                          <button onClick={() => deleteResource(item._id, item.title)} className="p-2 text-zinc-500 hover:text-red-500 bg-[#111] hover:bg-red-500/10 rounded-lg transition-all" title="Delete">
+                            <Trash2 size={16} />
+                          </button>
+                        </>
                       ) : (
                         <button
                           onClick={() => {
@@ -277,7 +333,77 @@ export function AdminResources() {
         </div>
       )}
 
-      <ReportIssueModal 
+      {editModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl w-full max-w-lg shadow-2xl relative">
+            <div className="p-6 border-b border-[#222] flex justify-between items-center bg-[#111] rounded-t-2xl">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Pencil size={20} className="text-[#FF9000]" />
+                Edit Resource
+              </h2>
+              <button onClick={() => setEditModalOpen(false)} className="text-zinc-500 hover:text-white p-1 rounded-lg hover:bg-[#222]">
+                ✕
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-5">
+              <div className="flex gap-6 mb-4 p-3 bg-[#111] rounded-lg border border-[#222]">
+                <label className="flex items-center gap-2 text-sm font-bold text-zinc-300 cursor-pointer hover:text-white transition-colors">
+                  <input type="radio" checked={editFormData.type === "youtube"} onChange={() => setEditFormData({...editFormData, type: "youtube"})} className="accent-[#FF9000] w-4 h-4" />
+                  YouTube Channel
+                </label>
+                <label className="flex items-center gap-2 text-sm font-bold text-zinc-300 cursor-pointer hover:text-white transition-colors">
+                  <input type="radio" checked={editFormData.type === "website"} onChange={() => setEditFormData({...editFormData, type: "website"})} className="accent-[#FF9000] w-4 h-4" />
+                  Website / Article
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Title / Name *</label>
+                <input required type="text" value={editFormData.title} onChange={e => setEditFormData({...editFormData, title: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="e.g. Neso Academy" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Resource URL *</label>
+                <input required type="url" value={editFormData.url} onChange={e => setEditFormData({...editFormData, url: e.target.value})} className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000] transition-colors" placeholder="https://..." />
+              </div>
+
+              <div className="p-4 bg-[#111] rounded-xl border border-[#222] space-y-4">
+                <p className="text-xs text-zinc-400">Leave the below fields empty to make this resource available to everyone (Global).</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Target Branch</label>
+                    <select value={editFormData.branch} onChange={e => setEditFormData({...editFormData, branch: e.target.value})} className="w-full bg-[#1A1A1A] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000]">
+                      <option value="">All Branches</option>
+                      {branches.map(b => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Target Semester</label>
+                    <select value={editFormData.semester} onChange={e => setEditFormData({...editFormData, semester: e.target.value})} className="w-full bg-[#1A1A1A] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000]">
+                      <option value="">All Semesters</option>
+                      {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Specific Subject</label>
+                  <select value={editFormData.subject} onChange={e => setEditFormData({...editFormData, subject: e.target.value})} className="w-full bg-[#1A1A1A] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF9000]">
+                    <option value="">No specific subject</option>
+                    {subjects.map(s => <option key={s._id} value={s.name}>{s.name} ({s.code})</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <button disabled={editLoading} type="submit" className="w-full bg-[#FF9000] text-black font-bold py-3 rounded-lg hover:bg-[#E58100] transition-colors disabled:opacity-50 flex justify-center items-center gap-2 mt-6">
+                {editLoading && <Loader2 className="animate-spin" size={18} />}
+                {editLoading ? "Saving..." : "Save Changes"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}      <ReportIssueModal 
         isOpen={reportModalOpen} 
         onClose={() => setReportModalOpen(false)} 
         itemId={reportItem.id} 

@@ -3,6 +3,7 @@ import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
 import { Note } from "../models/Note.js";
 import { Subject, Department } from "../models/Academic.js";
+import { getSubjectQuery, getUniqueSubjects } from "../utils/subjectHelper.js";
 import type { AuthRequest } from "../types.js";
 
 const upload = multer({
@@ -86,18 +87,24 @@ notesRouter.get("/list/:branch/:semester", requireAuth, async (req: AuthRequest,
     }
 
     const branchCode = req.params.branch.toUpperCase();
-    const validSubjects = await Subject.find({
-      branches: branchCode,
-      semesters: semNum
-    });
+    const { q, syllabus } = req.query;
+
+    const validSubjects = await Subject.find(getSubjectQuery(branchCode, semNum, syllabus));
     const validSubjectNames = validSubjects.map(s => s.name);
 
-    const { q, syllabus } = req.query;
     let query: any = {
-      semester: semNum,
       $or: [
-        { branch: branchCode },
-        { subject: { $in: validSubjectNames } }
+        {
+          semester: semNum,
+          $or: [
+            { branch: branchCode },
+            { subject: { $in: validSubjectNames } }
+          ]
+        },
+        ...(semNum === 1 || semNum === 2 ? [{
+          semester: semNum === 1 ? 2 : 1,
+          subject: { $in: validSubjectNames }
+        }] : [])
       ]
     };
 
@@ -175,16 +182,8 @@ notesRouter.get("/subjects/:branch/:semester", requireAuth, async (req: AuthRequ
     }
 
     const { syllabus } = req.query;
-    let query: any = { 
-      semesters: semNum, 
-      branches: req.params.branch.toUpperCase() 
-    };
-    if (syllabus === "new" || syllabus === "old") {
-      query.syllabus = syllabus;
-    }
-
-    const subjects = await Subject.find(query).select("name code");
-    res.json(subjects);
+    const subjects = await Subject.find(getSubjectQuery(req.params.branch.toUpperCase(), semNum, syllabus)).select("name code");
+    res.json(getUniqueSubjects(subjects));
   } catch (error) {
     next(error);
   }
