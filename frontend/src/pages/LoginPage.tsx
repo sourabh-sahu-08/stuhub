@@ -175,7 +175,9 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rollNumber, setRollNumber] = useState("");
-  const [branch, setBranch] = useState("");
+  const [department, setDepartment] = useState("");
+  const [departments, setDepartments] = useState<{_id: string, name: string, code: string}[]>([]);
+  const [departmentsError, setDepartmentsError] = useState(false);
   const [semester, setSemester] = useState<number | "">("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -279,7 +281,7 @@ export function LoginPage() {
           email, 
           password, 
           role: "student",
-          branch,
+          department,
           semester: semester ? Number(semester) : undefined,
           rollNumber 
         });
@@ -291,6 +293,24 @@ export function LoginPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Only run if not logged in
+    if (!user && modalMode === "register") {
+      setDepartmentsError(false);
+      api.get("/auth/departments")
+        .then((res) => {
+          setDepartments(res.data);
+          if (res.data.length > 0) {
+            setDepartment(res.data[0]._id);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          setDepartmentsError(true);
+        });
+    }
+  }, [user, modalMode]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1247,21 +1267,24 @@ export function LoginPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Branch</label>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Department</label>
                       <select
-                        value={branch}
-                        onChange={(e) => setBranch(e.target.value)}
-                        className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white"
+                        required
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                        className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white appearance-none"
                       >
-                        <option value="" disabled>Select your branch</option>
-                        <option value="CSE">Computer Science and Engineering (CSE)</option>
-                        <option value="IT">Information Technology (IT)</option>
-                        <option value="ET&T">Electronics and Telecommunication (ET&T)</option>
-                        <option value="EE">Electrical Engineering (EE)</option>
-                        <option value="EEE">Electrical & Electronics Engineering (EEE)</option>
-                        <option value="MECH">Mechanical Engineering (MECH)</option>
-                        <option value="CIVIL">Civil Engineering (CIVIL)</option>
-                        <option value="MINING">Mining Engineering (MINING)</option>
+                        {departmentsError ? (
+                          <option value="" disabled className="bg-surface-container text-red-400">Backend offline - Please refresh</option>
+                        ) : departments.length === 0 ? (
+                          <option value="" disabled className="bg-surface-container">Loading departments...</option>
+                        ) : (
+                          departments.map((dept) => (
+                            <option key={dept._id} value={dept._id} className="bg-surface-container">
+                              {dept.name} ({dept.code})
+                            </option>
+                          ))
+                        )}
                       </select>
                     </div>
                   </>

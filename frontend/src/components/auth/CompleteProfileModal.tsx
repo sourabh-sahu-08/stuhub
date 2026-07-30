@@ -17,16 +17,17 @@ export function CompleteProfileModal() {
   const [name, setName] = useState(user?.name ?? "");
   const [rollNumber, setRollNumber] = useState("");
   const [department, setDepartment] = useState("");
-  const [branch, setBranch] = useState("");
   const [semester, setSemester] = useState<number | "">("");
   
   // UI states
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [departmentsError, setDepartmentsError] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Load departments
   useEffect(() => {
+    setDepartmentsError(false);
     api.get("/auth/departments")
       .then((res) => {
         setDepartments(res.data);
@@ -36,6 +37,7 @@ export function CompleteProfileModal() {
       })
       .catch((err) => {
         console.error("Failed to fetch departments", err);
+        setDepartmentsError(true);
       });
   }, []);
 
@@ -66,7 +68,6 @@ export function CompleteProfileModal() {
         name,
         rollNumber,
         department,
-        branch,
         semester: Number(semester)
       });
     } catch (err: any) {
@@ -131,7 +132,9 @@ export function CompleteProfileModal() {
               onChange={(e) => setDepartment(e.target.value)}
               className="w-full h-11 rounded border border-outline bg-surface-container px-3 text-sm focus:outline-none focus:border-primary text-white transition-all appearance-none"
             >
-              {departments.length === 0 ? (
+              {departmentsError ? (
+                <option value="" disabled className="bg-surface-container text-red-400">Backend offline - Please refresh</option>
+              ) : departments.length === 0 ? (
                 <option value="" disabled className="bg-surface-container">Loading departments...</option>
               ) : (
                 departments.map((dept) => (
@@ -143,29 +146,7 @@ export function CompleteProfileModal() {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* Branch */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Branch *</label>
-              <select
-                required
-                value={branch}
-                onChange={(e) => setBranch(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded h-11 px-3 text-white focus:outline-none focus:border-primary transition-colors text-sm"
-              >
-                <option value="" disabled>Select Branch</option>
-                <option value="CSE">Computer Science and Engineering (CSE)</option>
-                <option value="IT">Information Technology (IT)</option>
-                <option value="ET&T">Electronics and Telecommunication (ET&T)</option>
-                <option value="EE">Electrical Engineering (EE)</option>
-                <option value="EEE">Electrical & Electronics Engineering (EEE)</option>
-                <option value="MECH">Mechanical Engineering (MECH)</option>
-                <option value="CIVIL">Civil Engineering (CIVIL)</option>
-                <option value="MINING">Mining Engineering (MINING)</option>
-              </select>
-            </div>
-
-            {/* Semester */}
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-mono">Semester *</label>
               <select
