@@ -141,8 +141,8 @@ gamificationRouter.get("/profile/:userId", async (req, res, next) => {
     // Combine into recentUploads
     const recentUploads = [
       ...notesList.map(n => ({ id: n._id, title: n.title, type: "Note", createdAt: n.createdAt, views: (n as any).views || 0, likes: (n as any).likes || 0 })),
-      ...pyqsList.map(p => ({ id: p._id, title: p.paperName || p.title || p.subject || 'PYQ', type: "PYQ", createdAt: p.createdAt, views: (p as any).views || 0, likes: (p as any).likes || 0 })),
-      ...ctpyqsList.map(c => ({ id: c._id, title: c.paperName || c.title || c.subject || 'CT-PYQ', type: "CT-PYQ", createdAt: c.createdAt, views: (c as any).views || 0, likes: (c as any).likes || 0 })),
+      ...pyqsList.map(p => ({ id: p._id, title: p.paperName || (p as any).title || p.subject || 'PYQ', type: "PYQ", createdAt: p.createdAt, views: (p as any).views || 0, likes: (p as any).likes || 0 })),
+      ...ctpyqsList.map(c => ({ id: c._id, title: c.paperName || (c as any).title || c.subject || 'CT-PYQ', type: "CT-PYQ", createdAt: c.createdAt, views: (c as any).views || 0, likes: (c as any).likes || 0 })),
       ...assignmentsList.map(a => ({ id: a._id, title: a.title, type: "Assignment", createdAt: a.createdAt, views: (a as any).views || 0, likes: (a as any).likes || 0 }))
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
