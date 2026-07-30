@@ -141,37 +141,38 @@ gamificationRouter.get("/profile/:userId", async (req, res, next) => {
     // Combine into recentUploads
     const recentUploads = [
       ...notesList.map(n => ({ id: n._id, title: n.title, type: "Note", createdAt: n.createdAt, views: (n as any).views || 0, likes: (n as any).likes || 0 })),
-      ...pyqsList.map(p => ({ id: p._id, title: `${p.subject || 'PYQ'} - ${(p as any).year}`, type: "PYQ", createdAt: p.createdAt, views: (p as any).views || 0, likes: (p as any).likes || 0 })),
-      ...ctpyqsList.map(c => ({ id: c._id, title: `${c.subject || 'CT-PYQ'} - ${(c as any).year}`, type: "CT-PYQ", createdAt: c.createdAt, views: (c as any).views || 0, likes: (c as any).likes || 0 })),
+      ...pyqsList.map(p => ({ id: p._id, title: p.paperName || p.title || p.subject || 'PYQ', type: "PYQ", createdAt: p.createdAt, views: (p as any).views || 0, likes: (p as any).likes || 0 })),
+      ...ctpyqsList.map(c => ({ id: c._id, title: c.paperName || c.title || c.subject || 'CT-PYQ', type: "CT-PYQ", createdAt: c.createdAt, views: (c as any).views || 0, likes: (c as any).likes || 0 })),
       ...assignmentsList.map(a => ({ id: a._id, title: a.title, type: "Assignment", createdAt: a.createdAt, views: (a as any).views || 0, likes: (a as any).likes || 0 }))
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
-    // Generate Heatmap Data (last 365 days)
+    // Generate Heatmap Data (last 365 days) from actual content to handle legacy uploads
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
     
-    const heatmapLogs = await ActivityLog.aggregate([
-      { 
-        $match: { 
-          user: user._id,
-          createdAt: { $gte: oneYearAgo },
-          actionType: { $in: ["UPLOAD_NOTE", "UPLOAD_PYQ", "UPLOAD_CTPYQ", "UPLOAD_ASSIGNMENT"] }
-        } 
-      },
-      {
-        $group: {
-          _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
-          },
-          count: { $sum: 1 }
-        }
-      }
+    // Helper to get date counts
+    const getCounts = async (Model: any) => {
+      const logs = await Model.aggregate([
+        { $match: { user: user._id, createdAt: { $gte: oneYearAgo } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
+      ]);
+      return logs;
+    };
+
+    const [noteCounts, pyqCounts, ctCounts, assignCounts] = await Promise.all([
+      getCounts(Note),
+      getCounts(Pyq),
+      getCounts(CtPyq),
+      getCounts(Assignment)
     ]);
 
-    const heatmapData = heatmapLogs.map(log => ({
-      date: log._id,
-      count: log.count
-    }));
+    // Merge counts by date
+    const dateMap = new Map<string, number>();
+    [...noteCounts, ...pyqCounts, ...ctCounts, ...assignCounts].forEach(log => {
+      dateMap.set(log._id, (dateMap.get(log._id) || 0) + log.count);
+    });
+
+    const heatmapData = Array.from(dateMap.entries()).map(([date, count]) => ({ date, count }));
 
     res.json({
       user,
