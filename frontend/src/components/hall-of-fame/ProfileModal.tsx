@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { X, Award, Zap, BookOpen, Star } from "lucide-react";
 import { api } from "../../lib/api";
@@ -10,6 +10,19 @@ interface ProfileModalProps {
 }
 
 export function ProfileModal({ user, onClose }: ProfileModalProps) {
+  const [pyqScanState, setPyqScanState] = useState<"idle" | "scanning" | "done">("idle");
+
+  // Helper to generate last 364 dates
+  const heatmapDates = useMemo(() => {
+    const dates = [];
+    const today = new Date();
+    for (let i = 363; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      dates.push(d.toISOString().split('T')[0]);
+    }
+    return dates;
+  }, []);
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -112,13 +125,17 @@ export function ProfileModal({ user, onClose }: ProfileModalProps) {
                 </h3>
                 <div className="p-6 rounded-[20px] bg-white/[0.02] border border-white/[0.05] overflow-hidden">
                   <div className="grid grid-rows-7 grid-flow-col gap-1 overflow-x-auto hide-scrollbar pb-4 -mb-4">
-                    {Array.from({ length: 364 }).map((_, i) => {
-                      const activeLog = profileData?.heatmapData?.[i % (profileData.heatmapData.length || 1)];
+                    {heatmapDates.map((dateStr, i) => {
+                      const activeLog = profileData?.heatmapData?.find((log: any) => log.date === dateStr);
                       const intensity = activeLog ? activeLog.count : 0;
+                      const dateObj = new Date(dateStr);
+                      const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                      const titleText = `${intensity} upload${intensity === 1 ? '' : 's'} on ${formattedDate}`;
                       return (
                         <div 
-                          key={i} 
-                          className={`w-3 h-3 rounded-[3px] ${
+                          key={i}
+                          title={titleText}
+                          className={`w-3 h-3 rounded-[3px] transition-transform hover:scale-110 cursor-help ${
                             intensity === 0 ? 'bg-white/[0.04]' : 
                             intensity < 2 ? 'bg-zinc-600' : 
                             intensity < 5 ? 'bg-zinc-400' : 
