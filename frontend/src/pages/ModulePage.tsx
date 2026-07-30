@@ -76,7 +76,7 @@ export function ModulePage() {
 
   // Local state for Edit Profile Modal
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [editProfileForm, setEditProfileForm] = useState({ name: "", rollNumber: "", branch: "", semester: "" });
+  const [editProfileForm, setEditProfileForm] = useState({ name: "", rollNumber: "", department: "", semester: "" });
   const [editProfileLoading, setEditProfileLoading] = useState(false);
   const { updateProfile } = useAuth();
 
@@ -475,7 +475,7 @@ export function ModulePage() {
                   setEditProfileForm({
                     name: user?.name || "",
                     rollNumber: user?.rollNumber || "",
-                    branch: user?.branch || "",
+                    department: typeof user?.department === 'string' ? user?.department : user?.department?._id || "",
                     semester: user?.semester ? String(user.semester) : ""
                   });
                   setIsEditProfileOpen(true);
@@ -644,7 +644,7 @@ export function ModulePage() {
                     await updateProfile({
                       name: editProfileForm.name,
                       rollNumber: editProfileForm.rollNumber,
-                      branch: editProfileForm.branch,
+                      department: editProfileForm.department,
                       semester: editProfileForm.semester ? Number(editProfileForm.semester) : undefined
                     });
                     setIsEditProfileOpen(false);
@@ -679,8 +679,8 @@ export function ModulePage() {
                     <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1 font-mono">Branch</label>
                     <input
                       type="text"
-                      value={editProfileForm.branch}
-                      onChange={(e) => setEditProfileForm({...editProfileForm, branch: e.target.value})}
+                      value={editProfileForm.department}
+                      onChange={(e) => setEditProfileForm({...editProfileForm, department: e.target.value})}
                       className="w-full bg-[#111] border border-[#333] rounded h-10 px-3 text-white text-sm focus:outline-none focus:border-primary transition-colors"
                     />
                   </div>

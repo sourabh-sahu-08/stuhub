@@ -7,10 +7,10 @@ interface AuthContextValue {
   token: string | null;
   loading: boolean;
   login(email: string, password: string): Promise<void>;
-  register(payload: { name: string; email: string; password: string; role: Role; branch?: string; semester?: number; rollNumber?: string }): Promise<void>;
+  register(payload: { name: string; email: string; password: string; role: Role; department?: string; semester?: number; rollNumber?: string }): Promise<void>;
   socialLogin(idToken: string): Promise<void>;
-  completeProfile(payload: { name: string; rollNumber: string; department?: string; branch?: string; semester?: number }): Promise<void>;
-  updateProfile(payload: { name?: string; rollNumber?: string; branch?: string; semester?: number }): Promise<void>;
+  completeProfile(payload: { name: string; rollNumber: string; department?: string; semester?: number }): Promise<void>;
+  updateProfile(payload: { name?: string; rollNumber?: string; department?: string; semester?: number }): Promise<void>;
   logout(): void;
   setAuthSession(token: string, user: User): void;
 }
