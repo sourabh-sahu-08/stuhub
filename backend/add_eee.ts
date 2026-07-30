@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-mongoose.connect('mongodb://localhost:27017/stuhub').then(async () => {
+dotenv.config();
+
+mongoose.connect(process.env.MONGODB_URI as string).then(async () => {
   const db = mongoose.connection.db;
   await db.collection('departments').updateOne(
     { code: 'EEE' },
@@ -16,6 +19,6 @@ mongoose.connect('mongodb://localhost:27017/stuhub').then(async () => {
     },
     { upsert: true }
   );
-  console.log('Added EEE');
+  console.log('Added EEE to remote MongoDB Atlas!');
   process.exit(0);
 });
