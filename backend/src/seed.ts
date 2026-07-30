@@ -37,7 +37,8 @@ const [it, cse, mech, civil, mining, elec, entc] = await Department.create([
   { name: "Civil Engineering", code: "CIVIL", description: "Structures, environmental engineering, and infrastructures." },
   { name: "Mining Engineering", code: "MINING", description: "Resource extraction, minerals, and geology." },
   { name: "Electrical Engineering", code: "ELEC", description: "Power systems, circuits, and machinery." },
-  { name: "Electronics and Telecommunication", code: "ELECTRONICS AND TELECOMMUNICATION", description: "Signals, communication systems, and electronic designs." }
+  { name: "Electronics and Telecommunication", code: "ELECTRONICS AND TELECOMMUNICATION", description: "Signals, communication systems, and electronic designs." },
+  { name: "Electrical and Electronics Engineering", code: "EEE", description: "Electrical machines, electronics, and power engineering." },
 ]);
 
 const [btechCse] = await Course.create([
