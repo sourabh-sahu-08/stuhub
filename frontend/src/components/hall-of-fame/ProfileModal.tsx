@@ -128,10 +128,14 @@ export function ProfileModal({ user, onClose }: ProfileModalProps) {
                     {heatmapDates.map((dateStr, i) => {
                       const activeLog = profileData?.heatmapData?.find((log: any) => log.date === dateStr);
                       const intensity = activeLog ? activeLog.count : 0;
+                      const dateObj = new Date(dateStr);
+                      const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                      const titleText = `${intensity} upload${intensity === 1 ? '' : 's'} on ${formattedDate}`;
                       return (
                         <div 
-                          key={i} 
-                          className={`w-3 h-3 rounded-[3px] ${
+                          key={i}
+                          title={titleText}
+                          className={`w-3 h-3 rounded-[3px] transition-transform hover:scale-110 cursor-help ${
                             intensity === 0 ? 'bg-white/[0.04]' : 
                             intensity < 2 ? 'bg-zinc-600' : 
                             intensity < 5 ? 'bg-zinc-400' : 
