@@ -6,6 +6,7 @@ import { Note } from "../models/Note.js";
 import { Pyq } from "../models/Pyq.js";
 import { CtPyq } from "../models/CtPyq.js";
 import { Assignment } from "../models/Assignment.js";
+import { Resource } from "../models/Resource.js";
 
 export const gamificationRouter = Router();
 
@@ -88,15 +89,16 @@ gamificationRouter.get("/leaderboard", async (req, res, next) => {
     // Fetch total contributions for each top user
     const usersWithContributions = await Promise.all(
       topUsers.map(async (user) => {
-        const [notes, pyqs, ctpyqs, assignments] = await Promise.all([
+        const [notes, pyqs, ctpyqs, assignments, resources] = await Promise.all([
           Note.countDocuments({ user: user._id }),
           Pyq.countDocuments({ user: user._id }),
           CtPyq.countDocuments({ user: user._id }),
-          Assignment.countDocuments({ user: user._id })
+          Assignment.countDocuments({ user: user._id }),
+          Resource.countDocuments({ user: user._id })
         ]);
         return {
           ...user,
-          totalContributions: notes + pyqs + ctpyqs + assignments
+          totalContributions: notes + pyqs + ctpyqs + assignments + resources
         };
       })
     );
@@ -133,25 +135,28 @@ gamificationRouter.get("/profile/:userId", async (req, res, next) => {
       .limit(20);
 
     // Get Total Uploads across collections
-    const [notesList, pyqsList, ctpyqsList, assignmentsList] = await Promise.all([
+    const [notesList, pyqsList, ctpyqsList, assignmentsList, resourcesList] = await Promise.all([
       Note.find({ user: userId }).sort({ createdAt: -1 }).limit(10).lean(),
       Pyq.find({ user: userId }).sort({ createdAt: -1 }).limit(10).lean(),
       CtPyq.find({ user: userId }).sort({ createdAt: -1 }).limit(10).lean(),
-      Assignment.find({ user: userId }).sort({ createdAt: -1 }).limit(10).lean()
+      Assignment.find({ user: userId }).sort({ createdAt: -1 }).limit(10).lean(),
+      Resource.find({ user: userId }).sort({ createdAt: -1 }).limit(10).lean()
     ]);
     
     // Also get counts
     const totalUploads = await Note.countDocuments({ user: userId }) +
                          await Pyq.countDocuments({ user: userId }) +
                          await CtPyq.countDocuments({ user: userId }) +
-                         await Assignment.countDocuments({ user: userId });
+                         await Assignment.countDocuments({ user: userId }) +
+                         await Resource.countDocuments({ user: userId });
 
     // Combine into recentUploads
     const recentUploads = [
       ...notesList.map(n => ({ id: n._id, title: n.title, type: "Note", createdAt: n.createdAt, views: (n as any).views || 0, likes: (n as any).likes || 0 })),
       ...pyqsList.map(p => ({ id: p._id, title: p.paperName || (p as any).title || p.subject || 'PYQ', type: "PYQ", createdAt: p.createdAt, views: (p as any).views || 0, likes: (p as any).likes || 0 })),
       ...ctpyqsList.map(c => ({ id: c._id, title: c.paperName || (c as any).title || c.subject || 'CT-PYQ', type: "CT-PYQ", createdAt: c.createdAt, views: (c as any).views || 0, likes: (c as any).likes || 0 })),
-      ...assignmentsList.map(a => ({ id: a._id, title: a.title, type: "Assignment", createdAt: a.createdAt, views: (a as any).views || 0, likes: (a as any).likes || 0 }))
+      ...assignmentsList.map(a => ({ id: a._id, title: a.title, type: "Assignment", createdAt: a.createdAt, views: (a as any).views || 0, likes: (a as any).likes || 0 })),
+      ...resourcesList.map(r => ({ id: r._id, title: r.title, type: "Resource", createdAt: r.createdAt, views: (r as any).views || 0, likes: (r as any).likes || 0 }))
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
     // Generate Heatmap Data (last 365 days) from actual content to handle legacy uploads

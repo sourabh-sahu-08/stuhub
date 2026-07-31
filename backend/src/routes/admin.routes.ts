@@ -6,6 +6,7 @@ import { CtPyq } from "../models/CtPyq.js";
 import { Assignment } from "../models/Assignment.js";
 import { Feedback } from "../models/Feedback.js";
 import { Resource } from "../models/Resource.js";
+import { GamificationService } from "../services/gamification.service.js";
 import { Subject, Department } from "../models/Academic.js";
 import { requireAuth, allowRoles } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
@@ -334,7 +335,15 @@ router.post("/resources/link", async (req: AuthRequest, res: Response, next: Nex
         syllabus: syllabus || undefined,
         branch: branch || undefined
       });
-    res.status(201).json(resource);
+
+      await GamificationService.logActivity(
+        req.user!._id,
+        "UPLOAD_RESOURCE",
+        resource._id,
+        "Resource"
+      );
+
+      res.status(201).json(resource);
   } catch (error) {
     next(error);
   }
