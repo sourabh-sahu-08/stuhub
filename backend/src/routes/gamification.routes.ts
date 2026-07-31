@@ -96,9 +96,10 @@ gamificationRouter.get("/leaderboard", async (req, res, next) => {
           Assignment.countDocuments({ user: user._id }),
           Resource.countDocuments({ user: user._id })
         ]);
+        const bonus = (user as any).gamification?.bonusUploads || 0;
         return {
           ...user,
-          totalContributions: notes + pyqs + ctpyqs + assignments + resources
+          totalContributions: notes + pyqs + ctpyqs + assignments + resources + bonus
         };
       })
     );
@@ -143,12 +144,16 @@ gamificationRouter.get("/profile/:userId", async (req, res, next) => {
       Resource.find({ user: userId }).sort({ createdAt: -1 }).limit(10).lean()
     ]);
     
+    const userObj = user.toObject();
+    const bonus = userObj.gamification?.bonusUploads || 0;
+
     // Also get counts
     const totalUploads = await Note.countDocuments({ user: userId }) +
                          await Pyq.countDocuments({ user: userId }) +
                          await CtPyq.countDocuments({ user: userId }) +
                          await Assignment.countDocuments({ user: userId }) +
-                         await Resource.countDocuments({ user: userId });
+                         await Resource.countDocuments({ user: userId }) +
+                         bonus;
 
     // Combine into recentUploads
     const recentUploads = [

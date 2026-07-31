@@ -51,6 +51,9 @@ function RunnerUpCard({ contributor, rank, onClick }: { contributor: Contributor
         <div className="absolute inset-[3px] rounded-full overflow-hidden border border-[#111111]">
           <img src={contributor.avatar || fallbackAvatar} alt={contributor.name} className="w-full h-full object-cover" />
         </div>
+        <div className="absolute -bottom-1 -right-1 bg-[#111111] text-zinc-300 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full border border-white/[0.08] z-10">
+          Lvl {level}
+        </div>
       </div>
 
       <div className="flex-1 min-w-0">
@@ -64,7 +67,7 @@ function RunnerUpCard({ contributor, rank, onClick }: { contributor: Contributor
         <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05]">
             <Star className={`w-3.5 h-3.5 ${isRank2 ? 'text-zinc-300' : 'text-orange-500'}`} />
-            <span className="text-sm font-semibold text-white">{level}</span>
+            <span className="text-sm font-semibold text-white">{xp} XP</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05]">
             <BookOpen className={`w-3.5 h-3.5 ${isRank2 ? 'text-zinc-300' : 'text-orange-500'}`} />

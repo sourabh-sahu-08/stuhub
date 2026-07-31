@@ -56,7 +56,7 @@ export function ContributorList({ contributors, startRank, onUserClick }: { cont
             <div className="flex items-center gap-5 mt-5 pt-4 border-t border-white/[0.04] relative z-10">
               <div className="flex items-center gap-1.5">
                 <Star className="w-3.5 h-3.5 text-zinc-400" />
-                <span className="text-sm font-semibold text-zinc-300">{xp}</span>
+                <span className="text-sm font-semibold text-zinc-300">{xp} XP</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
