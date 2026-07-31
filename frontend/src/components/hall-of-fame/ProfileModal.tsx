@@ -124,7 +124,7 @@ export function ProfileModal({ user, onClose }: ProfileModalProps) {
                   <BookOpen className="text-zinc-500" size={16} /> Contributions
                 </h3>
                 <div className="p-6 rounded-[20px] bg-white/[0.02] border border-white/[0.05] overflow-hidden">
-                  <div className="grid grid-rows-7 grid-flow-col gap-1 overflow-x-auto hide-scrollbar pb-4 -mb-4">
+                  <div className="grid grid-rows-7 grid-flow-col gap-1 overflow-x-auto pb-2">
                     {heatmapDates.map((dateStr, i) => {
                       const activeLog = profileData?.heatmapData?.find((log: any) => log.date === dateStr);
                       const intensity = activeLog ? activeLog.count : 0;
