@@ -44,8 +44,9 @@ export function ResourcesPage() {
 
   // Group by Subject
   const groupedResources = resources.reduce((acc, curr) => {
-    if (!acc[curr.subject]) acc[curr.subject] = [];
-    acc[curr.subject].push(curr);
+    const subject = curr.subject || "General Resources";
+    if (!acc[subject]) acc[subject] = [];
+    acc[subject].push(curr);
     return acc;
   }, {} as Record<string, Resource[]>);
 
