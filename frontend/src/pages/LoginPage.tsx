@@ -566,7 +566,7 @@ export function LoginPage() {
 
           {/* Right Column: Realistic Widget Previews (6 cols) */}
           <div className="lg:col-span-6 relative h-[500px] w-full no-print">
-            <div className="absolute inset-0 grid grid-cols-2 gap-5 auto-rows-[110px]">
+            <div className="absolute inset-0 grid grid-cols-1 sm:grid-cols-2 gap-5 auto-rows-[110px]">
               
               {/* Widget 1: Attendance */}
               <motion.div 

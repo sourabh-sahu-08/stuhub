@@ -106,8 +106,10 @@ gamificationRouter.get("/leaderboard", async (req, res, next) => {
 
     // Sort by XP first, then by totalContributions as a tie-breaker
     usersWithContributions.sort((a, b) => {
-      if (b.gamification.xp !== a.gamification.xp) {
-        return b.gamification.xp - a.gamification.xp;
+      const bXp = b.gamification?.xp || 0;
+      const aXp = a.gamification?.xp || 0;
+      if (bXp !== aXp) {
+        return bXp - aXp;
       }
       return b.totalContributions - a.totalContributions;
     });

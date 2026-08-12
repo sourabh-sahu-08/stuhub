@@ -42,6 +42,7 @@ export class GamificationService {
           reputation: 0,
           currentStreak: 0,
           longestStreak: 0,
+          bonusUploads: 0,
           lastContributionDate: undefined
         };
       }
