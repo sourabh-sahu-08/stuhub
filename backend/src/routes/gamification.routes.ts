@@ -79,8 +79,8 @@ gamificationRouter.get("/leaderboard", async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit as string) || 10;
     
-    // Sort by XP (reputation) and only show users with XP > 0
-    const topUsers = await User.find({ "gamification.xp": { $gt: 0 } })
+    // Sort by XP (reputation). We don't filter by XP > 0 so that new contributors without XP can still appear if they have contributions.
+    const topUsers = await User.find({})
       .sort({ "gamification.xp": -1 })
       .limit(limit)
       .select("name avatar department branch gamification")
@@ -114,7 +114,10 @@ gamificationRouter.get("/leaderboard", async (req, res, next) => {
       return b.totalContributions - a.totalContributions;
     });
 
-    res.json(usersWithContributions);
+    // Filter out users who have 0 XP and 0 contributions
+    const filteredUsers = usersWithContributions.filter(u => u.totalContributions > 0 || (u.gamification?.xp || 0) > 0);
+
+    res.json(filteredUsers);
   } catch (error) {
     next(error);
   }

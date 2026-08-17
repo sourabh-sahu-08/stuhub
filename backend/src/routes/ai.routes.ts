@@ -48,7 +48,7 @@ Your goal is to help students with their studies, assignments, and understanding
 
     const completion = await groq.chat.completions.create({
       messages: [systemPrompt, ...messages] as any,
-      model: "llama-3.1-8b-instant",
+      model: "qwen/qwen3.6-27b",
       temperature: 0.7,
       max_tokens: 1500,
       top_p: 1,
@@ -56,7 +56,10 @@ Your goal is to help students with their studies, assignments, and understanding
       stop: null
     });
 
-    const reply = completion.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response.";
+    let reply = completion.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response.";
+    
+    // Strip <think>...</think> reasoning blocks if the model includes them
+    reply = reply.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 
     res.json({ reply });
   } catch (error) {

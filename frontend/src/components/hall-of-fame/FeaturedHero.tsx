@@ -12,8 +12,7 @@ export function FeaturedHero({ contributor, onClick }: { contributor: Contributo
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, type: "spring", stiffness: 80, damping: 20 }}
       className="w-full max-w-4xl mx-auto mb-16 z-20"
       onClick={onClick}
