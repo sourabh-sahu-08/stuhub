@@ -28,11 +28,8 @@ export class GamificationService {
     itemModel?: string,
     description?: string
   ) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
-      const user = await User.findById(userId).session(session);
+      const user = await User.findById(userId);
       if (!user) throw new Error("User not found");
       
       if (!user.gamification) {
@@ -86,46 +83,42 @@ export class GamificationService {
 
         if (isDailyFirst) {
           xpEarned += XP_REWARDS.DAILY_CONTRIBUTION;
-          await ActivityLog.create([{
+          await ActivityLog.create({
             user: userId,
             actionType: "STREAK_BONUS",
             xpEarned: XP_REWARDS.DAILY_CONTRIBUTION,
             description: `Daily contribution bonus`
-          }], { session });
+          });
         }
 
         // Check for streak badges
         if (user.gamification!.currentStreak === 7) {
           xpEarned += XP_REWARDS.STREAK_7_DAYS;
-          await this.awardBadge(userId, "7_DAY_STREAK", "🔥 7 Day Streak", "Contributed for 7 consecutive days", session);
+          await this.awardBadge(userId, "7_DAY_STREAK", "🔥 7 Day Streak", "Contributed for 7 consecutive days");
         } else if (user.gamification!.currentStreak === 30) {
           xpEarned += XP_REWARDS.STREAK_30_DAYS;
-          await this.awardBadge(userId, "30_DAY_STREAK", "🔥 30 Day Streak", "Contributed for 30 consecutive days", session);
+          await this.awardBadge(userId, "30_DAY_STREAK", "🔥 30 Day Streak", "Contributed for 30 consecutive days");
         }
       }
 
       // Create primary activity log
-      await ActivityLog.create([{
+      await ActivityLog.create({
         user: userId,
         actionType,
         xpEarned: XP_REWARDS[actionType] || 0,
         itemRef,
         itemModel,
         description
-      }], { session });
+      });
 
       // Update User XP & Level
       user.gamification!.xp += xpEarned;
       user.gamification!.reputation += xpEarned;
       user.gamification!.level = Math.floor(user.gamification!.xp / 100) + 1;
 
-      await user.save({ session });
+      await user.save();
       
-      await session.commitTransaction();
-      session.endSession();
     } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
       console.error("Error in GamificationService:", error);
     }
   }
@@ -134,24 +127,23 @@ export class GamificationService {
     userId: string | mongoose.Types.ObjectId, 
     badgeId: string, 
     title: string, 
-    description: string, 
-    session: mongoose.ClientSession
+    description: string
   ) {
-    const existing = await UserBadge.findOne({ user: userId, badgeId }).session(session);
+    const existing = await UserBadge.findOne({ user: userId, badgeId });
     if (!existing) {
-      await UserBadge.create([{
+      await UserBadge.create({
         user: userId,
         badgeId,
         title,
         description
-      }], { session });
+      });
       
-      await ActivityLog.create([{
+      await ActivityLog.create({
         user: userId,
         actionType: "ACHIEVEMENT_UNLOCKED",
         xpEarned: 0,
         description: `Unlocked Badge: ${title}`
-      }], { session });
+      });
     }
   }
 }

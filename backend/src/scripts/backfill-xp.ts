@@ -58,13 +58,29 @@ async function backfillXp() {
           };
         }
 
-        // Only backfill if current XP is 0 (or optionally, reset and calculate strictly)
-        // Let's just set it to expectedXp if current XP is less than expected
-        if ((user.gamification.xp || 0) < expectedXp) {
-          console.log(`Updating ${user.name}: Has ${totalUploads} uploads. Current XP: ${user.gamification.xp}. New XP: ${expectedXp}`);
-          user.gamification.xp = expectedXp;
-          user.gamification.reputation = expectedXp;
-          user.gamification.level = Math.floor(expectedXp / 100) + 1;
+        // Strictly calculate based on uploads. Add likes/downloads if available.
+        const totalLikes = 
+          notes.reduce((sum, n) => sum + ((n as any).likes || 0), 0) +
+          pyqs.reduce((sum, p) => sum + ((p as any).likes || 0), 0) +
+          ctpyqs.reduce((sum, c) => sum + ((c as any).likes || 0), 0) +
+          assignments.reduce((sum, a) => sum + ((a as any).likes || 0), 0) +
+          resources.reduce((sum, r) => sum + ((r as any).likes || 0), 0);
+
+        const totalDownloads = 
+          notes.reduce((sum, n) => sum + ((n as any).downloads || 0), 0) +
+          pyqs.reduce((sum, p) => sum + ((p as any).downloads || 0), 0) +
+          ctpyqs.reduce((sum, c) => sum + ((c as any).downloads || 0), 0) +
+          assignments.reduce((sum, a) => sum + ((a as any).downloads || 0), 0) +
+          resources.reduce((sum, r) => sum + ((r as any).downloads || 0), 0);
+
+        const exactXp = expectedXp + (totalLikes * 5) + (totalDownloads * 2);
+
+        if (user.gamification.xp !== exactXp || user.gamification.bonusUploads !== 0) {
+          console.log(`Resetting ${user.name}: Has ${totalUploads} uploads, ${totalLikes} likes, ${totalDownloads} downloads. Current XP: ${user.gamification.xp}. New Exact XP: ${exactXp}`);
+          user.gamification.xp = exactXp;
+          user.gamification.reputation = exactXp;
+          user.gamification.level = Math.floor(exactXp / 100) + 1;
+          user.gamification.bonusUploads = 0; // Strip the boost
           await user.save();
         }
       }
