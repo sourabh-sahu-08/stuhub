@@ -23,6 +23,7 @@ import { AdminMessages } from "./pages/admin/AdminMessages";
 import { useAuth } from "./context/AuthContext";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
 import { AiChatWidget } from "./components/chat/AiChatWidget";
+import { EntryModal } from "./components/ui/EntryModal";
 
 export function App() {
   const { user, loading } = useAuth();
@@ -31,6 +32,7 @@ export function App() {
 
   return (
     <>
+      <EntryModal />
       <Routes>
         {/* Root landing and overview page */}
         <Route path="/" element={<LoginPage />} />
