@@ -36,7 +36,7 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
       ],
       model: "qwen/qwen3.6-27b",
       temperature: 0.1,
-      max_tokens: 1200,
+      max_tokens: 8000,
     });
 
     const content = completion.choices[0]?.message?.content;

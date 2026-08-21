@@ -63,7 +63,7 @@ Return strictly a JSON object with a "clusters" array.
       ],
       model: "qwen/qwen3.6-27b",
       temperature: 0.2,
-      max_tokens: 1500,
+      max_tokens: 8000,
     });
 
     const content = completion.choices[0]?.message?.content;
