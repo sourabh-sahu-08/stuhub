@@ -2,7 +2,9 @@ import { Router, Response, NextFunction } from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
-import { PDFParse } from "pdf-parse";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
 import { Groq } from "groq-sdk";
 import { env } from "../config/env.js";
 import { QuestionExtractorService } from "../services/pyq/questionExtractor.service.js";
@@ -147,8 +149,7 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       const SYLLABUS_LIMIT = 5000;
 
       // 1. Parse Syllabus
-      const syllabusParser = new PDFParse({ data: syllabusFiles[0].buffer });
-      const syllabusData = await syllabusParser.getText();
+      const syllabusData = await pdfParse(syllabusFiles[0].buffer);
       const syllabusText = syllabusData.text.slice(0, SYLLABUS_LIMIT);
 
       // --- TEMPORARY DEBUG LOGS (DISABLED) ---
@@ -168,8 +169,7 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       const allYearsSet = new Set<string>();
 
       for (const file of pyqFiles) {
-        const parser = new PDFParse({ data: file.buffer });
-        const data = await parser.getText();
+        const data = await pdfParse(file.buffer);
         const textToProcess = data.text.slice(0, PER_PAPER_LIMIT);
         
         const extracted = await QuestionExtractorService.extract(file.originalname, textToProcess);

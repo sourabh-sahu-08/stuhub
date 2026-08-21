@@ -34,7 +34,7 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
         { role: "system", content: "You output only strictly valid JSON. You never invent data. You extract perfectly." },
         { role: "user", content: prompt }
       ],
-      model: "qwen/qwen3.6-27b",
+      model: "llama3-8b-8192",
       response_format: { type: "json_object" },
       temperature: 0.1,
       max_tokens: 1200,
