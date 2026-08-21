@@ -62,7 +62,6 @@ Return strictly a JSON object with a "clusters" array.
         { role: "user", content: prompt }
       ],
       model: "qwen/qwen3.6-27b",
-      response_format: { type: "json_object" },
       temperature: 0.2,
       max_tokens: 1500,
     });
@@ -73,7 +72,19 @@ Return strictly a JSON object with a "clusters" array.
     }
 
     try {
-      const parsed = JSON.parse(content);
+      // Handle reasoning models that output <think> tags or markdown
+      let jsonStr = content;
+      const thinkEnd = jsonStr.lastIndexOf("</think>");
+      if (thinkEnd !== -1) {
+        jsonStr = jsonStr.substring(thinkEnd + 8);
+      }
+      const start = jsonStr.indexOf("{");
+      const end = jsonStr.lastIndexOf("}");
+      if (start !== -1 && end !== -1) {
+        jsonStr = jsonStr.substring(start, end + 1);
+      }
+      
+      const parsed = JSON.parse(jsonStr);
       return parsed.clusters || [];
     } catch (e) {
       console.error("Failed to parse clustering JSON:", e);

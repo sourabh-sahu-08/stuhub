@@ -35,19 +35,29 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
         { role: "user", content: prompt }
       ],
       model: "qwen/qwen3.6-27b",
-      response_format: { type: "json_object" },
       temperature: 0.1,
       max_tokens: 1200,
     });
 
     const content = completion.choices[0]?.message?.content;
     if (!content) {
-      console.error("No content from Groq in QuestionExtractorService");
-      return [];
+      throw new Error("No content from Groq");
     }
 
     try {
-      const parsed = JSON.parse(content);
+      // Handle reasoning models that output <think> tags or markdown
+      let jsonStr = content;
+      const thinkEnd = jsonStr.lastIndexOf("</think>");
+      if (thinkEnd !== -1) {
+        jsonStr = jsonStr.substring(thinkEnd + 8);
+      }
+      const start = jsonStr.indexOf("{");
+      const end = jsonStr.lastIndexOf("}");
+      if (start !== -1 && end !== -1) {
+        jsonStr = jsonStr.substring(start, end + 1);
+      }
+      
+      const parsed = JSON.parse(jsonStr);
       return (parsed.questions || []).map((q: any) => ({
         ...q,
         paperName,
