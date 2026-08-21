@@ -61,7 +61,7 @@ Return strictly a JSON object with a "clusters" array.
         { role: "system", content: "You output only strictly valid JSON. You never invent data. You follow instructions perfectly." },
         { role: "user", content: prompt }
       ],
-      model: "llama3-70b-8192",
+      model: "qwen/qwen3.6-27b",
       response_format: { type: "json_object" },
       temperature: 0.2,
       max_tokens: 1500,
