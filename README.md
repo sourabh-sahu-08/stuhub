@@ -4,7 +4,7 @@
   <p><strong>A modern, handcrafted academic workspace for students.</strong></p>
 </div>
 
----
+---     
 
 StuHub is a premium full-stack academic platform designed with a modern command-palette interface, rich aesthetics, and intelligent AI features. It moves beyond traditional learning management systems by acting as a living, personalized workspace.
 
