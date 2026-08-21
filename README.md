@@ -8,7 +8,7 @@
 
 StuHub is a premium full-stack academic platform designed with a modern command-palette interface, rich aesthetics, and intelligent AI features. It moves beyond traditional learning management systems by acting as a living, personalized workspace.
 
-## ✨ Features
+## ✨ Features -
 
 - **Omnibar Command Palette**: Navigate, search notes, assignments, and PYQs instantly with a sleek `⌘K` interface.
 - **Smart OAuth Integrations**: One-click authentication with Google, GitHub, and LinkedIn.
