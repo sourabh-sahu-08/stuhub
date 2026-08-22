@@ -3,33 +3,36 @@ import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
 import { PDFParse } from "pdf-parse";
-import { Groq } from "groq-sdk";
 import { env } from "../config/env.js";
-import { QuestionExtractorService } from "../services/pyq/questionExtractor.service.js";
+import { QuestionExtractorService, PaperInput } from "../services/pyq/questionExtractor.service.js";
 import { ClusteringService } from "../services/pyq/clustering.service.js";
 import { SyllabusParserService } from "../services/pyq/syllabusParser.service.js";
 import { RawQuestion, V4DashboardJSON, V4UnitGroup } from "../services/pyq/types.js";
 import stringSimilarity from "string-similarity";
 
-const groq = new Groq({
-  apiKey: env.GROQ_API_KEY || "dummy",
-});
+// Safe startup validation
+console.log(`[PYQ ANALYZER] Booting up AI Engine...`);
+if (!env.GROQ_API_KEY) {
+  console.warn(`[PYQ ANALYZER ERROR] GROQ_API_KEY is missing!`);
+} else {
+  console.log(`✓ AI_PROVIDER loaded: ${env.AI_PROVIDER}`);
+  console.log(`✓ GROQ_API_KEY present`);
+  console.log(`✓ GROQ_MODEL loaded: ${env.GROQ_MODEL}`);
+}
 
-// Setup multer to accept files up to 5MB, filtering for PDFs only
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: (_req, file, cb) => {
-    if (file.mimetype !== "application/pdf") {
-      return cb(new Error("Only PDF files are allowed"));
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per file
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === "application/pdf") {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF files are allowed"));
     }
-    cb(null, true);
-  }
+  },
 }).fields([
   { name: "syllabus", maxCount: 1 },
-  { name: "pyqs", maxCount: 10 }
+  { name: "pyqs", maxCount: 10 },
 ]);
 
 export const pyqAnalyzerRouter = Router();
@@ -121,12 +124,14 @@ pyqAnalyzerRouter.post("/validate-upload", requireAuth, (req: AuthRequest, res: 
 pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response, next: NextFunction) => {
   upload(req, res, async (err) => {
     if (err) {
-      return res.status(400).json({ message: "File upload error: " + err.message });
+      return res.status(400).json({ success: false, error: { code: "UPLOAD_ERROR", message: "File upload error: " + err.message } });
     }
 
     if (!env.GROQ_API_KEY) {
-      return res.status(503).json({ message: "AI capabilities are currently unavailable. Missing GROQ API Key." });
+      return res.status(503).json({ success: false, error: { code: "AI_CONFIGURATION_ERROR", message: "AI provider is not configured correctly." } });
     }
+
+    console.log(`[PYQ ANALYZER] Analysis request received`);
 
     const { subject, branch, semester } = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
@@ -134,17 +139,19 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
     const pyqFiles = files?.["pyqs"];
 
     if (!syllabusFiles || syllabusFiles.length !== 1) {
-      return res.status(400).json({ message: "Exactly one syllabus PDF is required." });
+      return res.status(400).json({ success: false, error: { code: "VALIDATION_ERROR", message: "Exactly one syllabus PDF is required." } });
     }
     if (!pyqFiles || pyqFiles.length < 3 || pyqFiles.length > 10) {
-      return res.status(400).json({ message: "Between 3 and 10 PYQ PDFs are required." });
+      return res.status(400).json({ success: false, error: { code: "VALIDATION_ERROR", message: "Between 3 and 10 PYQ PDFs are required." } });
     }
+
+    console.log(`[PYQ ANALYZER] Files received: ${pyqFiles.length} PYQs, 1 Syllabus`);
 
     try {
       // Adaptive per-paper char limit
       const pyqCount = pyqFiles.length;
-      const PER_PAPER_LIMIT = Math.max(3000, Math.floor(30000 / pyqCount));
-      const SYLLABUS_LIMIT = 5000;
+      const PER_PAPER_LIMIT = Math.max(800, Math.floor(4000 / pyqCount));
+      const SYLLABUS_LIMIT = 2000;
 
       // 1. Parse Syllabus
       const syllabusParser = new PDFParse({ data: syllabusFiles[0].buffer });
@@ -167,21 +174,22 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       let allRawQuestions: RawQuestion[] = [];
       const allYearsSet = new Set<string>();
 
+      const paperInputs = [];
       for (const file of pyqFiles) {
         const parser = new PDFParse({ data: file.buffer });
         const data = await parser.getText();
         const textToProcess = data.text.slice(0, PER_PAPER_LIMIT);
-        
-        const extracted = await QuestionExtractorService.extract(file.originalname, textToProcess);
-        allRawQuestions = [...allRawQuestions, ...extracted];
-        
-        // Collect years
-        extracted.forEach(q => {
-          if (q.paperYear && q.paperYear !== "Unknown") {
-            allYearsSet.add(q.paperYear);
-          }
-        });
+        paperInputs.push({ paperName: file.originalname, text: textToProcess });
       }
+
+      allRawQuestions = await QuestionExtractorService.extractMultiple(paperInputs);
+
+      // Collect years
+      allRawQuestions.forEach(q => {
+        if (q.paperYear && q.paperYear !== "Unknown") {
+          allYearsSet.add(q.paperYear);
+        }
+      });
 
       // If no valid years found, inject some defaults based on count or filenames
       if (allYearsSet.size === 0) {
@@ -331,13 +339,42 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
 
       return res.status(200).json(dashboardJson);
     } catch (error: any) {
-      console.error("AI Analysis Pipeline Error:", error);
-      const groqMsg = error?.error?.message || error?.message || "Unknown error";
-      const statusCode = error?.status === 413 || groqMsg.includes("too large") ? 413 : 500;
+      console.error("[PYQ ANALYZER ERROR]", error);
+      const errMsg = error?.error?.message || error?.message || "Unknown error";
+      
+      let statusCode = 500;
+      let errorCode = "AI_ANALYSIS_FAILED";
+      let displayMessage = "Unable to complete PYQ analysis.";
+
+      if (error?.status === 413 || errMsg.includes("too large") || errMsg.includes("context_length_exceeded")) {
+        statusCode = 413;
+        errorCode = "PDF_EXTRACTION_FAILED";
+        displayMessage = "Your uploaded files contain too much text. Try using shorter or fewer PDFs.";
+      } else if (errMsg.includes("Rate limit") || errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("try again") || errMsg.includes("rate_limit_exceeded") || errMsg.includes("limit")) {
+        statusCode = 429;
+        errorCode = "AI_RATE_LIMITED";
+        displayMessage = "AI service rate limit reached. Please try again shortly.";
+      } else if (errMsg.includes("503") || errMsg.includes("unavailable") || errMsg.includes("overloaded")) {
+        statusCode = 503;
+        errorCode = "AI_SERVICE_UNAVAILABLE";
+        displayMessage = "The AI service is temporarily overloaded. Please try again in a minute.";
+      } else if (errMsg.includes("401") || errMsg.includes("authentication") || errMsg.includes("invalid api key")) {
+        statusCode = 401;
+        errorCode = "AI_AUTHENTICATION_ERROR";
+        displayMessage = "AI provider authentication failed.";
+      } else if (errMsg.includes("model") || errMsg.includes("404")) {
+        statusCode = 503;
+        errorCode = "AI_MODEL_UNAVAILABLE";
+        displayMessage = "The configured AI model is unavailable.";
+      }
+
       return res.status(statusCode).json({
-        message: statusCode === 413
-          ? "Your uploaded files contain too much text. Try using shorter or fewer PDFs."
-          : "AI Analysis Pipeline failed: " + groqMsg
+        success: false,
+        message: displayMessage,
+        error: {
+          code: errorCode,
+          message: displayMessage
+        }
       });
     }
   });

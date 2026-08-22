@@ -2,7 +2,10 @@ import Groq from "groq-sdk";
 import { RawQuestion } from "./types.js";
 import { env } from "../../config/env.js";
 
-const groq = new Groq({ apiKey: env.GROQ_API_KEY });
+let groq: Groq | null = null;
+if (env.GROQ_API_KEY) {
+  groq = new Groq({ apiKey: env.GROQ_API_KEY });
+}
 
 export interface ClusterOutput {
   representativeQuestion: string;
@@ -17,7 +20,11 @@ export class ClusteringService {
     validUnits: string[],
     questions: RawQuestion[]
   ): Promise<ClusterOutput[]> {
-    // We map questions to include an ID so the LLM can reference them easily
+    if (questions.length === 0) return [];
+    if (!groq) {
+      throw new Error("AI_CONFIGURATION_ERROR: Groq is not configured.");
+    }
+
     const indexedQuestions = questions.map((q, idx) => ({
       id: idx,
       q: q.rawQuestion
@@ -56,39 +63,68 @@ Return strictly a JSON object with a "clusters" array.
 }
 `;
 
-    const completion = await groq.chat.completions.create({
-      messages: [
-        { role: "system", content: "You output only strictly valid JSON. You never invent data. You follow instructions perfectly." },
-        { role: "user", content: prompt }
-      ],
-      model: "qwen/qwen3.6-27b",
-      temperature: 0.2,
-      max_tokens: 8000,
-    });
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        console.log(`[AI] Sending clustering request...`);
+        const completion = await groq.chat.completions.create({
+          messages: [
+            { role: "system", content: "You output only strictly valid JSON. You never invent data." },
+            { role: "user", content: prompt }
+          ],
+          model: env.GROQ_MODEL,
+          temperature: 0.2,
+          max_tokens: 1000,
+        });
+        
+        const content = completion.choices[0]?.message?.content;
+        if (!content) {
+          throw new Error("No content from Groq in ClusteringService");
+        }
 
-    const content = completion.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error("No content from Groq in ClusteringService");
-    }
+        let jsonStr = content;
+        const thinkEnd = jsonStr.lastIndexOf("</think>");
+        if (thinkEnd !== -1) {
+          jsonStr = jsonStr.substring(thinkEnd + 8);
+        }
+        const start = jsonStr.indexOf("{");
+        const end = jsonStr.lastIndexOf("}");
+        if (start !== -1 && end !== -1) {
+          jsonStr = jsonStr.substring(start, end + 1);
+        }
 
-    try {
-      // Handle reasoning models that output <think> tags or markdown
-      let jsonStr = content;
-      const thinkEnd = jsonStr.lastIndexOf("</think>");
-      if (thinkEnd !== -1) {
-        jsonStr = jsonStr.substring(thinkEnd + 8);
+        const parsed = JSON.parse(jsonStr);
+        console.log(`[AI] Clustering complete`);
+        return parsed.clusters || [];
+      } catch (e: any) {
+        console.error(`[AI ERROR]
+Provider: ${env.AI_PROVIDER}
+Model: ${env.GROQ_MODEL}
+Error Type: Clustering failure
+Details: ${e.message}`);
+        
+        const errMsg = e.message || "";
+        const isRetryable = errMsg.includes("429") || errMsg.includes("500") || errMsg.includes("503") || errMsg.includes("timeout") || errMsg.includes("Rate limit") || errMsg.includes("try again in");
+        
+        if (!isRetryable) {
+          throw new Error(`AI_ANALYSIS_FAILED: Fatal clustering error - ${errMsg}`);
+        }
+        
+        retries--;
+        if (retries === 0) {
+          throw new Error(`AI_ANALYSIS_FAILED: Clustering failed after retries. Last error: ${errMsg}`);
+        }
+        
+        let waitTime = 5000;
+        const match = errMsg.match(/try again in ([\d.]+)s/);
+        if (match && match[1]) {
+          waitTime = (parseFloat(match[1]) + 1) * 1000;
+        }
+        
+        console.log(`[AI] Temporary failure. Retrying in ${waitTime/1000}s...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
       }
-      const start = jsonStr.indexOf("{");
-      const end = jsonStr.lastIndexOf("}");
-      if (start !== -1 && end !== -1) {
-        jsonStr = jsonStr.substring(start, end + 1);
-      }
-      
-      const parsed = JSON.parse(jsonStr);
-      return parsed.clusters || [];
-    } catch (e) {
-      console.error("Failed to parse clustering JSON:", e);
-      throw new Error("Failed to parse AI clustering results.");
     }
+    return [];
   }
 }
