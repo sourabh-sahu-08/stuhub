@@ -7,7 +7,7 @@ const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY || "");
 
 export class QuestionExtractorService {
   static async extract(paperName: string, text: string): Promise<RawQuestion[]> {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
     const prompt = `
 You are an expert academic data extractor.
 Extract EVERY question from this Previous Year Question Paper text.
