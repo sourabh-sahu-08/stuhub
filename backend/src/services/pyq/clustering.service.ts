@@ -74,7 +74,7 @@ Return strictly a JSON object with a "clusters" array.
           ],
           model: env.GROQ_MODEL,
           temperature: 0.2,
-          max_tokens: 8000,
+          max_tokens: 2000,
         });
         
         const content = completion.choices[0]?.message?.content;

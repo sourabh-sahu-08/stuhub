@@ -18,7 +18,6 @@ export class QuestionExtractorService {
       throw new Error("AI_CONFIGURATION_ERROR: Groq is not configured.");
     }
     
-    // Process papers one-by-one or chunked because Qwen context/TPM might reject 6 full PDFs at once
     console.log(`[PYQ ANALYZER] Extracting PDF text...`);
     console.log(`[AI] Provider: ${env.AI_PROVIDER}`);
     console.log(`[AI] Model: ${env.GROQ_MODEL}`);
@@ -62,7 +61,7 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
             ],
             model: env.GROQ_MODEL,
             temperature: 0.1,
-            max_tokens: 8000,
+            max_tokens: 2000,
           });
 
           const content = completion.choices[0]?.message?.content;
