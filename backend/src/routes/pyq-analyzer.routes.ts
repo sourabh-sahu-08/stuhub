@@ -350,11 +350,15 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
         statusCode = 413;
         errorCode = "PDF_EXTRACTION_FAILED";
         displayMessage = "Your uploaded files contain too much text. Try using shorter or fewer PDFs.";
-      } else if (errMsg.includes("Rate limit") || errMsg.includes("429") || errMsg.includes("quota")) {
+      } else if (errMsg.includes("Rate limit") || errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("try again") || errMsg.includes("rate_limit_exceeded") || errMsg.includes("limit")) {
         statusCode = 429;
         errorCode = "AI_RATE_LIMITED";
         displayMessage = "AI service rate limit reached. Please try again shortly.";
-      } else if (errMsg.includes("Authentication") || errMsg.includes("401") || errMsg.includes("API key")) {
+      } else if (errMsg.includes("503") || errMsg.includes("unavailable") || errMsg.includes("overloaded")) {
+        statusCode = 503;
+        errorCode = "AI_SERVICE_UNAVAILABLE";
+        displayMessage = "The AI service is temporarily overloaded. Please try again in a minute.";
+      } else if (errMsg.includes("401") || errMsg.includes("authentication") || errMsg.includes("invalid api key")) {
         statusCode = 401;
         errorCode = "AI_AUTHENTICATION_ERROR";
         displayMessage = "AI provider authentication failed.";

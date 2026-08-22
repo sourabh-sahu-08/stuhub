@@ -61,7 +61,7 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
             ],
             model: env.GROQ_MODEL,
             temperature: 0.1,
-            max_tokens: 2000,
+            max_tokens: 300,
           });
 
           const content = completion.choices[0]?.message?.content;
@@ -93,7 +93,7 @@ Error Type: Extraction failure
 Details: ${e.message}`);
           
           const errMsg = e.message || "";
-          const isRetryable = errMsg.includes("429") || errMsg.includes("500") || errMsg.includes("503") || errMsg.includes("timeout") || errMsg.includes("Rate limit");
+          const isRetryable = errMsg.includes("429") || errMsg.includes("500") || errMsg.includes("503") || errMsg.includes("timeout") || errMsg.includes("Rate limit") || errMsg.includes("try again in");
           
           if (!isRetryable) {
             throw new Error(`AI_ANALYSIS_FAILED: Fatal extraction error - ${errMsg}`);
@@ -101,10 +101,17 @@ Details: ${e.message}`);
           
           retries--;
           if (retries === 0) {
-            throw new Error("AI_ANALYSIS_FAILED: Extraction failed after retries.");
+            throw new Error(`AI_ANALYSIS_FAILED: Extraction failed after retries. Last error: ${errMsg}`);
           }
-          console.log(`[AI] Temporary failure. Retrying in 5s...`);
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          
+          let waitTime = 5000;
+          const match = errMsg.match(/try again in ([\d.]+)s/);
+          if (match && match[1]) {
+            waitTime = (parseFloat(match[1]) + 1) * 1000;
+          }
+          
+          console.log(`[AI] Temporary failure. Retrying in ${waitTime/1000}s...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
         }
       }
     }
