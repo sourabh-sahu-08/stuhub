@@ -1,10 +1,13 @@
-import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RawQuestion } from "./types.js";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+import { env } from "../../config/env.js";
+
+const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY || "");
 
 export class QuestionExtractorService {
   static async extract(paperName: string, text: string): Promise<RawQuestion[]> {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt = `
 You are an expert academic data extractor.
 Extract EVERY question from this Previous Year Question Paper text.
@@ -29,35 +32,20 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
 }
 `;
 
-    const completion = await groq.chat.completions.create({
-      messages: [
-        { role: "system", content: "You output only strictly valid JSON. You never invent data. You extract perfectly." },
-        { role: "user", content: prompt }
-      ],
-      model: "qwen/qwen3.6-27b",
-      temperature: 0.1,
-      max_tokens: 8000,
-    });
-
-    const content = completion.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error("No content from Groq");
-    }
-
     try {
-      // Handle reasoning models that output <think> tags or markdown
-      let jsonStr = content;
-      const thinkEnd = jsonStr.lastIndexOf("</think>");
-      if (thinkEnd !== -1) {
-        jsonStr = jsonStr.substring(thinkEnd + 8);
-      }
-      const start = jsonStr.indexOf("{");
-      const end = jsonStr.lastIndexOf("}");
-      if (start !== -1 && end !== -1) {
-        jsonStr = jsonStr.substring(start, end + 1);
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.1,
+        }
+      });
+      const content = result.response.text();
+      if (!content) {
+        throw new Error("No content from Gemini");
       }
       
-      const parsed = JSON.parse(jsonStr);
+      const parsed = JSON.parse(content);
       return (parsed.questions || []).map((q: any) => ({
         ...q,
         paperName,

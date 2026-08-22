@@ -3,7 +3,7 @@ import multer from "multer";
 import { requireAuth } from "../middleware/auth.js";
 import type { AuthRequest } from "../types.js";
 import { PDFParse } from "pdf-parse";
-import { Groq } from "groq-sdk";
+
 import { env } from "../config/env.js";
 import { QuestionExtractorService } from "../services/pyq/questionExtractor.service.js";
 import { ClusteringService } from "../services/pyq/clustering.service.js";
@@ -11,9 +11,7 @@ import { SyllabusParserService } from "../services/pyq/syllabusParser.service.js
 import { RawQuestion, V4DashboardJSON, V4UnitGroup } from "../services/pyq/types.js";
 import stringSimilarity from "string-similarity";
 
-const groq = new Groq({
-  apiKey: env.GROQ_API_KEY || "dummy",
-});
+
 
 // Setup multer to accept files up to 5MB, filtering for PDFs only
 const upload = multer({
@@ -124,8 +122,8 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       return res.status(400).json({ message: "File upload error: " + err.message });
     }
 
-    if (!env.GROQ_API_KEY) {
-      return res.status(503).json({ message: "AI capabilities are currently unavailable. Missing GROQ API Key." });
+    if (!env.GEMINI_API_KEY) {
+      return res.status(503).json({ message: "AI capabilities are currently unavailable. Missing GEMINI API Key." });
     }
 
     const { subject, branch, semester } = req.body;

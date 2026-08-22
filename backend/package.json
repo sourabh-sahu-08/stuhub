@@ -12,6 +12,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.2.0",
     "compression": "^1.7.4",
@@ -27,6 +28,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
     "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.19.1",
     "socket.io": "^4.7.5",
     "string-similarity": "^4.0.4",
     "zod": "^3.23.8"

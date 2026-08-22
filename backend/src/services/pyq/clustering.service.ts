@@ -1,8 +1,8 @@
-import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RawQuestion } from "./types.js";
 import { env } from "../../config/env.js";
 
-const groq = new Groq({ apiKey: env.GROQ_API_KEY });
+const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY || "");
 
 export interface ClusterOutput {
   representativeQuestion: string;
@@ -17,7 +17,8 @@ export class ClusteringService {
     validUnits: string[],
     questions: RawQuestion[]
   ): Promise<ClusterOutput[]> {
-    // We map questions to include an ID so the LLM can reference them easily
+    if (questions.length === 0) return [];
+
     const indexedQuestions = questions.map((q, idx) => ({
       id: idx,
       q: q.rawQuestion
@@ -56,39 +57,26 @@ Return strictly a JSON object with a "clusters" array.
 }
 `;
 
-    const completion = await groq.chat.completions.create({
-      messages: [
-        { role: "system", content: "You output only strictly valid JSON. You never invent data. You follow instructions perfectly." },
-        { role: "user", content: prompt }
-      ],
-      model: "qwen/qwen3.6-27b",
-      temperature: 0.2,
-      max_tokens: 8000,
-    });
-
-    const content = completion.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error("No content from Groq in ClusteringService");
-    }
-
     try {
-      // Handle reasoning models that output <think> tags or markdown
-      let jsonStr = content;
-      const thinkEnd = jsonStr.lastIndexOf("</think>");
-      if (thinkEnd !== -1) {
-        jsonStr = jsonStr.substring(thinkEnd + 8);
-      }
-      const start = jsonStr.indexOf("{");
-      const end = jsonStr.lastIndexOf("}");
-      if (start !== -1 && end !== -1) {
-        jsonStr = jsonStr.substring(start, end + 1);
-      }
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.2,
+        }
+      });
       
-      const parsed = JSON.parse(jsonStr);
+      const content = result.response.text();
+      if (!content) {
+        throw new Error("No content from Gemini in ClusteringService");
+      }
+
+      const parsed = JSON.parse(content);
       return parsed.clusters || [];
     } catch (e) {
       console.error("Failed to parse clustering JSON:", e);
-      throw new Error("Failed to parse AI clustering results.");
+      return [];
     }
   }
 }
