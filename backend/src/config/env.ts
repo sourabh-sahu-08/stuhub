@@ -20,6 +20,8 @@ const schema = z.object({
   LINKEDIN_CLIENT_SECRET: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   GROQ_API_KEY: z.string().optional(),
+  AI_PROVIDER: z.string().default("groq"),
+  GROQ_MODEL: z.string().default("qwen/qwen3.6-27b"),
   GORQ_API_KEY: z.string().optional()
 });
 

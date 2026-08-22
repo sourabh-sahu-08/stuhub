@@ -1,8 +1,11 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { RawQuestion } from "./types.js";
 import { env } from "../../config/env.js";
 
-const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY || "");
+let groq: Groq | null = null;
+if (env.GROQ_API_KEY) {
+  groq = new Groq({ apiKey: env.GROQ_API_KEY });
+}
 
 export interface ClusterOutput {
   representativeQuestion: string;
@@ -18,6 +21,9 @@ export class ClusteringService {
     questions: RawQuestion[]
   ): Promise<ClusterOutput[]> {
     if (questions.length === 0) return [];
+    if (!groq) {
+      throw new Error("AI_CONFIGURATION_ERROR: Groq is not configured.");
+    }
 
     const indexedQuestions = questions.map((q, idx) => ({
       id: idx,
@@ -60,44 +66,56 @@ Return strictly a JSON object with a "clusters" array.
     let retries = 3;
     while (retries > 0) {
       try {
-        const model = genAI.getGenerativeModel({ 
-          model: "gemini-3.5-flash",
-          safetySettings: [
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-          ]
-        } as any);
-        const result = await model.generateContent({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.2,
-          }
+        console.log(`[AI] Sending clustering request...`);
+        const completion = await groq.chat.completions.create({
+          messages: [
+            { role: "system", content: "You output only strictly valid JSON. You never invent data." },
+            { role: "user", content: prompt }
+          ],
+          model: env.GROQ_MODEL,
+          temperature: 0.2,
+          max_tokens: 8000,
         });
         
-        const content = result.response.text();
+        const content = completion.choices[0]?.message?.content;
         if (!content) {
-          throw new Error("No content from Gemini in ClusteringService");
+          throw new Error("No content from Groq in ClusteringService");
         }
 
-        const parsed = JSON.parse(content);
+        let jsonStr = content;
+        const thinkEnd = jsonStr.lastIndexOf("</think>");
+        if (thinkEnd !== -1) {
+          jsonStr = jsonStr.substring(thinkEnd + 8);
+        }
+        const start = jsonStr.indexOf("{");
+        const end = jsonStr.lastIndexOf("}");
+        if (start !== -1 && end !== -1) {
+          jsonStr = jsonStr.substring(start, end + 1);
+        }
+
+        const parsed = JSON.parse(jsonStr);
+        console.log(`[AI] Clustering complete`);
         return parsed.clusters || [];
       } catch (e: any) {
-        retries--;
-        console.error(`Clustering failed. Retries left: ${retries}. Error:`, e.message);
-        if (retries === 0) {
-          throw new Error("AI Clustering failed after retries: " + (e.message || "Unknown error"));
+        console.error(`[AI ERROR]
+Provider: ${env.AI_PROVIDER}
+Model: ${env.GROQ_MODEL}
+Error Type: Clustering failure
+Details: ${e.message}`);
+        
+        const errMsg = e.message || "";
+        const isRetryable = errMsg.includes("429") || errMsg.includes("500") || errMsg.includes("503") || errMsg.includes("timeout") || errMsg.includes("Rate limit");
+        
+        if (!isRetryable) {
+          throw new Error(`AI_ANALYSIS_FAILED: Fatal clustering error - ${errMsg}`);
         }
         
-        let waitTime = 10000;
-        const match = e.message.match(/retryDelay["']?\s*:\s*["']?(\d+)s/);
-        if (match && match[1]) {
-          waitTime = (parseInt(match[1], 10) + 2) * 1000;
+        retries--;
+        if (retries === 0) {
+          throw new Error("AI_ANALYSIS_FAILED: Clustering failed after retries.");
         }
-        console.log(`Waiting ${waitTime}ms before retry...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        console.log(`[AI] Temporary failure. Retrying in 5s...`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
       }
     }
     return [];

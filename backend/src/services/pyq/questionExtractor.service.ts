@@ -1,9 +1,11 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { RawQuestion } from "./types.js";
-
 import { env } from "../../config/env.js";
 
-const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY || "");
+let groq: Groq | null = null;
+if (env.GROQ_API_KEY) {
+  groq = new Groq({ apiKey: env.GROQ_API_KEY });
+}
 
 export interface PaperInput {
   paperName: string;
@@ -12,69 +14,102 @@ export interface PaperInput {
 
 export class QuestionExtractorService {
   static async extractMultiple(papers: PaperInput[]): Promise<RawQuestion[]> {
-    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+    if (!groq) {
+      throw new Error("AI_CONFIGURATION_ERROR: Groq is not configured.");
+    }
     
-    // Combine all papers into one massive prompt to save API requests!
-    const combinedText = papers.map(p => `--- START OF PAPER: ${p.paperName} ---\n${p.text}\n--- END OF PAPER: ${p.paperName} ---`).join("\n\n");
+    // Process papers one-by-one or chunked because Qwen context/TPM might reject 6 full PDFs at once
+    console.log(`[PYQ ANALYZER] Extracting PDF text...`);
+    console.log(`[AI] Provider: ${env.AI_PROVIDER}`);
+    console.log(`[AI] Model: ${env.GROQ_MODEL}`);
 
-    const prompt = `
+    let allQuestions: RawQuestion[] = [];
+    
+    for (const p of papers) {
+      const prompt = `
 You are an expert academic data extractor.
-Extract EVERY question from the following Previous Year Question Papers.
+Extract EVERY question from this Previous Year Question Paper text.
+Paper Name: ${p.paperName}
 
-${combinedText}
+Text:
+${p.text}
 
 Output ONLY a JSON object with a single key "questions" containing an array of objects.
 Do not miss any questions. Look for question numbers, marks, and typical exam formatting.
-Make sure to correctly identify the "paperName" for each question based on the delimiters.
 {
   "questions": [
     {
-      "paperName": "Filename.pdf", // The exact name of the paper this question was found in
-      "paperYear": "2024", // Extract from text or filename, string, or null
-      "exam": "End Semester", // Extract from text (e.g. End Semester, Mid Semester, Supplementary), string, or null
-      "questionNumber": "Q1(a)", // String, or null
-      "rawQuestion": "The exact wording of the question", // String, required
-      "marks": 5, // Number, or null if not found
-      "questionType": "Theory" // One of: Definition, Theory, Numerical, Short Answer, Long Answer, Difference, Diagram, Algorithm, Programming, Case Study
+      "paperName": "${p.paperName}",
+      "paperYear": "2024", 
+      "exam": "End Semester", 
+      "questionNumber": "Q1(a)", 
+      "rawQuestion": "The exact wording of the question", 
+      "marks": 5, 
+      "questionType": "Theory" 
     }
   ]
 }
 `;
 
-    let retries = 5; // More retries since it's a huge request
-    while (retries > 0) {
-      try {
-        const result = await model.generateContent({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
+      let retries = 3;
+      while (retries > 0) {
+        try {
+          console.log(`[AI] Sending extraction request for ${p.paperName}`);
+          const completion = await groq.chat.completions.create({
+            messages: [
+              { role: "system", content: "You output only strictly valid JSON. You never invent data." },
+              { role: "user", content: prompt }
+            ],
+            model: env.GROQ_MODEL,
             temperature: 0.1,
+            max_tokens: 8000,
+          });
+
+          const content = completion.choices[0]?.message?.content;
+          if (!content) {
+            throw new Error("No content from Groq");
           }
-        });
-        const content = result.response.text();
-        if (!content) {
-          throw new Error("No content from Gemini");
+          
+          let jsonStr = content;
+          const thinkEnd = jsonStr.lastIndexOf("</think>");
+          if (thinkEnd !== -1) {
+            jsonStr = jsonStr.substring(thinkEnd + 8);
+          }
+          const start = jsonStr.indexOf("{");
+          const end = jsonStr.lastIndexOf("}");
+          if (start !== -1 && end !== -1) {
+            jsonStr = jsonStr.substring(start, end + 1);
+          }
+          
+          const parsed = JSON.parse(jsonStr);
+          const extracted = parsed.questions || [];
+          allQuestions = [...allQuestions, ...extracted.map((q: any) => ({ ...q, paperName: p.paperName }))];
+          console.log(`[AI] Response received for ${p.paperName}`);
+          break; // break retry loop
+        } catch (e: any) {
+          console.error(`[AI ERROR]
+Provider: ${env.AI_PROVIDER}
+Model: ${env.GROQ_MODEL}
+Error Type: Extraction failure
+Details: ${e.message}`);
+          
+          const errMsg = e.message || "";
+          const isRetryable = errMsg.includes("429") || errMsg.includes("500") || errMsg.includes("503") || errMsg.includes("timeout") || errMsg.includes("Rate limit");
+          
+          if (!isRetryable) {
+            throw new Error(`AI_ANALYSIS_FAILED: Fatal extraction error - ${errMsg}`);
+          }
+          
+          retries--;
+          if (retries === 0) {
+            throw new Error("AI_ANALYSIS_FAILED: Extraction failed after retries.");
+          }
+          console.log(`[AI] Temporary failure. Retrying in 5s...`);
+          await new Promise(resolve => setTimeout(resolve, 5000));
         }
-        
-        const parsed = JSON.parse(content);
-        return parsed.questions || [];
-      } catch (e: any) {
-        retries--;
-        console.error(`Extractor failed. Retries left: ${retries}. Error:`, e.message);
-        if (retries === 0) {
-          throw new Error("AI Extraction failed after retries: " + (e.message || "Unknown error"));
-        }
-        
-        // Dynamic wait based on error message or fallback to 10 seconds
-        let waitTime = 10000;
-        const match = e.message.match(/retryDelay["']?\s*:\s*["']?(\d+)s/);
-        if (match && match[1]) {
-          waitTime = (parseInt(match[1], 10) + 2) * 1000; // wait given seconds + 2 buffer
-        }
-        console.log(`Waiting ${waitTime}ms before retry...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
       }
     }
-    return [];
+    
+    return allQuestions;
   }
 }
