@@ -150,8 +150,8 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
     try {
       // Adaptive per-paper char limit
       const pyqCount = pyqFiles.length;
-      const PER_PAPER_LIMIT = Math.max(2000, Math.floor(12000 / pyqCount));
-      const SYLLABUS_LIMIT = 5000;
+      const PER_PAPER_LIMIT = Math.max(800, Math.floor(4000 / pyqCount));
+      const SYLLABUS_LIMIT = 2000;
 
       // 1. Parse Syllabus
       const syllabusParser = new PDFParse({ data: syllabusFiles[0].buffer });
@@ -366,6 +366,7 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
 
       return res.status(statusCode).json({
         success: false,
+        message: displayMessage,
         error: {
           code: errorCode,
           message: displayMessage
