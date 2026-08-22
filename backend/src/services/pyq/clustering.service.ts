@@ -90,8 +90,14 @@ Return strictly a JSON object with a "clusters" array.
         if (retries === 0) {
           throw new Error("AI Clustering failed after retries: " + (e.message || "Unknown error"));
         }
-        // Wait 5 seconds before retrying to bypass rate limits
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        let waitTime = 10000;
+        const match = e.message.match(/retryDelay["']?\s*:\s*["']?(\d+)s/);
+        if (match && match[1]) {
+          waitTime = (parseInt(match[1], 10) + 2) * 1000;
+        }
+        console.log(`Waiting ${waitTime}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
       }
     }
     return [];

@@ -165,21 +165,22 @@ pyqAnalyzerRouter.post("/analyze", requireAuth, (req: AuthRequest, res: Response
       let allRawQuestions: RawQuestion[] = [];
       const allYearsSet = new Set<string>();
 
+      const paperInputs = [];
       for (const file of pyqFiles) {
         const parser = new PDFParse({ data: file.buffer });
         const data = await parser.getText();
         const textToProcess = data.text.slice(0, PER_PAPER_LIMIT);
-        
-        const extracted = await QuestionExtractorService.extract(file.originalname, textToProcess);
-        allRawQuestions = [...allRawQuestions, ...extracted];
-        
-        // Collect years
-        extracted.forEach(q => {
-          if (q.paperYear && q.paperYear !== "Unknown") {
-            allYearsSet.add(q.paperYear);
-          }
-        });
+        paperInputs.push({ paperName: file.originalname, text: textToProcess });
       }
+
+      allRawQuestions = await QuestionExtractorService.extractMultiple(paperInputs);
+
+      // Collect years
+      allRawQuestions.forEach(q => {
+        if (q.paperYear && q.paperYear !== "Unknown") {
+          allYearsSet.add(q.paperYear);
+        }
+      });
 
       // If no valid years found, inject some defaults based on count or filenames
       if (allYearsSet.size === 0) {
