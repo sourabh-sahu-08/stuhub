@@ -57,26 +57,43 @@ Return strictly a JSON object with a "clusters" array.
 }
 `;
 
-    try {
-      const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        const model = genAI.getGenerativeModel({ 
+          model: "gemini-3.5-flash",
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+          ]
+        } as any);
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.2,
+          }
+        });
+        
+        const content = result.response.text();
+        if (!content) {
+          throw new Error("No content from Gemini in ClusteringService");
         }
-      });
-      
-      const content = result.response.text();
-      if (!content) {
-        throw new Error("No content from Gemini in ClusteringService");
-      }
 
-      const parsed = JSON.parse(content);
-      return parsed.clusters || [];
-    } catch (e) {
-      console.error("Failed to parse clustering JSON:", e);
-      return [];
+        const parsed = JSON.parse(content);
+        return parsed.clusters || [];
+      } catch (e: any) {
+        retries--;
+        console.error(`Clustering failed. Retries left: ${retries}. Error:`, e.message);
+        if (retries === 0) {
+          throw new Error("AI Clustering failed after retries: " + (e.message || "Unknown error"));
+        }
+        // Wait 5 seconds before retrying to bypass rate limits
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
     }
+    return [];
   }
 }

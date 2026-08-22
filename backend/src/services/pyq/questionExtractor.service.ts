@@ -32,27 +32,35 @@ Do not miss any questions. Look for question numbers, marks, and typical exam fo
 }
 `;
 
-    try {
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.1,
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.1,
+          }
+        });
+        const content = result.response.text();
+        if (!content) {
+          throw new Error("No content from Gemini");
         }
-      });
-      const content = result.response.text();
-      if (!content) {
-        throw new Error("No content from Gemini");
+        
+        const parsed = JSON.parse(content);
+        return (parsed.questions || []).map((q: any) => ({
+          ...q,
+          paperName,
+        }));
+      } catch (e: any) {
+        retries--;
+        console.error(`Extractor failed for ${paperName}. Retries left: ${retries}. Error:`, e.message);
+        if (retries === 0) {
+          throw new Error("AI Extraction failed after retries: " + (e.message || "Unknown error"));
+        }
+        await new Promise(resolve => setTimeout(resolve, 5000));
       }
-      
-      const parsed = JSON.parse(content);
-      return (parsed.questions || []).map((q: any) => ({
-        ...q,
-        paperName,
-      }));
-    } catch (e) {
-      console.error("Failed to parse extractor JSON:", e);
-      return [];
     }
+    return [];
   }
 }
